@@ -1,0 +1,426 @@
+{
+  "name": "MagicPlate.ai Outreach Automation",
+  "nodes": [
+    {
+      "id": "schedule-trigger",
+      "name": "Schedule Trigger - Daily Outreach",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [-800, 0],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 24
+            }
+          ]
+        }
+      },
+      "typeVersion": 1.3
+    },
+    {
+      "id": "webhook-trigger",
+      "name": "Webhook - New Qualified Leads",
+      "type": "n8n-nodes-base.webhook",
+      "position": [-800, 200],
+      "parameters": {
+        "path": "new-leads",
+        "httpMethod": "POST",
+        "options": {}
+      },
+      "webhookId": "magicplate-new-leads",
+      "typeVersion": 2.1
+    },
+    {
+      "id": "read-qualified-leads",
+      "name": "Read Qualified Leads File",
+      "type": "n8n-nodes-base.readBinaryFile",
+      "position": [-600, 0],
+      "parameters": {
+        "fileName": "={{ $env.WORKSPACE_PATH }}/data/qualified-leads.json",
+        "options": {}
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "parse-json",
+      "name": "Parse JSON Leads",
+      "type": "n8n-nodes-base.code",
+      "position": [-400, 0],
+      "parameters": {
+        "jsCode": "// Parse qualified leads and filter for unsent emails\nconst leads = JSON.parse($input.item.binary.data.data.toString('utf8'));\n\n// Filter leads that haven't been emailed yet\nconst unsentLeads = leads.filter(lead => \n  lead.status !== 'emailed' && \n  (lead.email || lead.potentialEmails?.length > 0)\n);\n\nreturn unsentLeads.map(lead => ({\n  json: {\n    id: lead.name + '-' + lead.address,\n    name: lead.name,\n    email: lead.email || lead.potentialEmails?.[0],\n    address: lead.address,\n    phone: lead.phone,\n    website: lead.website,\n    qualificationScore: lead.qualificationScore,\n    issues: lead.issues || [],\n    city: lead.city,\n    state: lead.state,\n    status: lead.status || 'new'\n  }\n}));"
+      },
+      "typeVersion": 2
+    },
+    {
+      "id": "split-batches",
+      "name": "Loop Over Leads",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [-200, 0],
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "typeVersion": 3
+    },
+    {
+      "id": "wait-between-emails",
+      "name": "Wait Between Emails",
+      "type": "n8n-nodes-base.wait",
+      "position": [0, 0],
+      "parameters": {
+        "amount": 2,
+        "unit": "seconds"
+      },
+      "typeVersion": 1.1
+    },
+    {
+      "id": "prepare-email",
+      "name": "Prepare Email Content",
+      "type": "n8n-nodes-base.code",
+      "position": [200, 0],
+      "parameters": {
+        "jsCode": "// Prepare personalized email based on restaurant issues\nconst lead = $input.item.json;\nconst issues = lead.issues || [];\n\nlet personalizedHook = '';\nif (issues.includes('not_on_doordash')) {\n  personalizedHook = 'We noticed you\\'re not on DoorDash yet—this is a huge opportunity to unlock 20-40% more revenue from delivery customers.';\n} else if (issues.includes('no_website') || issues.includes('broken_website')) {\n  personalizedHook = 'We noticed your restaurant could benefit from a stronger online presence—especially a shareable digital menu that customers can access anywhere.';\n} else if (issues.includes('no_menu_photos') || issues.includes('no_professional_photos')) {\n  personalizedHook = 'Your menu items deserve to look as amazing as they taste. We can transform your current photos into stunning visuals that drive orders.';\n} else {\n  personalizedHook = 'We help restaurants like yours transform their menu presentation and digital presence to drive more sales.';\n}\n\nconst html = `<!DOCTYPE html>\n<html>\n<head>\n  <style>\n    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }\n    .container { max-width: 600px; margin: 0 auto; background: #ffffff; }\n    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 30px; text-align: center; }\n    .header h1 { margin: 0; font-size: 32px; font-weight: 700; }\n    .content { padding: 40px 30px; background: #f9f9f9; }\n    .section { background: white; padding: 25px; border-radius: 8px; margin-bottom: 20px; }\n    .cta-button { display: inline-block; background: #667eea; color: white; padding: 16px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; margin: 20px 0; }\n  </style>\n</head>\n<body>\n  <div class=\"container\">\n    <div class=\"header\">\n      <h1>MagicPlate.ai</h1>\n      <p>Make Every Plate Magical ✨</p>\n    </div>\n    <div class=\"content\">\n      <div class=\"section\">\n        <p><strong>Hi there!</strong></p>\n        <p>My name is Sydney, and I'm reaching out from <strong>MagicPlate.ai</strong>. ${personalizedHook}</p>\n        <p>We specialize in AI-powered menu restoration and digital menu creation – transforming your real plate photos into stunning visuals that captivate customers and drive sales.</p>\n        <p><strong>Starting at $299</strong> - Get your magical digital menu in 48 hours.</p>\n        <div style=\"text-align: center;\">\n          <a href=\"https://magicplate.info/book\" class=\"cta-button\">Schedule a Free 15-Minute Call</a>\n        </div>\n        <p>📧 Reply to this email | 📞 (805) 668-9973</p>\n        <p>Best,<br>Sydney Ramey<br>MagicPlate.ai</p>\n      </div>\n    </div>\n  </div>\n</body>\n</html>`;\n\nconst text = `Hi there!\\n\\nMy name is Sydney, and I'm reaching out from MagicPlate.ai. ${personalizedHook}\\n\\nWe specialize in AI-powered menu restoration and digital menu creation. Starting at $299.\\n\\nBook your call: https://magicplate.info/book\\nReply to this email or call (805) 668-9973\\n\\nBest,\\nSydney Ramey\\nMagicPlate.ai`;\n\nreturn [{\n  json: {\n    ...lead,\n    emailHtml: html,\n    emailText: text,\n    personalizedHook: personalizedHook\n  }\n}];"
+      },
+      "typeVersion": 2
+    },
+    {
+      "id": "send-resend-email",
+      "name": "Send Email via Resend",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [400, 0],
+      "parameters": {
+        "url": "https://api.resend.com/emails",
+        "method": "POST",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "from",
+              "value": "Sydney Ramey - MagicPlate.ai <sydney@magicplate.info>"
+            },
+            {
+              "name": "to",
+              "value": "={{ $json.email }}"
+            },
+            {
+              "name": "subject",
+              "value": "Elevate Your Menu, Boost Revenue & Outshine the Competition"
+            },
+            {
+              "name": "html",
+              "value": "={{ $json.emailHtml }}"
+            },
+            {
+              "name": "text",
+              "value": "={{ $json.emailText }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "resend-api-key",
+          "name": "Resend API Key"
+        }
+      },
+      "typeVersion": 4.3
+    },
+    {
+      "id": "update-lead-status",
+      "name": "Update Lead Status",
+      "type": "n8n-nodes-base.code",
+      "position": [600, 0],
+      "parameters": {
+        "jsCode": "// Update lead status in qualified-leads.json\nconst lead = $input.item.json;\nconst fs = require('fs');\nconst path = require('path');\n\nconst leadsPath = path.join(process.env.WORKSPACE_PATH || '.', 'data', 'qualified-leads.json');\n\n// Read current leads\nlet leads = [];\ntry {\n  const data = fs.readFileSync(leadsPath, 'utf8');\n  leads = JSON.parse(data);\n} catch (error) {\n  console.log('Could not read leads file');\n}\n\n// Update the lead\nconst leadIndex = leads.findIndex(l => \n  (l.name + '-' + l.address).toLowerCase() === lead.id.toLowerCase()\n);\n\nif (leadIndex !== -1) {\n  leads[leadIndex].status = 'emailed';\n  leads[leadIndex].emailedAt = new Date().toISOString();\n  leads[leadIndex].emailUsed = lead.email;\n  \n  // Write back\n  fs.writeFileSync(leadsPath, JSON.stringify(leads, null, 2));\n}\n\n// Also update sent-emails.json\nconst trackingPath = path.join(process.env.WORKSPACE_PATH || '.', 'data', 'sent-emails.json');\nlet tracking = { sent: [], stats: { total: 0, successful: 0, failed: 0 } };\n\ntry {\n  const data = fs.readFileSync(trackingPath, 'utf8');\n  tracking = JSON.parse(data);\n} catch (error) {\n  // File doesn't exist, create new\n}\n\ntracking.sent.push({\n  restaurant: lead.name,\n  email: lead.email,\n  success: true,\n  score: lead.qualificationScore,\n  issues: lead.issues,\n  sentAt: new Date().toISOString()\n});\n\ntracking.stats.total++;\ntracking.stats.successful++;\n\nfs.writeFileSync(trackingPath, JSON.stringify(tracking, null, 2));\n\nreturn [{ json: { ...lead, updated: true } }];"
+      },
+      "typeVersion": 2
+    },
+    {
+      "id": "follow-up-trigger",
+      "name": "Schedule Trigger - Follow-ups",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [-800, 400],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 24
+            }
+          ]
+        }
+      },
+      "typeVersion": 1.3
+    },
+    {
+      "id": "read-sent-emails",
+      "name": "Read Sent Emails",
+      "type": "n8n-nodes-base.readBinaryFile",
+      "position": [-600, 400],
+      "parameters": {
+        "fileName": "={{ $env.WORKSPACE_PATH }}/data/sent-emails.json",
+        "options": {}
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "filter-follow-up",
+      "name": "Filter - Needs Follow-up",
+      "type": "n8n-nodes-base.filter",
+      "position": [-400, 400],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "follow-up-condition",
+              "leftValue": "={{ $now.diff(DateTime.fromISO($json.sentAt), 'days').days }}",
+              "rightValue": 3,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "typeVersion": 2.3
+    },
+    {
+      "id": "send-follow-up",
+      "name": "Send Follow-up Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [-200, 400],
+      "parameters": {
+        "url": "https://api.resend.com/emails",
+        "method": "POST",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "from",
+              "value": "Sydney Ramey - MagicPlate.ai <sydney@magicplate.info>"
+            },
+            {
+              "name": "to",
+              "value": "={{ $json.email }}"
+            },
+            {
+              "name": "subject",
+              "value": "Re: Elevate Your Menu - Quick Follow-up"
+            },
+            {
+              "name": "html",
+              "value": "=Hi there!\\n\\nJust following up on my previous email about MagicPlate.ai. I'd love to show you how we can transform your menu presentation and drive more sales.\\n\\nQuick reminder: Starting at $299 for a complete digital menu transformation.\\n\\nWould you be open to a quick 15-minute call this week?\\n\\nBest,\\nSydney Ramey\\nMagicPlate.ai\\n(805) 668-9973"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "resend-api-key",
+          "name": "Resend API Key"
+        }
+      },
+      "typeVersion": 4.3
+    },
+    {
+      "id": "resend-webhook",
+      "name": "Resend Webhook - Email Replies",
+      "type": "n8n-nodes-base.webhook",
+      "position": [800, 0],
+      "parameters": {
+        "path": "resend-webhook",
+        "httpMethod": "POST",
+        "options": {}
+      },
+      "webhookId": "resend-email-replies",
+      "typeVersion": 2.1
+    },
+    {
+      "id": "process-reply",
+      "name": "Process Email Reply",
+      "type": "n8n-nodes-base.code",
+      "position": [1000, 0],
+      "parameters": {
+        "jsCode": "// Process email reply from Resend webhook\nconst webhookData = $input.item.json;\n\n// Extract reply information\nconst replyData = {\n  from: webhookData.body?.from || webhookData.from,\n  to: webhookData.body?.to || webhookData.to,\n  subject: webhookData.body?.subject || webhookData.subject,\n  text: webhookData.body?.text || webhookData.text,\n  receivedAt: new Date().toISOString()\n};\n\n// Update sent-emails.json to mark as replied\nconst fs = require('fs');\nconst path = require('path');\nconst trackingPath = path.join(process.env.WORKSPACE_PATH || '.', 'data', 'sent-emails.json');\n\nlet tracking = { sent: [], stats: { total: 0, successful: 0, failed: 0 } };\n\ntry {\n  const data = fs.readFileSync(trackingPath, 'utf8');\n  tracking = JSON.parse(data);\n} catch (error) {\n  // File doesn't exist\n}\n\n// Find and update the email\nconst emailIndex = tracking.sent.findIndex(e => e.email === replyData.from);\nif (emailIndex !== -1) {\n  tracking.sent[emailIndex].replied = true;\n  tracking.sent[emailIndex].replyReceivedAt = replyData.receivedAt;\n  tracking.sent[emailIndex].replyText = replyData.text;\n  \n  fs.writeFileSync(trackingPath, JSON.stringify(tracking, null, 2));\n}\n\nreturn [{ json: replyData }];"
+      },
+      "typeVersion": 2
+    },
+    {
+      "id": "sticky-note-setup",
+      "name": "Setup Instructions",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [-1000, -200],
+      "parameters": {
+        "width": 1200,
+        "height": 600,
+        "content": "## MagicPlate.ai Outreach Automation\n\n### Setup Instructions:\n\n1. **Resend API Key**:\n   - Go to https://resend.com\n   - Get your API key\n   - Create HTTP Header Auth credential in n8n:\n     - Name: `Authorization`\n     - Value: `Bearer re_9Va9PPPZ_LQ6od53eR2RWWr35piKNFrj3`\n   - Verify your domain `magicplate.info` in Resend dashboard\n\n2. **Resend Webhook** (for email replies):\n   - In Resend dashboard, go to Webhooks\n   - Add webhook URL: `https://your-n8n-instance.com/webhook/resend-webhook`\n   - Select events: `email.replied`\n\n3. **Environment Variables**:\n   - Set `WORKSPACE_PATH` to your magicplate directory path\n   - Or update file paths in the nodes to use absolute paths\n\n4. **Schedule**:\n   - Daily outreach trigger runs every 24 hours\n   - Follow-up trigger runs every 24 hours (sends to leads emailed 3 days ago)\n\n### Workflow Features:\n- ✅ Reads qualified leads from `data/qualified-leads.json`\n- ✅ Sends personalized emails via Resend\n- ✅ Updates lead status after sending\n- ✅ Tracks all emails in `data/sent-emails.json`\n- ✅ Automatic follow-ups after 3 days\n- ✅ Webhook for email replies\n- ✅ Rate limiting (2 seconds between emails)\n\n### Usage:\n1. Run your scraping: `npm run scrape`\n2. This workflow will automatically send emails to qualified leads\n3. Check tracking: `npm run track`"
+      },
+      "typeVersion": 1
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger - Daily Outreach": {
+      "main": [
+        [
+          {
+            "node": "Read Qualified Leads File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - New Qualified Leads": {
+      "main": [
+        [
+          {
+            "node": "Read Qualified Leads File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Qualified Leads File": {
+      "main": [
+        [
+          {
+            "node": "Parse JSON Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse JSON Leads": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Leads": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Wait Between Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Between Emails": {
+      "main": [
+        [
+          {
+            "node": "Prepare Email Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Email Content": {
+      "main": [
+        [
+          {
+            "node": "Send Email via Resend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email via Resend": {
+      "main": [
+        [
+          {
+            "node": "Update Lead Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Lead Status": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger - Follow-ups": {
+      "main": [
+        [
+          {
+            "node": "Read Sent Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Sent Emails": {
+      "main": [
+        [
+          {
+            "node": "Filter - Needs Follow-up",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter - Needs Follow-up": {
+      "main": [
+        [
+          {
+            "node": "Send Follow-up Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resend Webhook - Email Replies": {
+      "main": [
+        [
+          {
+            "node": "Process Email Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

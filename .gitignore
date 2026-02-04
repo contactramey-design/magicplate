@@ -7,7 +7,9 @@ package-lock.json
 
 # Data files
 data/
-*.json
+# Allow package.json and n8n workflows
+!package.json
+!n8n-workflows/*.json
 
 # Logs
 *.log
