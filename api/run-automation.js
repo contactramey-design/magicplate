@@ -111,7 +111,7 @@ module.exports = async (req, res) => {
     console.log('🤖 Starting automation...');
     
     // 1. Scrape leads
-    const area = process.env.SEARCH_AREA || 'Kansas City, MO';
+    const area = process.env.SEARCH_AREA || 'Los Angeles, CA';
     const sources = [];
     if (process.env.GOOGLE_PLACES_API_KEY) sources.push('googleMaps');
     if (process.env.YELP_API_KEY) sources.push('yelp');

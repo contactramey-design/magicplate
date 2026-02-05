@@ -383,58 +383,126 @@ const scrapeSources = {
 };
 
 async function findEmails(leads) {
-  // Enhanced email finding
+  // Enhanced email finding with multiple strategies
+  const emailRegex = /[\w\.-]+@[\w\.-]+\.\w+/g;
+  const excludedPatterns = ['noreply', 'no-reply', 'privacy', 'example.com', 'test.com', 'placeholder', 'sentry', 'monitoring', 'analytics', 'tracking'];
+  
   for (const lead of leads) {
     if (!lead.email && lead.website) {
+      const foundEmails = new Set();
+      
       try {
+        // Strategy 1: Check main page
         const response = await axios.get(lead.website, {
           timeout: 5000,
           headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
         });
         const $ = cheerio.load(response.data);
         
-        // Multiple strategies to find email
-        const emailRegex = /[\w\.-]+@[\w\.-]+\.\w+/g;
+        // Extract emails from text content
         const pageText = $('body').text();
-        GOOGLE_PLACES_API_KEY=YOUR_NEW_GOOGLE_KEY_HERE
-                const emails = pageText.match(emailRegex) || [];
+        const pageEmails = (pageText.match(emailRegex) || []);
+        pageEmails.forEach(e => foundEmails.add(e.toLowerCase()));
         
-        // Also check contact page
-        let contactEmails = [];
-        try {
-          const contactLinks = $('a[href*="contact"], a[href*="about"]').attr('href');
-          if (contactLinks) {
-            const contactUrl = new URL(contactLinks, lead.website).href;
-            const contactResponse = await axios.get(contactUrl, { timeout: 3000 });
-            const contactText = contactResponse.data.match(emailRegex) || [];
-            contactEmails = contactText;
+        // Extract emails from href attributes (mailto: links)
+        $('a[href^="mailto:"]').each((i, el) => {
+          const href = $(el).attr('href');
+          const email = href.replace('mailto:', '').split('?')[0].trim();
+          if (email) foundEmails.add(email.toLowerCase());
+        });
+        
+        // Extract emails from data attributes and hidden fields
+        $('[data-email], [data-contact-email], .email, .contact-email').each((i, el) => {
+          const text = $(el).text() + ' ' + $(el).attr('data-email') + ' ' + $(el).attr('data-contact-email');
+          const emails = (text.match(emailRegex) || []);
+          emails.forEach(e => foundEmails.add(e.toLowerCase()));
+        });
+        
+        // Strategy 2: Check footer (common place for contact info)
+        const footerText = $('footer').text();
+        const footerEmails = (footerText.match(emailRegex) || []);
+        footerEmails.forEach(e => foundEmails.add(e.toLowerCase()));
+        
+        // Strategy 3: Check contact/about pages
+        const contactPageUrls = [];
+        
+        // Find all contact-related links
+        $('a[href*="contact"], a[href*="about"], a[href*="reach"], a[href*="connect"]').each((i, el) => {
+          let href = $(el).attr('href');
+          if (href && !href.startsWith('http') && !href.startsWith('mailto') && !href.startsWith('#')) {
+            try {
+              const contactUrl = new URL(href, lead.website).href;
+              if (!contactPageUrls.includes(contactUrl)) {
+                contactPageUrls.push(contactUrl);
+              }
+            } catch (e) {
+              // Invalid URL
+            }
           }
-        } catch (e) {
-          // Contact page not accessible
+        });
+        
+        // Also try common contact page paths
+        const baseUrl = new URL(lead.website);
+        const commonPaths = ['/contact', '/contact-us', '/about', '/about-us', '/reach-us', '/get-in-touch'];
+        commonPaths.forEach(path => {
+          try {
+            const contactUrl = new URL(path, lead.website).href;
+            if (!contactPageUrls.includes(contactUrl)) {
+              contactPageUrls.push(contactUrl);
+            }
+          } catch (e) {}
+        });
+        
+        // Check up to 3 contact pages
+        for (const contactUrl of contactPageUrls.slice(0, 3)) {
+          try {
+            const contactResponse = await axios.get(contactUrl, { 
+              timeout: 3000,
+              headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+            });
+            const contact$ = cheerio.load(contactResponse.data);
+            const contactText = contact$.text();
+            const contactEmails = (contactText.match(emailRegex) || []);
+            contactEmails.forEach(e => foundEmails.add(e.toLowerCase()));
+            
+            // Also check mailto links on contact page
+            contact$('a[href^="mailto:"]').each((i, el) => {
+              const href = contact$(el).attr('href');
+              const email = href.replace('mailto:', '').split('?')[0].trim();
+              if (email) foundEmails.add(email.toLowerCase());
+            });
+          } catch (e) {
+            // Contact page not accessible, skip
+          }
         }
         
-        // Combine and filter
-        const allEmails = [...emails, ...contactEmails];
-        const contactEmail = allEmails.find(e => 
-          !e.includes('noreply') && 
-          !e.includes('no-reply') &&
-          !e.includes('privacy') &&
-          !e.includes('support@') &&
-          !e.includes('hello@') &&
-          (e.includes('info@') || e.includes('contact@') || (e.includes('@') && e.split('@')[0].length < 20))
-        );
+        // Filter out excluded patterns and find best email
+        const validEmails = Array.from(foundEmails).filter(e => {
+          const lower = e.toLowerCase();
+          return !excludedPatterns.some(pattern => lower.includes(pattern)) &&
+                 !lower.includes('support@') &&
+                 !lower.includes('help@') &&
+                 lower.includes('@') &&
+                 lower.split('@')[0].length < 30; // Reasonable length
+        });
+        
+        // Prioritize: info@, contact@, then others
+        const contactEmail = validEmails.find(e => 
+          e.includes('info@') || e.includes('contact@') || e.includes('hello@')
+        ) || validEmails[0];
         
         if (contactEmail) {
           lead.email = contactEmail.toLowerCase();
         } else if (lead.name && lead.website) {
-          // Try common patterns
+          // Strategy 4: Try common email patterns based on domain
           try {
             const domain = new URL(lead.website).hostname.replace('www.', '');
             const commonEmails = [
               `info@${domain}`,
               `contact@${domain}`,
               `hello@${domain}`,
-              `sales@${domain}`
+              `general@${domain}`,
+              `inquiries@${domain}`
             ];
             lead.potentialEmails = commonEmails;
           } catch (e) {
@@ -442,7 +510,20 @@ async function findEmails(leads) {
           }
         }
       } catch (error) {
-        // Website not accessible or no email found
+        // Website not accessible - try common patterns as fallback
+        if (lead.name && lead.website) {
+          try {
+            const domain = new URL(lead.website).hostname.replace('www.', '');
+            const commonEmails = [
+              `info@${domain}`,
+              `contact@${domain}`,
+              `hello@${domain}`
+            ];
+            lead.potentialEmails = commonEmails;
+          } catch (e) {
+            // Invalid URL
+          }
+        }
       }
     }
   }
