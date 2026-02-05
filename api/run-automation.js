@@ -5,7 +5,11 @@ const path = require('path');
 
 // Helper to detect if running on Vercel
 function isVercel() {
-  return process.env.VERCEL === '1' || process.env.AWS_LAMBDA_FUNCTION_NAME;
+  // Vercel sets VERCEL=1, or we can check for /var/task (Vercel's serverless path)
+  return process.env.VERCEL === '1' || 
+         process.env.VERCEL_ENV !== undefined ||
+         process.cwd() === '/var/task' ||
+         __dirname.includes('/var/task');
 }
 
 // Helper to get data directory (use /tmp on Vercel)
