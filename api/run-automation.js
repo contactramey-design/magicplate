@@ -3,6 +3,21 @@ const { scrapeAndQualifyLeads } = require('../scripts/scrape-restaurants');
 const fs = require('fs').promises;
 const path = require('path');
 
+// Helper to detect if running on Vercel
+function isVercel() {
+  return process.env.VERCEL === '1' || process.env.AWS_LAMBDA_FUNCTION_NAME;
+}
+
+// Helper to get data directory (use /tmp on Vercel)
+function getDataDir() {
+  return isVercel() ? '/tmp' : path.join(process.cwd(), 'data');
+}
+
+// Helper to generate timestamp
+function getTimestamp() {
+  return new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
+}
+
 // Reuse the sendBatchEmails function from send-email.js
 // We'll import it dynamically to avoid circular dependencies
 async function sendBatchEmails(leads, options = {}) {
@@ -14,7 +29,7 @@ async function sendBatchEmails(leads, options = {}) {
   const { sendEmail, emailTemplates } = require('../config/email-config');
   const { batchSize = 5, delay = 2000, maxEmails = null } = options;
   
-  const TRACKING_FILE = path.join(process.cwd(), 'data', 'sent-emails.json');
+  const TRACKING_FILE = path.join(getDataDir(), 'sent-emails.json');
   
   async function loadSentEmails() {
     try {
@@ -137,19 +152,30 @@ module.exports = async (req, res) => {
     console.log(`✨ Found ${results.qualified.length} qualified leads`);
     
     // 2. Save ALL qualified leads (regardless of email status)
-    const dataDir = path.join(process.cwd(), 'data');
-    await fs.mkdir(dataDir, { recursive: true });
+    // Vercel serverless functions can only write to /tmp, not data directory
+    const dataDir = getDataDir();
     
-    // Save to JSON
-    const qualifiedLeadsFile = path.join(dataDir, 'qualified-leads.json');
-    await fs.writeFile(qualifiedLeadsFile, JSON.stringify(results.qualified, null, 2));
-    console.log(`💾 Saved ${results.qualified.length} qualified leads to ${qualifiedLeadsFile}`);
-    
-    // Export to CSV for easy review
-    const { exportLeadsToCSV } = require('../scripts/export-leads-csv');
+    // Generate CSV content (we'll return this in response)
+    const { leadsToCSV } = require('../scripts/export-leads-csv');
     const timestamp = getTimestamp();
-    const csvPath = await exportLeadsToCSV(results.qualified, `qualified-leads-${timestamp}.csv`);
-    console.log(`📊 Exported CSV: ${csvPath}`);
+    const csvContent = leadsToCSV(results.qualified);
+    
+    // Try to save files (works in /tmp on Vercel)
+    try {
+      await fs.mkdir(dataDir, { recursive: true });
+      
+      // Save to JSON
+      const qualifiedLeadsFile = path.join(dataDir, 'qualified-leads.json');
+      await fs.writeFile(qualifiedLeadsFile, JSON.stringify(results.qualified, null, 2));
+      console.log(`💾 Saved ${results.qualified.length} qualified leads to ${qualifiedLeadsFile}`);
+      
+      // Save CSV
+      const csvPath = path.join(dataDir, `qualified-leads-${timestamp}.csv`);
+      await fs.writeFile(csvPath, csvContent, 'utf8');
+      console.log(`📊 Exported CSV: ${csvPath}`);
+    } catch (error) {
+      console.log(`⚠️  Could not save files: ${error.message} (this is OK - data returned in response)`);
+    }
     
     // 3. Filter leads with emails (for automated email sending)
     const qualifiedLeadsWithEmails = results.qualified.filter(l => l.email || l.potentialEmails?.[0]);
@@ -178,9 +204,12 @@ module.exports = async (req, res) => {
         sources: sources,
         totalLeads: results.all.length,
         qualifiedLeads: results.qualified.length,
-        leadsWithEmails: qualifiedLeadsWithEmails.length,
-        savedToFile: 'data/qualified-leads.json',
-        csvExport: `data/qualified-leads-${timestamp}.csv`
+        leadsWithEmails: qualifiedLeadsWithEmails.length
+      },
+      leads: {
+        qualified: results.qualified,
+        csv: csvContent,
+        csvFilename: `qualified-leads-${timestamp}.csv`
       },
       emailing: {
         attempted: leadsToEmail.length,
