@@ -1,0 +1,1916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MagicPlate.ai - Make Every Plate Magical</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; 
+      background: #0d2e1f;
+      color: #fff; 
+      overflow-x: hidden;
+      cursor: default;
+    }
+    
+    /* Particle Background Effect */
+    .particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      overflow: hidden;
+    }
+    
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: #4caf50;
+      border-radius: 50%;
+      opacity: 0.3;
+      animation: float-particle 15s infinite ease-in-out;
+    }
+    
+    @keyframes float-particle {
+      0%, 100% { 
+        transform: translate(0, 0) scale(1);
+        opacity: 0.3;
+      }
+      25% { 
+        transform: translate(100px, -100px) scale(1.5);
+        opacity: 0.6;
+      }
+      50% { 
+        transform: translate(-50px, -200px) scale(0.8);
+        opacity: 0.4;
+      }
+      75% { 
+        transform: translate(-100px, -50px) scale(1.2);
+        opacity: 0.5;
+      }
+    }
+    
+    /* Top Header Bar with Smooth Slide */
+    .top-header {
+      background: rgba(26, 77, 58, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 15px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      border-bottom: 1px solid rgba(76, 175, 80, 0.3);
+      animation: slideDown 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    
+    @keyframes slideDown {
+      from {
+        transform: translateY(-100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .fork-knife-icon {
+      width: 24px;
+      height: 24px;
+      color: #4caf50;
+      animation: rotateIn 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.3s both;
+      filter: drop-shadow(0 0 8px rgba(76, 175, 80, 0.6));
+    }
+    
+    @keyframes rotateIn {
+      from {
+        transform: rotate(-180deg) scale(0);
+        opacity: 0;
+      }
+      to {
+        transform: rotate(0deg) scale(1);
+        opacity: 1;
+      }
+    }
+    
+    .brand-name {
+      font-size: 20px;
+      font-weight: 700;
+      color: #4caf50;
+      letter-spacing: 1px;
+      text-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
+      animation: glowPulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes glowPulse {
+      0%, 100% {
+        text-shadow: 0 0 20px rgba(76, 175, 80, 0.5), 0 0 30px rgba(76, 175, 80, 0.3);
+      }
+      50% {
+        text-shadow: 0 0 30px rgba(76, 175, 80, 0.8), 0 0 40px rgba(76, 175, 80, 0.5);
+      }
+    }
+    
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #4caf50;
+      font-size: 18px;
+      animation: fadeInRight 1s ease-out 0.5s both;
+    }
+    
+    @keyframes fadeInRight {
+      from {
+        transform: translateX(50px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    /* Main Hero Section with Parallax */
+    .hero-section {
+      background: linear-gradient(180deg, #0d2e1f 0%, #1a4d3a 50%, #0d2e1f 100%);
+      padding: 120px 20px 80px;
+      text-align: center;
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 50% 50%, rgba(76, 175, 80, 0.1) 0%, transparent 70%);
+      animation: pulseGlow 4s ease-in-out infinite;
+    }
+    
+    @keyframes pulseGlow {
+      0%, 100% {
+        opacity: 0.5;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.8;
+        transform: scale(1.1);
+      }
+    }
+    
+    .hero-content {
+      max-width: 700px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .intro-image {
+      width: 320px;
+      height: auto;
+      border-radius: 25px;
+      margin-bottom: 40px;
+      box-shadow: 
+        0 20px 60px rgba(0,0,0,0.5),
+        0 0 40px rgba(76, 175, 80, 0.3),
+        inset 0 0 30px rgba(76, 175, 80, 0.1);
+      animation: 
+        imageFloat 6s ease-in-out infinite,
+        imageGlow 3s ease-in-out infinite,
+        scaleIn 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s both;
+      transition: transform 0.3s ease;
+      border: 2px solid rgba(76, 175, 80, 0.3);
+    }
+    
+    .intro-image:hover {
+      transform: scale(1.05) rotateY(5deg);
+      box-shadow: 
+        0 30px 80px rgba(0,0,0,0.6),
+        0 0 60px rgba(76, 175, 80, 0.5);
+    }
+    
+    @keyframes imageFloat {
+      0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+      }
+      50% {
+        transform: translateY(-20px) rotate(1deg);
+      }
+    }
+    
+    @keyframes imageGlow {
+      0%, 100% {
+        box-shadow: 
+          0 20px 60px rgba(0,0,0,0.5),
+          0 0 40px rgba(76, 175, 80, 0.3);
+      }
+      50% {
+        box-shadow: 
+          0 20px 60px rgba(0,0,0,0.5),
+          0 0 60px rgba(76, 175, 80, 0.6);
+      }
+    }
+    
+    @keyframes scaleIn {
+      from {
+        transform: scale(0) rotate(-180deg);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+      }
+    }
+    
+    .hero-text {
+      font-size: 3.5em;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 15px;
+      line-height: 1.1;
+      text-shadow: 
+        0 0 20px rgba(255,255,255,0.3),
+        0 4px 10px rgba(0,0,0,0.5);
+      animation: 
+        textReveal 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.8s both,
+        textShimmer 3s ease-in-out infinite 2s;
+      letter-spacing: 2px;
+    }
+    
+    @keyframes textReveal {
+      from {
+        clip-path: inset(0 100% 0 0);
+        transform: translateX(-50px);
+        opacity: 0;
+      }
+      to {
+        clip-path: inset(0 0 0 0);
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes textShimmer {
+      0%, 100% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+    }
+    
+    .hero-subtext {
+      font-size: 3.2em;
+      font-weight: 900;
+      background: linear-gradient(90deg, #4caf50, #66bb6a, #4caf50);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 50px;
+      animation: 
+        textReveal 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1s both,
+        gradientShift 3s ease infinite;
+      text-shadow: 0 0 30px rgba(76, 175, 80, 0.5);
+      filter: drop-shadow(0 0 20px rgba(76, 175, 80, 0.4));
+    }
+    
+    @keyframes gradientShift {
+      0%, 100% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+    }
+    
+    /* Food Showcase with 3D Effect */
+    .food-showcase {
+      margin: 50px 0;
+      perspective: 1000px;
+      animation: fadeInUp 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1.5s both;
+    }
+    
+    @keyframes fadeInUp {
+      from {
+        transform: translateY(100px) rotateX(20deg);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0) rotateX(0deg);
+        opacity: 1;
+      }
+    }
+    
+    .food-image-large {
+      width: 100%;
+      max-width: 550px;
+      height: 350px;
+      object-fit: cover;
+      border-radius: 25px;
+      box-shadow: 
+        0 25px 70px rgba(0,0,0,0.6),
+        0 0 50px rgba(76, 175, 80, 0.4);
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      border: 3px solid rgba(76, 175, 80, 0.3);
+      animation: imagePulse 4s ease-in-out infinite;
+    }
+    
+    .food-image-large:hover {
+      transform: scale(1.05) rotateY(5deg) rotateX(5deg);
+      box-shadow: 
+        0 35px 100px rgba(0,0,0,0.7),
+        0 0 80px rgba(76, 175, 80, 0.6);
+      border-color: rgba(76, 175, 80, 0.6);
+    }
+    
+    @keyframes imagePulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.02);
+      }
+    }
+    
+    /* Video Section with Advanced Animations */
+    .video-section {
+      background: linear-gradient(180deg, #0d2e1f 0%, #1a4d3a 50%, #0d2e1f 100%);
+      padding: 100px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .video-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 50%, rgba(76, 175, 80, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 50%, rgba(76, 175, 80, 0.15) 0%, transparent 50%);
+      animation: videoGlow 6s ease-in-out infinite;
+      pointer-events: none;
+    }
+    
+    @keyframes videoGlow {
+      0%, 100% {
+        opacity: 0.5;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.8;
+        transform: scale(1.1);
+      }
+    }
+    
+    .video-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .video-title {
+      font-size: 3em;
+      font-weight: 900;
+      color: #fff;
+      text-align: center;
+      margin-bottom: 50px;
+      text-shadow: 
+        0 0 30px rgba(255,255,255,0.3),
+        0 4px 15px rgba(0,0,0,0.5);
+      animation: 
+        titleSlideIn 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) both,
+        titleGlow 3s ease-in-out infinite 1.5s;
+      letter-spacing: 2px;
+    }
+    
+    @keyframes titleSlideIn {
+      from {
+        transform: translateY(-50px) scale(0.8);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes titleGlow {
+      0%, 100% {
+        text-shadow: 
+          0 0 30px rgba(255,255,255,0.3),
+          0 4px 15px rgba(0,0,0,0.5);
+      }
+      50% {
+        text-shadow: 
+          0 0 50px rgba(76, 175, 80, 0.6),
+          0 0 30px rgba(255,255,255,0.4),
+          0 4px 15px rgba(0,0,0,0.5);
+      }
+    }
+    
+    .video-wrapper {
+      position: relative;
+      border-radius: 30px;
+      overflow: hidden;
+      box-shadow: 
+        0 30px 100px rgba(0,0,0,0.7),
+        0 0 60px rgba(76, 175, 80, 0.4),
+        inset 0 0 40px rgba(76, 175, 80, 0.1);
+      border: 3px solid rgba(76, 175, 80, 0.3);
+      background: #000;
+      animation: 
+        videoContainerFloat 8s ease-in-out infinite,
+        videoContainerGlow 4s ease-in-out infinite,
+        videoScaleIn 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+      transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      perspective: 1000px;
+    }
+    
+    @keyframes videoContainerFloat {
+      0%, 100% {
+        transform: translateY(0px) rotateX(0deg);
+      }
+      50% {
+        transform: translateY(-20px) rotateX(2deg);
+      }
+    }
+    
+    @keyframes videoContainerGlow {
+      0%, 100% {
+        box-shadow: 
+          0 30px 100px rgba(0,0,0,0.7),
+          0 0 60px rgba(76, 175, 80, 0.4);
+        border-color: rgba(76, 175, 80, 0.3);
+      }
+      50% {
+        box-shadow: 
+          0 40px 120px rgba(0,0,0,0.8),
+          0 0 80px rgba(76, 175, 80, 0.6);
+        border-color: rgba(76, 175, 80, 0.5);
+      }
+    }
+    
+    @keyframes videoScaleIn {
+      from {
+        transform: scale(0.8) rotateY(20deg);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1) rotateY(0deg);
+        opacity: 1;
+      }
+    }
+    
+    .video-wrapper:hover {
+      transform: translateY(-15px) rotateX(5deg) scale(1.02);
+      box-shadow: 
+        0 50px 150px rgba(0,0,0,0.8),
+        0 0 100px rgba(76, 175, 80, 0.7),
+        inset 0 0 60px rgba(76, 175, 80, 0.2);
+      border-color: rgba(76, 175, 80, 0.7);
+    }
+    
+    .magic-video {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 27px;
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      background: #000;
+    }
+    
+    .magic-video::-webkit-media-controls-panel {
+      background: rgba(26, 77, 58, 0.9);
+      backdrop-filter: blur(10px);
+    }
+    
+    .magic-video::-webkit-media-controls-play-button {
+      background: #4caf50;
+      border-radius: 50%;
+    }
+    
+    .video-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(
+        135deg,
+        rgba(76, 175, 80, 0.1) 0%,
+        transparent 50%,
+        rgba(76, 175, 80, 0.1) 100%
+      );
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.5s;
+      border-radius: 30px;
+    }
+    
+    .video-wrapper:hover .video-overlay {
+      opacity: 1;
+    }
+    
+    /* Mid Section with Parallax */
+    .mid-section {
+      background: #1a4d3a;
+      padding: 60px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .mid-section::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(76, 175, 80, 0.1) 0%, transparent 70%);
+      animation: rotate 20s linear infinite;
+    }
+    
+    @keyframes rotate {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    
+    .mid-image {
+      width: 100%;
+      max-width: 700px;
+      height: 300px;
+      object-fit: cover;
+      border-radius: 25px;
+      margin: 0 auto;
+      display: block;
+      box-shadow: 
+        0 20px 60px rgba(0,0,0,0.5),
+        0 0 40px rgba(76, 175, 80, 0.3);
+      position: relative;
+      z-index: 2;
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      animation: slideInFromRight 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+    }
+    
+    @keyframes slideInFromRight {
+      from {
+        transform: translateX(100px) scale(0.8);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0) scale(1);
+        opacity: 1;
+      }
+    }
+    
+    .mid-image:hover {
+      transform: scale(1.03) rotateZ(-2deg);
+      box-shadow: 
+        0 30px 80px rgba(0,0,0,0.6),
+        0 0 60px rgba(76, 175, 80, 0.5);
+    }
+    
+    /* Package Cards with Staggered Animation */
+    .packages-section {
+      background: linear-gradient(180deg, #1a4d3a 0%, #0d2e1f 100%);
+      padding: 80px 20px;
+      text-align: center;
+      position: relative;
+    }
+    
+    .section-title {
+      font-size: 2.8em;
+      color: #fff;
+      margin-bottom: 50px;
+      font-weight: 800;
+      text-shadow: 0 0 30px rgba(76, 175, 80, 0.5);
+      animation: titleReveal 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+    }
+    
+    @keyframes titleReveal {
+      from {
+        transform: translateY(-30px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    
+    .package-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      max-width: 1100px;
+      margin: 0 auto;
+      perspective: 1000px;
+    }
+    
+    .package-card {
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(76, 175, 80, 0.2);
+      border-radius: 25px;
+      padding: 30px;
+      transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      overflow: hidden;
+      animation: cardFloat 6s ease-in-out infinite;
+    }
+    
+    .package-card:nth-child(1) {
+      animation-delay: 0s;
+      animation: cardSlideIn 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.2s both, cardFloat 6s ease-in-out infinite 1.2s;
+    }
+    
+    .package-card:nth-child(2) {
+      animation-delay: 0.3s;
+      animation: cardSlideIn 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.4s both, cardFloat 6s ease-in-out infinite 1.4s;
+    }
+    
+    .package-card:nth-child(3) {
+      animation-delay: 0.6s;
+      animation: cardSlideIn 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.6s both, cardFloat 6s ease-in-out infinite 1.6s;
+    }
+    
+    @keyframes cardSlideIn {
+      from {
+        transform: translateY(100px) rotateX(30deg);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0) rotateX(0deg);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes cardFloat {
+      0%, 100% {
+        transform: translateY(0px) rotateY(0deg);
+      }
+      50% {
+        transform: translateY(-15px) rotateY(2deg);
+      }
+    }
+    
+    .package-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(76, 175, 80, 0.1) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.6s;
+    }
+    
+    .package-card:hover {
+      transform: translateY(-20px) rotateY(5deg) scale(1.05);
+      box-shadow: 
+        0 30px 80px rgba(0,0,0,0.6),
+        0 0 60px rgba(76, 175, 80, 0.5);
+      border-color: #4caf50;
+    }
+    
+    .package-card:hover::before {
+      opacity: 1;
+    }
+    
+    .package-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 20px;
+      margin-bottom: 25px;
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+    
+    .package-card:hover img {
+      transform: scale(1.1) rotateZ(2deg);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+    }
+    
+    .package-card h3 {
+      color: #4caf50;
+      font-size: 1.8em;
+      margin-bottom: 15px;
+      text-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
+      transition: all 0.3s;
+    }
+    
+    .package-card:hover h3 {
+      transform: scale(1.1);
+      text-shadow: 0 0 30px rgba(76, 175, 80, 0.8);
+    }
+    
+    .package-card p {
+      color: #fff;
+      font-size: 1.1em;
+      line-height: 1.6;
+      transition: all 0.3s;
+    }
+    
+    .package-price {
+      color: #4caf50;
+      font-size: 1.6em;
+      font-weight: 800;
+      margin-top: 20px;
+      text-shadow: 0 0 20px rgba(76, 175, 80, 0.6);
+      animation: pricePulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pricePulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+    }
+    
+    /* Services Section */
+    .services-section {
+      background: #0d2e1f;
+      padding: 80px 20px;
+      text-align: center;
+      position: relative;
+    }
+    
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 25px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    .service-item {
+      background: rgba(76, 175, 80, 0.1);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(76, 175, 80, 0.3);
+      padding: 35px 25px;
+      border-radius: 20px;
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      overflow: hidden;
+      animation: serviceSlideIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+    }
+    
+    .service-item:nth-child(1) { animation-delay: 0.1s; }
+    .service-item:nth-child(2) { animation-delay: 0.2s; }
+    .service-item:nth-child(3) { animation-delay: 0.3s; }
+    .service-item:nth-child(4) { animation-delay: 0.4s; }
+    
+    @keyframes serviceSlideIn {
+      from {
+        transform: translateX(-100px) rotateY(90deg);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0) rotateY(0deg);
+        opacity: 1;
+      }
+    }
+    
+    .service-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(76, 175, 80, 0.3), transparent);
+      transition: left 0.6s;
+    }
+    
+    .service-item:hover::before {
+      left: 100%;
+    }
+    
+    .service-item:hover {
+      background: rgba(76, 175, 80, 0.2);
+      border-color: #4caf50;
+      transform: translateY(-15px) rotateX(5deg) scale(1.05);
+      box-shadow: 
+        0 20px 60px rgba(0,0,0,0.5),
+        0 0 40px rgba(76, 175, 80, 0.4);
+    }
+    
+    .service-item h3 {
+      color: #4caf50;
+      font-size: 1.5em;
+      margin-bottom: 15px;
+      text-shadow: 0 0 15px rgba(76, 175, 80, 0.5);
+      transition: all 0.3s;
+    }
+    
+    .service-item:hover h3 {
+      transform: scale(1.1);
+      text-shadow: 0 0 25px rgba(76, 175, 80, 0.8);
+    }
+    
+    .service-item p {
+      color: #fff;
+      font-size: 1em;
+      line-height: 1.6;
+    }
+    
+    /* Gallery Section */
+    .gallery-section {
+      background: linear-gradient(180deg, #0d2e1f 0%, #1a4d3a 100%);
+      padding: 80px 20px;
+      position: relative;
+    }
+
+    /* -----------------------------
+       Plate Cleaning Game (Scoped)
+       ----------------------------- */
+    .plate-game-section {
+      background: radial-gradient(circle at 50% 0%, rgba(76,175,80,0.18) 0%, rgba(13,46,31,1) 45%, rgba(13,46,31,1) 100%);
+      padding: 90px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .plate-game-section::before {
+      content: '';
+      position: absolute;
+      inset: -40%;
+      background: conic-gradient(from 180deg, rgba(76,175,80,0.0), rgba(76,175,80,0.12), rgba(76,175,80,0.0));
+      animation: rotate 18s linear infinite;
+      pointer-events: none;
+      opacity: 0.55;
+    }
+
+    .plate-game-shell {
+      max-width: 980px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+      border-radius: 30px;
+      padding: 34px 26px;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(76,175,80,0.22);
+      backdrop-filter: blur(10px);
+      box-shadow:
+        0 30px 120px rgba(0,0,0,0.65),
+        0 0 60px rgba(76,175,80,0.25);
+      transform-style: preserve-3d;
+      animation: videoScaleIn 1.1s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    .plate-game-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      justify-content: center;
+      margin-bottom: 22px;
+      text-align: left;
+    }
+
+    .plate-game-badge {
+      font-weight: 900;
+      letter-spacing: 1px;
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, rgba(76,175,80,0.9), rgba(102,187,106,0.7));
+      color: #0d2e1f;
+      box-shadow: 0 10px 24px rgba(76,175,80,0.25);
+      text-transform: uppercase;
+    }
+
+    .plate-game-title {
+      font-size: 2.2em;
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-shadow: 0 0 30px rgba(76,175,80,0.35), 0 6px 18px rgba(0,0,0,0.55);
+      margin-bottom: 6px;
+    }
+
+    .plate-game-subtitle {
+      opacity: 0.9;
+      color: rgba(255,255,255,0.92);
+    }
+
+    .plate-game-stage {
+      position: relative;
+      max-width: 560px;
+      margin: 0 auto;
+      border-radius: 28px;
+      overflow: hidden;
+      border: 3px solid rgba(76,175,80,0.22);
+      box-shadow:
+        0 30px 100px rgba(0,0,0,0.65),
+        0 0 70px rgba(76,175,80,0.25);
+      background: rgba(0,0,0,0.35);
+      transform: translateZ(0);
+    }
+
+    .plate-game-stage::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(76,175,80,0.10), transparent 45%, rgba(76,175,80,0.08));
+      pointer-events: none;
+      opacity: 0.0;
+      transition: opacity 0.45s ease;
+    }
+
+    .plate-game-stage:hover::after {
+      opacity: 1;
+    }
+
+    .plate-canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1 / 1;
+      cursor: crosshair;
+      background: transparent;
+    }
+
+    .plate-game-hud {
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      bottom: 14px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      pointer-events: none;
+    }
+
+    .plate-progress {
+      width: min(360px, 72%);
+      pointer-events: auto;
+    }
+
+    .plate-progress-track {
+      height: 12px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(254,215,170,0.45), rgba(254,202,202,0.35));
+      overflow: hidden;
+      box-shadow: 0 6px 20px rgba(251,191,36,0.18);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .plate-progress-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #fbbf24, #f59e0b);
+      box-shadow: 0 0 18px rgba(251,191,36,0.55);
+      transition: width 0.2s ease;
+    }
+
+    .plate-progress-text {
+      margin-top: 10px;
+      font-weight: 700;
+      font-size: 14px;
+      color: rgba(255,255,255,0.92);
+      text-shadow: 0 2px 10px rgba(0,0,0,0.55);
+    }
+
+    .plate-btn {
+      pointer-events: auto;
+      border: 0;
+      border-radius: 14px;
+      padding: 10px 14px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .plate-btn:active {
+      transform: translateY(1px) scale(0.99);
+    }
+
+    .plate-btn-primary {
+      width: 100%;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #fff;
+      box-shadow: 0 16px 40px rgba(34,197,94,0.25);
+    }
+
+    .plate-btn-secondary {
+      background: linear-gradient(135deg, rgba(245,158,11,0.95), rgba(234,88,12,0.95));
+      color: #fff;
+      box-shadow: 0 16px 40px rgba(245,158,11,0.20);
+    }
+
+    .plate-btn:hover {
+      transform: translateY(-2px) scale(1.02);
+      filter: brightness(1.05);
+      box-shadow: 0 22px 55px rgba(0,0,0,0.35);
+    }
+
+    .plate-game-note {
+      margin: 22px auto 0;
+      max-width: 680px;
+      text-align: center;
+      opacity: 0.92;
+    }
+
+    .plate-sparkle {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--c, #fbbf24);
+      box-shadow: 0 0 18px var(--c, #fbbf24);
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      animation: plateSpark 0.7s ease-out forwards;
+      mix-blend-mode: screen;
+    }
+
+    @keyframes plateSpark {
+      0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      100% { opacity: 0; transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(0.35); }
+    }
+
+    .plate-win-modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(10px);
+      z-index: 2000;
+      padding: 20px;
+    }
+
+    .plate-win-modal.show {
+      display: flex;
+    }
+
+    .plate-modal {
+      width: min(520px, 96vw);
+      background: rgba(255,255,255,0.96);
+      color: #123;
+      border-radius: 26px;
+      padding: 28px 26px;
+      text-align: center;
+      box-shadow: 0 30px 120px rgba(0,0,0,0.55);
+      animation: slideUp 0.55s ease both;
+    }
+
+    .plate-modal-emoji {
+      font-size: 46px;
+      margin-bottom: 10px;
+      animation: bounce 0.9s ease-in-out infinite;
+    }
+
+    .plate-modal-title {
+      font-size: 26px;
+      font-weight: 900;
+      margin-bottom: 10px;
+      color: #b45309;
+    }
+
+    .plate-modal-text {
+      color: #553b23;
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+
+    .plate-form {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .plate-input {
+      width: 100%;
+      padding: 14px 14px;
+      border-radius: 14px;
+      border: 2px solid rgba(254, 215, 170, 1);
+      font-size: 16px;
+      outline: none;
+    }
+
+    .plate-input:focus {
+      border-color: rgba(245,158,11,1);
+      box-shadow: 0 0 0 4px rgba(245,158,11,0.15);
+    }
+
+    .plate-success {
+      display: none;
+      font-weight: 800;
+      color: #16a34a;
+      margin-top: 6px;
+    }
+
+    .plate-success.show {
+      display: block;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 768px) {
+      .plate-game-shell { padding: 26px 16px; }
+      .plate-game-header { justify-content: flex-start; }
+      .plate-game-title { font-size: 1.8em; }
+      .plate-game-hud { left: 12px; right: 12px; bottom: 12px; }
+      .plate-progress { width: 72%; }
+    }
+    
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+      max-width: 1100px;
+      margin: 0 auto 40px;
+      perspective: 1000px;
+    }
+    
+    .gallery-item {
+      position: relative;
+      border-radius: 25px;
+      overflow: hidden;
+      box-shadow: 
+        0 20px 60px rgba(0,0,0,0.5),
+        0 0 40px rgba(76, 175, 80, 0.2);
+      transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      animation: galleryFadeIn 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+    }
+    
+    .gallery-item:nth-child(1) { animation-delay: 0.2s; }
+    .gallery-item:nth-child(2) { animation-delay: 0.4s; }
+    .gallery-item:nth-child(3) { animation-delay: 0.6s; }
+    
+    @keyframes galleryFadeIn {
+      from {
+        transform: scale(0) rotate(180deg);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+      }
+    }
+    
+    .gallery-item::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(45deg, rgba(76, 175, 80, 0.1) 0%, transparent 100%);
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+    
+    .gallery-item:hover {
+      transform: scale(1.1) rotateY(10deg) rotateX(5deg);
+      box-shadow: 
+        0 30px 100px rgba(0,0,0,0.7),
+        0 0 80px rgba(76, 175, 80, 0.5);
+      z-index: 10;
+    }
+    
+    .gallery-item:hover::after {
+      opacity: 1;
+    }
+    
+    .gallery-item img {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    
+    .gallery-item:hover img {
+      transform: scale(1.2);
+    }
+    
+    /* Footer CTA */
+    .footer-cta {
+      background: linear-gradient(135deg, #8b1538, #a01d44);
+      padding: 25px 40px;
+      text-align: center;
+      border-radius: 20px;
+      margin: 50px auto 0;
+      max-width: 500px;
+      box-shadow: 
+        0 20px 60px rgba(139, 21, 56, 0.5),
+        0 0 40px rgba(139, 21, 56, 0.3);
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      animation: ctaPulse 3s ease-in-out infinite;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .footer-cta::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      animation: rotate 10s linear infinite;
+    }
+    
+    @keyframes ctaPulse {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow: 
+          0 20px 60px rgba(139, 21, 56, 0.5),
+          0 0 40px rgba(139, 21, 56, 0.3);
+      }
+      50% {
+        transform: scale(1.05);
+        box-shadow: 
+          0 30px 80px rgba(139, 21, 56, 0.7),
+          0 0 60px rgba(139, 21, 56, 0.5);
+      }
+    }
+    
+    .footer-cta:hover {
+      transform: scale(1.1) rotateZ(2deg);
+      box-shadow: 
+        0 35px 100px rgba(139, 21, 56, 0.8),
+        0 0 80px rgba(139, 21, 56, 0.6);
+    }
+    
+    .footer-cta a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 1.4em;
+      font-weight: 800;
+      display: block;
+      position: relative;
+      z-index: 2;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+      letter-spacing: 1px;
+      transition: all 0.3s;
+    }
+    
+    .footer-cta:hover a {
+      transform: scale(1.1);
+    }
+    
+    /* Smooth Scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
+    
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .hero-text {
+        font-size: 2.2em;
+      }
+      
+      .hero-subtext {
+        font-size: 1.8em;
+      }
+      
+      .intro-image {
+        width: 250px;
+      }
+      
+      .package-cards,
+      .gallery-grid,
+      .services-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .food-image-large {
+        height: 250px;
+      }
+      
+      .mid-image {
+        height: 220px;
+      }
+      
+      .video-title {
+        font-size: 2em;
+      }
+      
+      .video-wrapper {
+        border-radius: 20px;
+      }
+      
+      .magic-video {
+        border-radius: 17px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Particle Background -->
+  <div class="particles" id="particles"></div>
+
+  <!-- Top Header Bar -->
+  <div class="top-header">
+    <div class="header-left">
+      <svg class="fork-knife-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M8.1 13.34l2.83-2.83L3.91 3.5c-1.56 1.56-1.56 4.09 0 5.66l4.19 4.18zm6.78-1.81c1.53.71 3.68.21 5.27-1.38 1.91-1.91 2.28-4.65.81-6.12-1.46-1.46-4.2-1.1-6.12.81-1.59 1.59-2.09 3.74-1.38 5.27L3.7 19.87l1.41 1.41L12 14.41l6.88 6.88 1.41-1.41L13.41 13l1.47-1.47z"/>
+      </svg>
+      <span class="brand-name">MAGICPLATE.AI</span>
+    </div>
+    <div class="header-right">
+      <span>✨</span>
+    </div>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <img src="/images/sydney-intro.png" alt="Sydney Ramey - MagicPlate.ai" class="intro-image" onerror="this.style.display='none'">
+      <h1 class="hero-text">LET'S TEST OF</h1>
+      <h2 class="hero-subtext">MAGIC PLATE!</h2>
+      
+      <div class="food-showcase">
+        <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=550&h=350&fit=crop" alt="Delicious Burger" class="food-image-large">
+      </div>
+    </div>
+  </section>
+
+  <!-- Video Section -->
+  <section class="video-section">
+    <div class="video-container">
+      <h2 class="video-title">See The Magic In Action</h2>
+      <div class="video-wrapper">
+        <video 
+          class="magic-video" 
+          controls 
+          poster=""
+          preload="metadata"
+          playsinline
+        >
+          <source src="/videos/menu-transformation.mp4" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+        <div class="video-overlay"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Mid Section -->
+  <section class="mid-section">
+    <img src="https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=700&h=300&fit=crop" alt="Sushi Preparation" class="mid-image">
+  </section>
+
+  <!-- Packages Section -->
+  <section class="packages-section">
+    <h2 class="section-title">Choose a Package</h2>
+    <div class="package-cards">
+      <div class="package-card">
+        <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=250&fit=crop" alt="Basic Package">
+        <h3>Quick Visual Fix</h3>
+        <p class="package-price">$150</p>
+        <p>AI restore 5 items + digital link/videos.</p>
+      </div>
+      <div class="package-card">
+        <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=250&fit=crop" alt="Standard Package">
+        <h3>Restaurant Menu Pack</h3>
+        <p class="package-price">$300</p>
+        <p>Full menu + link/videos.</p>
+      </div>
+      <div class="package-card">
+        <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=250&fit=crop" alt="Pro Package">
+        <h3>Full Overhaul</h3>
+        <p class="package-price">$400</p>
+        <p>Restoration, DoorDash, videos.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Mini Game: Plate Cleaning -->
+  <section class="plate-game-section" id="plate-game">
+    <div class="plate-game-shell">
+      <div class="plate-game-header">
+        <div class="plate-game-badge">NEW</div>
+        <div>
+          <h2 class="plate-game-title">✨ Plate Cleaning Game</h2>
+          <p class="plate-game-subtitle">Drag your magic wand to restore the plate.</p>
+        </div>
+      </div>
+
+      <div class="plate-game-stage">
+        <canvas id="dirtyCanvas" class="plate-canvas" aria-label="Plate Cleaning Game"></canvas>
+        <div class="plate-game-hud">
+          <div class="plate-progress">
+            <div class="plate-progress-track">
+              <div id="progressFill" class="plate-progress-fill"></div>
+            </div>
+            <div class="plate-progress-text">
+              Plate Restored: <span id="progressText">0</span>%
+            </div>
+          </div>
+          <button id="restartBtn" class="plate-btn plate-btn-secondary" type="button">🔄 Restart</button>
+        </div>
+      </div>
+
+      <div class="plate-game-note">
+        Beat the game and drop your email — we’ll send a <strong>free sample enhancement</strong>.
+      </div>
+    </div>
+
+    <!-- Win Modal -->
+    <div id="winModal" class="plate-win-modal" role="dialog" aria-modal="true" aria-labelledby="winTitle">
+      <div class="plate-modal">
+        <div class="plate-modal-emoji">🎉✨🍽️</div>
+        <h3 class="plate-modal-title" id="winTitle">You Restored the Plate!</h3>
+        <p class="plate-modal-text" id="winMessage">Enter your email for a FREE menu photo enhancement sample from MagicPlate.ai</p>
+        <form id="emailForm" class="plate-form" autocomplete="on">
+          <label class="sr-only" for="emailInput">Email address</label>
+          <input type="email" id="emailInput" class="plate-input" placeholder="your@email.com" required />
+          <button type="submit" class="plate-btn plate-btn-primary">🎁 Claim Free Sample</button>
+          <div id="successMessage" class="plate-success">✅ Thanks! Check your inbox soon!</div>
+        </form>
+        <button id="playAgainBtn" class="plate-btn plate-btn-secondary" type="button">Play Again</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services Lineup -->
+  <section class="services-section">
+    <h2 class="section-title">The Lineup</h2>
+    <div class="services-grid">
+      <div class="service-item">
+        <h3>AI Photo Fix</h3>
+        <p>Enhance real images ethically.</p>
+      </div>
+      <div class="service-item">
+        <h3>Digital Link + Videos</h3>
+        <p>QR with previews for every item.</p>
+      </div>
+      <div class="service-item">
+        <h3>DoorDash Setup</h3>
+        <p>Get on delivery fast.</p>
+      </div>
+      <div class="service-item">
+        <h3>Marketing Boost</h3>
+        <p>Emails & social templates.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bottom Gallery -->
+  <section class="gallery-section">
+    <div class="gallery-grid">
+      <div class="gallery-item">
+        <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=400&fit=crop" alt="Professional Service">
+      </div>
+      <div class="gallery-item">
+        <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=400&fit=crop" alt="Food Presentation">
+      </div>
+      <div class="gallery-item">
+        <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=400&fit=crop" alt="Restaurant Setting">
+      </div>
+    </div>
+    
+    <div class="footer-cta">
+      <a href="https://magicplate.info/book">magicplate.info</a>
+    </div>
+  </section>
+
+  <script>
+    // Create particle system
+    function createParticles() {
+      const particlesContainer = document.getElementById('particles');
+      const particleCount = 30;
+      
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.top = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 15 + 's';
+        particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+        particlesContainer.appendChild(particle);
+      }
+    }
+    
+    // Parallax scroll effect
+    window.addEventListener('scroll', () => {
+      const scrolled = window.pageYOffset;
+      const heroSection = document.querySelector('.hero-section');
+      const heroContent = document.querySelector('.hero-content');
+      
+      if (heroContent) {
+        heroContent.style.transform = `translateY(${scrolled * 0.3}px)`;
+        heroContent.style.opacity = 1 - (scrolled / 500);
+      }
+    });
+    
+    // Intersection Observer for scroll animations
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.animationPlayState = 'running';
+        }
+      });
+    }, observerOptions);
+    
+    // Observe all animated elements
+    document.querySelectorAll('.package-card, .service-item, .gallery-item').forEach(el => {
+      observer.observe(el);
+    });
+    
+    // Initialize on load
+    window.addEventListener('load', () => {
+      createParticles();
+    });
+  </script>
+
+  <script>
+    // -----------------------------
+    // Plate Cleaning Game (Scoped)
+    // -----------------------------
+    (function plateGame() {
+      const defaultConfig = {
+        brushSize: 52,
+        restoreThreshold: 82,
+      };
+
+      let canvas, ctx;
+      let isDrawing = false;
+      let isGameWon = false;
+      let w = 0;
+      let h = 0;
+      let dpr = 1;
+
+      const dom = {
+        modal: () => document.getElementById('winModal'),
+        progressFill: () => document.getElementById('progressFill'),
+        progressText: () => document.getElementById('progressText'),
+        emailForm: () => document.getElementById('emailForm'),
+        emailInput: () => document.getElementById('emailInput'),
+        success: () => document.getElementById('successMessage'),
+        restartBtn: () => document.getElementById('restartBtn'),
+        playAgainBtn: () => document.getElementById('playAgainBtn'),
+      };
+
+      function clamp(n, min, max) {
+        return Math.max(min, Math.min(max, n));
+      }
+
+      function resizeCanvas() {
+        const wrapper = document.querySelector('.plate-game-stage');
+        if (!wrapper) return;
+
+        const rect = wrapper.getBoundingClientRect();
+        const size = Math.floor(Math.min(rect.width, 560));
+        const cssW = size;
+        const cssH = size;
+
+        dpr = window.devicePixelRatio || 1;
+        canvas.style.width = cssW + 'px';
+        canvas.style.height = cssH + 'px';
+        canvas.width = Math.floor(cssW * dpr);
+        canvas.height = Math.floor(cssH * dpr);
+        w = canvas.width;
+        h = canvas.height;
+
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // draw in CSS pixels
+      }
+
+      function drawDirtyPlate() {
+        const cssW = canvas.getBoundingClientRect().width;
+        const cssH = canvas.getBoundingClientRect().height;
+        const centerX = cssW / 2;
+        const centerY = cssH / 2;
+        const plateRadius = Math.min(cssW, cssH) * 0.36;
+
+        ctx.clearRect(0, 0, cssW, cssH);
+
+        // Backdrop
+        const bg = ctx.createLinearGradient(0, 0, cssW, cssH);
+        bg.addColorStop(0, 'rgba(255, 251, 235, 0.95)');
+        bg.addColorStop(1, 'rgba(254, 243, 199, 0.92)');
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, cssW, cssH);
+
+        // Shadow ring
+        const shadow = ctx.createRadialGradient(centerX, centerY - plateRadius * 0.15, plateRadius * 0.2, centerX, centerY, plateRadius * 1.15);
+        shadow.addColorStop(0, 'rgba(0, 0, 0, 0.10)');
+        shadow.addColorStop(1, 'rgba(0, 0, 0, 0.18)');
+        ctx.fillStyle = shadow;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, plateRadius * 1.06, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Plate base
+        const plate = ctx.createLinearGradient(centerX - plateRadius, centerY - plateRadius, centerX + plateRadius, centerY + plateRadius);
+        plate.addColorStop(0, '#fffbeb');
+        plate.addColorStop(0.5, '#fef3c7');
+        plate.addColorStop(1, '#fde68a');
+        ctx.fillStyle = plate;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, plateRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Gold rim
+        ctx.strokeStyle = '#d4af37';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.strokeStyle = 'rgba(212, 175, 55, 0.25)';
+        ctx.lineWidth = 7;
+        ctx.stroke();
+
+        // Subtle residues under grime
+        ctx.fillStyle = 'rgba(200, 150, 50, 0.12)';
+        for (let i = 0; i < 12; i++) {
+          const a = Math.random() * Math.PI * 2;
+          const dist = Math.random() * plateRadius * 0.7;
+          const x = centerX + Math.cos(a) * dist;
+          const y = centerY + Math.sin(a) * dist;
+          const s = Math.random() * 34 + 18;
+          ctx.beginPath();
+          ctx.arc(x, y, s, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.fillStyle = 'rgba(139, 69, 19, 0.18)';
+        for (let i = 0; i < 36; i++) {
+          const x = centerX + (Math.random() - 0.5) * plateRadius * 1.7;
+          const y = centerY + (Math.random() - 0.5) * plateRadius * 1.7;
+          const ww = Math.random() * 7 + 2;
+          const hh = Math.random() * 5 + 1;
+          ctx.fillRect(x - ww / 2, y - hh / 2, ww, hh);
+        }
+
+        // Grime layer (this gets erased)
+        const grime = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, plateRadius * 1.25);
+        grime.addColorStop(0, 'rgba(80, 50, 20, 0.42)');
+        grime.addColorStop(0.6, 'rgba(100, 70, 40, 0.55)');
+        grime.addColorStop(1, 'rgba(120, 80, 50, 0.62)');
+        ctx.fillStyle = grime;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, plateRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Center gunk
+        ctx.fillStyle = 'rgba(60, 40, 20, 0.55)';
+        ctx.beginPath();
+        ctx.ellipse(centerX, centerY, plateRadius * 0.62, plateRadius * 0.68, 0.15, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Stains
+        ctx.fillStyle = 'rgba(70, 50, 30, 0.42)';
+        for (let i = 0; i < 14; i++) {
+          const a = Math.random() * Math.PI * 2;
+          const dist = Math.random() * plateRadius * 0.8;
+          const x = centerX + Math.cos(a) * dist;
+          const y = centerY + Math.sin(a) * dist;
+          const s = Math.random() * 44 + 28;
+          ctx.beginPath();
+          ctx.ellipse(x, y, s, s * 0.7, Math.random() * Math.PI, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Grain
+        ctx.globalAlpha = 0.28;
+        ctx.fillStyle = '#8b8b8b';
+        for (let i = 0; i < 220; i++) {
+          ctx.fillRect(Math.random() * cssW, Math.random() * cssH, Math.random() * 1.6, Math.random() * 1.6);
+        }
+        ctx.globalAlpha = 1;
+
+        // Vignette
+        const vig = ctx.createRadialGradient(centerX, centerY, plateRadius * 0.5, centerX, centerY, plateRadius * 1.35);
+        vig.addColorStop(0, 'rgba(0,0,0,0)');
+        vig.addColorStop(1, 'rgba(0,0,0,0.28)');
+        ctx.fillStyle = vig;
+        ctx.fillRect(centerX - plateRadius * 1.6, centerY - plateRadius * 1.6, plateRadius * 3.2, plateRadius * 3.2);
+      }
+
+      function getPointerPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        const pt = e.touches?.[0] ?? e;
+        return {
+          x: pt.clientX - rect.left,
+          y: pt.clientY - rect.top,
+        };
+      }
+
+      function sparkle(x, y) {
+        const s = document.createElement('div');
+        s.className = 'plate-sparkle';
+        const colors = ['#fbbf24', '#f59e0b', '#fecaca', '#fed7aa'];
+        const c = colors[(Math.random() * colors.length) | 0];
+        s.style.left = x + 'px';
+        s.style.top = y + 'px';
+        s.style.setProperty('--c', c);
+        s.style.setProperty('--tx', (Math.random() - 0.5) * 70 + 'px');
+        s.style.setProperty('--ty', (Math.random() - 0.5) * 70 - 35 + 'px');
+        canvas.parentElement.appendChild(s);
+        setTimeout(() => s.remove(), 700);
+      }
+
+      function start(e) {
+        if (isGameWon) return;
+        isDrawing = true;
+        wipe(e);
+      }
+
+      function stop() {
+        isDrawing = false;
+      }
+
+      function wipe(e) {
+        if (!isDrawing || isGameWon) return;
+        e.preventDefault?.();
+
+        const { x, y } = getPointerPos(e);
+        const brush = defaultConfig.brushSize * 1.55;
+
+        // Soft brush with highlight ring (feels like cloth)
+        const g = ctx.createRadialGradient(x, y, 0, x, y, brush / 2);
+        g.addColorStop(0, 'rgba(255, 255, 255, 0.92)');
+        g.addColorStop(0.7, 'rgba(255, 255, 255, 0.55)');
+        g.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+        ctx.save();
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(x, y, brush / 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        // Sparkles (few per wipe)
+        for (let i = 0; i < 2; i++) {
+          const a = Math.random() * Math.PI * 2;
+          const dist = Math.random() * (brush / 3);
+          sparkle(x + Math.cos(a) * dist, y + Math.sin(a) * dist);
+        }
+
+        updateProgress();
+        checkWin();
+      }
+
+      function updateProgress() {
+        const cssW = canvas.getBoundingClientRect().width | 0;
+        const cssH = canvas.getBoundingClientRect().height | 0;
+        const img = ctx.getImageData(0, 0, cssW, cssH);
+        const data = img.data;
+        let cleared = 0;
+        for (let i = 3; i < data.length; i += 4) {
+          if (data[i] === 0) cleared++;
+        }
+        const pct = clamp(Math.round((cleared / (cssW * cssH)) * 100), 0, 100);
+        dom.progressFill().style.width = pct + '%';
+        dom.progressText().textContent = String(pct);
+      }
+
+      function checkWin() {
+        const pct = parseInt(dom.progressText().textContent || '0', 10);
+        if (!isGameWon && pct >= defaultConfig.restoreThreshold) {
+          isGameWon = true;
+          setTimeout(() => dom.modal().classList.add('show'), 280);
+        }
+      }
+
+      function resetUI() {
+        isGameWon = false;
+        isDrawing = false;
+        dom.modal().classList.remove('show');
+        dom.success().classList.remove('show');
+        dom.emailInput().value = '';
+      }
+
+      function init() {
+        canvas = document.getElementById('dirtyCanvas');
+        if (!canvas) return;
+        ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+        resizeCanvas();
+        drawDirtyPlate();
+        resetUI();
+        updateProgress();
+
+        // Pointer handlers
+        canvas.addEventListener('mousedown', start);
+        canvas.addEventListener('mousemove', wipe);
+        window.addEventListener('mouseup', stop);
+        canvas.addEventListener('mouseleave', stop);
+
+        canvas.addEventListener('touchstart', start, { passive: false });
+        canvas.addEventListener('touchmove', wipe, { passive: false });
+        canvas.addEventListener('touchend', stop);
+
+        dom.restartBtn().addEventListener('click', () => {
+          resizeCanvas();
+          drawDirtyPlate();
+          resetUI();
+          updateProgress();
+        });
+        dom.playAgainBtn().addEventListener('click', () => {
+          resizeCanvas();
+          drawDirtyPlate();
+          resetUI();
+          updateProgress();
+        });
+
+        dom.emailForm().addEventListener('submit', (e) => {
+          e.preventDefault();
+          const email = dom.emailInput().value?.trim();
+          if (!email) return;
+
+          // Send lead to backend (stores + sends immediate confirmation email)
+          fetch('/api/leads', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, source: 'plate-game' }),
+          })
+            .then(async (r) => {
+              if (!r.ok) throw new Error('Request failed');
+              return r.json();
+            })
+            .then(() => {
+              dom.success().classList.add('show');
+            })
+            .catch(() => {
+              dom.success().classList.add('show');
+              dom.success().textContent = '✅ Got it! (If you don’t get an email, DM us and we’ll send the sample.)';
+            });
+        });
+
+        // Close modal on backdrop click
+        dom.modal().addEventListener('click', (e) => {
+          if (e.target === dom.modal()) dom.modal().classList.remove('show');
+        });
+      }
+
+      // Re-init on resize (debounced)
+      let rT = null;
+      window.addEventListener('resize', () => {
+        clearTimeout(rT);
+        rT = setTimeout(() => {
+          if (!canvas) return;
+          resizeCanvas();
+          drawDirtyPlate();
+          updateProgress();
+        }, 160);
+      });
+
+      window.addEventListener('load', init);
+    })();
+  </script>
+</body>
+</html>

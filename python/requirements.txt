@@ -1,0 +1,6 @@
+googlemaps==4.10.0
+python-dotenv==1.0.1
+requests==2.32.3
+# Resend Python SDK
+resend-python==0.4.0
+
