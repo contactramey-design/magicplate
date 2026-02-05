@@ -136,13 +136,28 @@ module.exports = async (req, res) => {
     console.log(`✅ Scraped ${results.all.length} total leads`);
     console.log(`✨ Found ${results.qualified.length} qualified leads`);
     
-    // 2. Filter leads with emails
-    const qualifiedLeads = results.qualified.filter(l => l.email || l.potentialEmails?.[0]);
-    console.log(`📧 ${qualifiedLeads.length} qualified leads have emails`);
+    // 2. Save ALL qualified leads (regardless of email status)
+    const dataDir = path.join(process.cwd(), 'data');
+    await fs.mkdir(dataDir, { recursive: true });
     
-    // 3. Send emails with daily limit (respect Vercel's 60s timeout)
+    // Save to JSON
+    const qualifiedLeadsFile = path.join(dataDir, 'qualified-leads.json');
+    await fs.writeFile(qualifiedLeadsFile, JSON.stringify(results.qualified, null, 2));
+    console.log(`💾 Saved ${results.qualified.length} qualified leads to ${qualifiedLeadsFile}`);
+    
+    // Export to CSV for easy review
+    const { exportLeadsToCSV } = require('../scripts/export-leads-csv');
+    const timestamp = getTimestamp();
+    const csvPath = await exportLeadsToCSV(results.qualified, `qualified-leads-${timestamp}.csv`);
+    console.log(`📊 Exported CSV: ${csvPath}`);
+    
+    // 3. Filter leads with emails (for automated email sending)
+    const qualifiedLeadsWithEmails = results.qualified.filter(l => l.email || l.potentialEmails?.[0]);
+    console.log(`📧 ${qualifiedLeadsWithEmails.length} qualified leads have emails`);
+    
+    // 4. Send emails with daily limit (respect Vercel's 60s timeout)
     const dailyLimit = parseInt(process.env.MAX_EMAILS_PER_DAY) || 30; // Conservative limit
-    const leadsToEmail = qualifiedLeads.slice(0, dailyLimit);
+    const leadsToEmail = qualifiedLeadsWithEmails.slice(0, dailyLimit);
     
     console.log(`📨 Sending emails to ${leadsToEmail.length} leads (limit: ${dailyLimit})`);
     
@@ -163,7 +178,9 @@ module.exports = async (req, res) => {
         sources: sources,
         totalLeads: results.all.length,
         qualifiedLeads: results.qualified.length,
-        leadsWithEmails: qualifiedLeads.length
+        leadsWithEmails: qualifiedLeadsWithEmails.length,
+        savedToFile: 'data/qualified-leads.json',
+        csvExport: `data/qualified-leads-${timestamp}.csv`
       },
       emailing: {
         attempted: leadsToEmail.length,
