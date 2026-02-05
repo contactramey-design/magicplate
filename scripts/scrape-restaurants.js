@@ -10,13 +10,18 @@ const scoreRestaurant = async (restaurant) => {
   const issues = [];
   const maxReviews = parseInt(process.env.MAX_REVIEWS) || 15;
   
-  // Hard filter: too many reviews (already well‑established online)
+  // Soft filter: too many reviews reduces score (but doesn't disqualify)
+  // Restaurants with many reviews might still need menu updates
   if (restaurant.totalRatings && restaurant.totalRatings > maxReviews) {
-    issues.push('too_many_reviews');
-    restaurant.qualificationScore = 0;
-    restaurant.issues = issues;
-    restaurant.isQualified = false;
-    return restaurant;
+    // Reduce score by 10 points per 100 reviews over the limit
+    const excessReviews = restaurant.totalRatings - maxReviews;
+    const penalty = Math.min(30, Math.floor(excessReviews / 100) * 10);
+    score -= penalty;
+    issues.push('many_reviews');
+  } else if (restaurant.totalRatings && restaurant.totalRatings <= maxReviews) {
+    // Bonus for low review count (indicates less online presence)
+    score += 15;
+    issues.push('low_review_count');
   }
   
   // Check 1: Low/No Internet Presence (30 points)

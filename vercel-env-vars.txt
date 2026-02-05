@@ -1,0 +1,14 @@
+# Copy these to Vercel Dashboard → Settings → Environment Variables
+# Make sure to select Production, Preview, AND Development for each
+
+GOOGLE_PLACES_API_KEY=AIzaSyBzArcqfRqDguqL4d9F4xSAq2zbuEOyYNk
+RESEND_API_KEY=re_9Va9PPPZ_LQ6od53eR2RWWr35piKNFrj3
+FROM_EMAIL=sydney@magicplate.info
+FROM_NAME=Sydney Ramey - MagicPlate.ai
+SEARCH_AREA=Kansas City, MO
+MAX_REVIEWS=50
+QUALIFICATION_THRESHOLD=20
+EXCLUDE_DOORDASH=false
+TARGET_INDEPENDENT=false
+MAX_EMAILS_PER_DAY=30
+SEARCH_RADIUS=10

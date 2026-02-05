@@ -10,8 +10,8 @@ if (process.env.SENDGRID_API_KEY) {
 }
 
 if (process.env.RESEND_API_KEY) {
-  const Resend = require('resend');
-  resend = Resend;
+  const { Resend } = require('resend');
+  resend = new Resend(process.env.RESEND_API_KEY);
 }
 
 // Determine which email service to use (Resend takes priority if both are set)
@@ -30,6 +30,8 @@ const emailTemplates = {
       personalizedHook = 'We noticed your restaurant could benefit from a stronger online presence—especially a shareable digital menu that customers can access anywhere.';
     } else if (issues.includes('no_menu_photos') || issues.includes('no_professional_photos')) {
       personalizedHook = 'Your menu items deserve to look as amazing as they taste. We can transform your current photos into stunning visuals that drive orders.';
+    } else if (issues.includes('outdated_website') || issues.includes('outdated_menu')) {
+      personalizedHook = 'We noticed your menu could use a refresh—transforming outdated menus into stunning, modern designs that captivate customers and drive sales.';
     } else {
       personalizedHook = 'We help restaurants like yours transform their menu presentation and digital presence to drive more sales.';
     }
@@ -74,46 +76,54 @@ const emailTemplates = {
           <div class="content">
             <div class="intro">
               <p><strong>Hi there!</strong></p>
-              <p>My name is Sydney, and I'm reaching out from <strong>MagicPlate.ai</strong>. ${personalizedHook}</p>
+              <p>My name is Sydney, and I'm reaching out from <strong>MagicPlate.ai</strong>. We specialize in food menu restoration – transforming outdated menus into stunning, modern designs that captivate customers and drive sales.</p>
             </div>
             
             <div class="section">
-              <h2>What We Do</h2>
-              <p>We specialize in <strong>AI-powered menu restoration and digital menu creation</strong> – transforming your real plate photos into stunning visuals that captivate customers and drive sales.</p>
-              
-              <ul class="benefits">
-                <li><strong>AI Menu Restoration:</strong> We enhance your real photos with AI magic – sharpening details, boosting colors, perfect lighting – all true to your originals (no fakes!)</li>
-                <li><strong>Digital Magic Menu:</strong> Create a sleek, shareable digital menu with your custom link (e.g., yourrestaurant.magicplate.info/menu) – perfect for QR codes, social media, and in-store displays</li>
-                <li><strong>Interactive Features:</strong> Zoomable photos, AI descriptions, diet filters, search functionality, and effortless updates for specials</li>
-                <li><strong>DoorDash Optimization:</strong> Get your enhanced photos and descriptions synced to DoorDash for standout visibility ($99 add-on, or $50 when bundled)</li>
-              </ul>
+              <h2>The Challenge</h2>
+              <p>We know the challenges: constantly hiring expensive photographers for new dishes, or struggling to make new items look great. A tired menu can silently erode your profits and make it harder to compete with the sleek, high-tech visuals seen elsewhere.</p>
+              <p>Our service gives your restaurant that <strong>"big city" visual appeal and professionalism</strong>, ensuring every dish looks irresistible and future updates are simple and cost-effective.</p>
             </div>
             
             <div class="highlight">
-              <p><strong>💰 The Results:</strong> Clients typically see a <strong>20-40% increase in average order values</strong> and <strong>20-40% boost in delivery revenue</strong> after our menu transformation. Plus, you'll save 80% compared to traditional design firms.</p>
-            </div>
-            
-            <div class="pricing">
-              <p style="margin: 0; font-size: 18px;">Starting at</p>
-              <div class="price">$299</div>
-              <p style="margin: 0;">Get your magical digital menu in 48 hours</p>
-            </div>
-            
-            <div style="text-align: center;">
-              <a href="https://magicplate.info/book" class="cta-button">Schedule a Free 15-Minute Call</a>
+              <p><strong>💰 The Results:</strong> Clients often see a <strong>20-30% increase in average order values</strong> after our menu revitalization.</p>
             </div>
             
             <div class="section">
-              <p><strong>Our Magic Formula:</strong></p>
-              <p>Gather Real Plates → Apply AI Enhancements → Launch Digital Magic → Watch Business Flourish</p>
-              <p>Ready to see how a professional digital menu can significantly grow your business? Let's schedule a brief 15-minute Zoom call this week, and I can show you examples tailored to your menu!</p>
+              <h2>DoorDash Onboarding</h2>
+              <p>Additionally, for just <strong>$100 ($50 when bundled with menu restoration)</strong>, we offer seamless DoorDash onboarding. We handle the setup, menu integration, and best practices to get you live quickly.</p>
+              <p>This unlocks new delivery customers, <strong>boosting off-peak revenue by 20-40% on average</strong>, and expands your reach effortlessly.</p>
             </div>
             
-            <div style="background: white; padding: 20px; border-radius: 8px; margin-top: 20px;">
-              <p style="margin: 0;"><strong>Book your call:</strong></p>
+            <div style="text-align: center; margin: 30px 0;">
+              <p style="font-size: 18px; margin-bottom: 20px;"><strong>Ready to see how a professional menu and optimized delivery presence can significantly grow your business?</strong></p>
+              <p style="margin-bottom: 20px;">Let's schedule a brief 15-minute Zoom call this week to explore your menu's potential and I can show you a few options from your menu!</p>
+              <div style="margin: 25px 0;">
+                <a href="https://magicplate.info" class="cta-button" style="display: inline-block; background: #667eea; color: white; padding: 16px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; margin: 20px 0;">Visit MagicPlate.ai</a>
+              </div>
+            </div>
+            
+            <div class="section">
+              <h2>Learn More</h2>
+              <p style="margin-bottom: 15px;"><strong>Visit our website:</strong></p>
+              <p style="margin-bottom: 25px;"><a href="https://magicplate.info" style="color: #667eea; text-decoration: none; font-size: 18px; font-weight: 600;">https://magicplate.info</a></p>
+              
+              <p style="margin-bottom: 10px;"><strong>Watch our short welcome video:</strong></p>
+              <p style="margin-bottom: 20px;"><a href="https://app.heygen.com/videos/11388ae023ba4fde9a6859dc46435cb3" style="color: #667eea; text-decoration: none;">https://app.heygen.com/videos/11388ae023ba4fde9a6859dc46435cb3</a></p>
+              
+              <p style="margin-bottom: 10px;"><strong>View examples of our work and packages:</strong></p>
+              <ul style="list-style: none; padding: 0; margin: 0 0 20px 0;">
+                <li style="margin-bottom: 8px;"><a href="https://www.canva.com/design/DAHAJ2AuwbM/VnBpDnMfM3_xd3CYgVfWUA/edit?utm_content=DAHAJ2AuwbM&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton" style="color: #667eea; text-decoration: none;">Example 1 - Menu Design</a></li>
+                <li style="margin-bottom: 8px;"><a href="https://www.canva.com/design/DAHAJ48NFeY/PkcoFMt3r4_Zurtcv2HAVw/edit?utm_content=DAHAJ48NFeY&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton" style="color: #667eea; text-decoration: none;">Example 2 - Package Options</a></li>
+                <li style="margin-bottom: 8px;"><a href="https://www.canva.com/design/DAHAJ-hVXU0/v9H5QEsDYaCuwEbvXlwbTA/edit?utm_content=DAHAJ-hVXU0&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton" style="color: #667eea; text-decoration: none;">Example 3 - Portfolio</a></li>
+              </ul>
+            </div>
+            
+            <div style="background: white; padding: 20px; border-radius: 8px; margin-top: 20px; border-left: 4px solid #667eea;">
+              <p style="margin: 0 0 15px 0;"><strong>Book your call directly:</strong></p>
               <p style="margin: 5px 0;">📧 Reply to this email</p>
-              <p style="margin: 5px 0;">📞 Call or text: (805) 668-9973</p>
-              <p style="margin: 5px 0;">🌐 Visit: <a href="https://magicplate.info/book">magicplate.info/book</a></p>
+              <p style="margin: 5px 0;">📞 Call or text: <a href="tel:8056689973" style="color: #667eea; text-decoration: none;">(805) 668-9973</a></p>
+              <p style="margin: 5px 0;">🌐 Visit: <a href="https://magicplate.info" style="color: #667eea; text-decoration: none; font-weight: 600;">magicplate.info</a></p>
             </div>
             
             <p style="margin-top: 30px;">Looking forward to connecting!</p>
@@ -122,14 +132,14 @@ const emailTemplates = {
               Best,<br>
               <strong>Sydney Ramey</strong><br>
               <em>MagicPlate.ai</em><br>
-              <a href="mailto:contact@magicplate.info">contact@magicplate.info</a> | (805) 668-9973<br>
+              <a href="mailto:sydney@magicplate.info">sydney@magicplate.info</a> | (805) 668-9973<br>
               <a href="https://instagram.com/rameyservices">Instagram: @Rameyservices</a>
             </p>
           </div>
           
           <div class="footer">
             <p>MagicPlate.ai - Where every plate becomes a masterpiece</p>
-            <p><a href="https://magicplate.info">Visit our website</a> | <a href="mailto:contact@magicplate.info">Contact us</a></p>
+            <p><a href="https://magicplate.info">Visit our website</a> | <a href="mailto:sydney@magicplate.info">Contact us</a></p>
           </div>
         </div>
       </body>
@@ -139,41 +149,46 @@ const emailTemplates = {
     const text = `
 Hi there!
 
-My name is Sydney, and I'm reaching out from MagicPlate.ai. ${personalizedHook}
+My name is Sydney, and I'm reaching out from MagicPlate.ai. We specialize in food menu restoration – transforming outdated menus into stunning, modern designs that captivate customers and drive sales.
 
-WHAT WE DO:
-We specialize in AI-powered menu restoration and digital menu creation – transforming your real plate photos into stunning visuals that captivate customers and drive sales.
+THE CHALLENGE:
+We know the challenges: constantly hiring expensive photographers for new dishes, or struggling to make new items look great. A tired menu can silently erode your profits and make it harder to compete with the sleek, high-tech visuals seen elsewhere.
 
-✨ AI Menu Restoration: We enhance your real photos with AI magic – sharpening details, boosting colors, perfect lighting – all true to your originals (no fakes!)
-
-✨ Digital Magic Menu: Create a sleek, shareable digital menu with your custom link (e.g., yourrestaurant.magicplate.info/menu) – perfect for QR codes, social media, and in-store displays
-
-✨ Interactive Features: Zoomable photos, AI descriptions, diet filters, search functionality, and effortless updates for specials
-
-✨ DoorDash Optimization: Get your enhanced photos and descriptions synced to DoorDash for standout visibility ($99 add-on, or $50 when bundled)
+Our service gives your restaurant that "big city" visual appeal and professionalism, ensuring every dish looks irresistible and future updates are simple and cost-effective.
 
 💰 THE RESULTS:
-Clients typically see a 20-40% increase in average order values and 20-40% boost in delivery revenue after our menu transformation. Plus, you'll save 80% compared to traditional design firms.
+Clients often see a 20-30% increase in average order values after our menu revitalization.
 
-PRICING:
-Starting at $299 - Get your magical digital menu in 48 hours
+DOORDASH ONBOARDING:
+Additionally, for just $100 ($50 when bundled with menu restoration), we offer seamless DoorDash onboarding. We handle the setup, menu integration, and best practices to get you live quickly.
 
-Book your call:
+This unlocks new delivery customers, boosting off-peak revenue by 20-40% on average, and expands your reach effortlessly.
+
+Ready to see how a professional menu and optimized delivery presence can significantly grow your business? Let's schedule a brief 15-minute Zoom call this week to explore your menu's potential and I can show you a few options from your menu!
+
+Visit our website: https://magicplate.info
+
+Watch our short welcome video here:
+https://app.heygen.com/videos/11388ae023ba4fde9a6859dc46435cb3
+
+View examples of our work and packages here:
+https://www.canva.com/design/DAHAJ2AuwbM/VnBpDnMfM3_xd3CYgVfWUA/edit?utm_content=DAHAJ2AuwbM&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
+
+https://www.canva.com/design/DAHAJ48NFeY/PkcoFMt3r4_Zurtcv2HAVw/edit?utm_content=DAHAJ48NFeY&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
+
+https://www.canva.com/design/DAHAJ-hVXU0/v9H5QEsDYaCuwEbvXlwbTA/edit?utm_content=DAHAJ-hVXU0&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
+
+Book your call directly:
 📧 Reply to this email
 📞 Call or text: (805) 668-9973
-🌐 Visit: https://magicplate.info/book
-
-Our Magic Formula:
-Gather Real Plates → Apply AI Enhancements → Launch Digital Magic → Watch Business Flourish
-
-Ready to see how a professional digital menu can significantly grow your business? Let's schedule a brief 15-minute Zoom call this week, and I can show you examples tailored to your menu!
+🌐 Visit: https://magicplate.info
 
 Looking forward to connecting!
 
 Best,
 Sydney Ramey
 MagicPlate.ai
-contact@magicplate.info | (805) 668-9973
+sydney@magicplate.info | (805) 668-9973
 Instagram: @Rameyservices
 
 ---
@@ -197,10 +212,8 @@ Visit: https://magicplate.info
 // Email sending function that works with both services
 async function sendEmail(emailData) {
   if (useResend && resend) {
-    const resendClient = new resend(process.env.RESEND_API_KEY);
-    
     try {
-      const result = await resendClient.emails.send({
+      const result = await resend.emails.send({
         from: `${emailData.from.name} <${emailData.from.email}>`,
         to: emailData.to,
         subject: emailData.subject,

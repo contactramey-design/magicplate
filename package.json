@@ -13,6 +13,8 @@
     "email:preview": "node scripts/send-email.js --dry-run",
     "track": "node scripts/track-responses.js",
     "followups": "node scripts/run-followups.js",
+    "requalify": "node scripts/re-qualify-leads.js",
+    "clean": "node scripts/clean-leads.js",
     "start": "node scripts/scrape-restaurants.js && node scripts/send-email.js"
   },
   "dependencies": {
