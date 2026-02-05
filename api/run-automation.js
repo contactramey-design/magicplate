@@ -165,16 +165,34 @@ module.exports = async (req, res) => {
     const csvContent = leadsToCSV(results.qualified);
     
     // Try to save files (works in /tmp on Vercel)
+    // If dataDir fails, fallback to /tmp (Vercel's writable directory)
+    let actualDataDir = dataDir;
     try {
       await fs.mkdir(dataDir, { recursive: true });
-      
+    } catch (error) {
+      // If mkdir fails, we're likely on Vercel - use /tmp
+      if (error.code === 'ENOENT' || error.path?.includes('/var/task')) {
+        actualDataDir = '/tmp';
+        try {
+          await fs.mkdir(actualDataDir, { recursive: true });
+          console.log(`⚠️  Switched to /tmp directory for file storage`);
+        } catch (tmpError) {
+          console.log(`⚠️  Could not create /tmp directory: ${tmpError.message}`);
+        }
+      } else {
+        throw error;
+      }
+    }
+    
+    // Try to save files
+    try {
       // Save to JSON
-      const qualifiedLeadsFile = path.join(dataDir, 'qualified-leads.json');
+      const qualifiedLeadsFile = path.join(actualDataDir, 'qualified-leads.json');
       await fs.writeFile(qualifiedLeadsFile, JSON.stringify(results.qualified, null, 2));
       console.log(`💾 Saved ${results.qualified.length} qualified leads to ${qualifiedLeadsFile}`);
       
       // Save CSV
-      const csvPath = path.join(dataDir, `qualified-leads-${timestamp}.csv`);
+      const csvPath = path.join(actualDataDir, `qualified-leads-${timestamp}.csv`);
       await fs.writeFile(csvPath, csvContent, 'utf8');
       console.log(`📊 Exported CSV: ${csvPath}`);
     } catch (error) {
