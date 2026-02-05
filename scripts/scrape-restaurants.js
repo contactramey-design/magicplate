@@ -156,18 +156,10 @@ const scrapeSources = {
     const excludeDoordash = options.excludeDoordash !== false; // Default true
     const targetIndependent = options.targetIndependent !== false; // Default true
     
-    // Build query with filters
-    let query = '';
-    if (targetIndependent) {
-      query = `independent restaurants ${area}`;
-    } else {
-      query = `restaurants ${area}`;
-    }
-    
-    // Add exclusion for DoorDash if enabled
-    if (excludeDoordash) {
-      query += ' -site:doordash.com';
-    }
+    // Build simpler query - just restaurants in the area
+    // "independent" keyword is too restrictive and often returns 0 results
+    // DoorDash exclusion doesn't work in Places API (that's web search syntax)
+    const query = `restaurants ${area}`;
     
     const params = {
       query,
@@ -186,12 +178,39 @@ const scrapeSources = {
     }
     
     try {
+      console.log(`   🔍 Query: "${query}"`);
       const response = await axios.get('https://maps.googleapis.com/maps/api/place/textsearch/json', {
         params
       });
       
+      // Check for API errors
+      if (response.data.status && response.data.status !== 'OK' && response.data.status !== 'ZERO_RESULTS') {
+        console.error(`   ❌ Google Places API error: ${response.data.status} - ${response.data.error_message || 'Unknown error'}`);
+        return [];
+      }
+      
+      if (!response.data.results || response.data.results.length === 0) {
+        console.log(`   ⚠️  No results found for query: "${query}"`);
+        console.log(`   💡 Try: Different city name, or check if Places API is enabled in Google Cloud`);
+        return [];
+      }
+      
+      console.log(`   ✅ Found ${response.data.results.length} places from Google Maps`);
+      
+      // Filter for independent restaurants if requested (after getting results)
+      let results = response.data.results;
+      if (targetIndependent) {
+        // Filter out chain restaurants by checking for common chain indicators
+        const chainIndicators = ['mcdonald', 'burger king', 'subway', 'taco bell', 'kfc', 'pizza hut', 'domino', 'starbucks', 'dunkin', 'wendy', 'chipotle', 'panera', 'olive garden', 'applebees', 'chilis', 'outback', 'red lobster'];
+        results = results.filter(place => {
+          const nameLower = place.name.toLowerCase();
+          return !chainIndicators.some(chain => nameLower.includes(chain));
+        });
+        console.log(`   🎯 Filtered to ${results.length} independent restaurants`);
+      }
+      
       const restaurants = await Promise.all(
-        response.data.results.map(async (place) => {
+        results.map(async (place) => {
           // Get detailed info
           let details = {};
           try {
@@ -228,6 +247,10 @@ const scrapeSources = {
       return restaurants;
     } catch (error) {
       console.error('❌ Google Maps API error:', error.message);
+      if (error.response) {
+        console.error('   Response status:', error.response.status);
+        console.error('   Response data:', JSON.stringify(error.response.data, null, 2));
+      }
       return [];
     }
   },
@@ -435,7 +458,7 @@ async function scrapeAndQualifyLeads(area, sources = ['googleMaps', 'yelp'], opt
   // Build scraping options
   const scrapeOptions = {
     excludeDoordash: process.env.EXCLUDE_DOORDASH === 'true', // default: do NOT exclude
-    targetIndependent: process.env.TARGET_INDEPENDENT !== 'false', // Default true
+    targetIndependent: process.env.TARGET_INDEPENDENT === 'true', // Default false for broader results
     radius: searchRadius
   };
   
@@ -554,7 +577,7 @@ async function main() {
   if (process.env.OUTSCRAPER_API_KEY) sources.push('outscraper');
   
   if (sources.length === 0) {
-    console.error('❌ No API keys configured. Set at least one: GOOGLE_PLACES_API_KEY, YELP_API_KEY, or OUTSCRAPER_API_KEY in .env');
+    console.error('❌ r8_blo9LeS78GDvRIMJLnNURRyxzk5UdKN2wrclHNo API keys configured. Set at least one: GOOGLE_PLACES_API_KEY, YELP_API_KEY, or OUTSCRAPER_API_KEY in .env');
     process.exit(1);
   }
   

@@ -129,7 +129,7 @@ module.exports = async (req, res) => {
     
     const results = await scrapeAndQualifyLeads(area, sources, {
       excludeDoordash: process.env.EXCLUDE_DOORDASH === 'true',
-      targetIndependent: process.env.TARGET_INDEPENDENT !== 'false',
+      targetIndependent: process.env.TARGET_INDEPENDENT === 'true', // Default false for broader results
       radius: parseInt(process.env.SEARCH_RADIUS) || 10
     });
     
