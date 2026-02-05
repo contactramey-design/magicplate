@@ -6,6 +6,14 @@
     {
       "source": "/api/leads",
       "destination": "/api/leads"
+    },
+    {
+      "source": "/api/enhance-image",
+      "destination": "/api/enhance-image"
+    },
+    {
+      "source": "/api/run-automation",
+      "destination": "/api/run-automation"
     }
   ],
   "crons": [
