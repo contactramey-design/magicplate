@@ -4,17 +4,21 @@
   "description": "Lead scraping and outreach system for MagicPlate.ai",
   "main": "index.js",
   "scripts": {
+    "dev": "node server.js",
+    "dev:static": "npx serve public -l 3000",
     "scrape": "node scripts/scrape-restaurants.js",
     "scrape:rural": "node scripts/scrape-rural-batch.js",
     "email": "node scripts/send-email.js",
     "email:test": "node scripts/send-email.js --max=5",
     "email:preview": "node scripts/send-email.js --dry-run",
     "track": "node scripts/track-responses.js",
+    "followups": "node scripts/run-followups.js",
     "start": "node scripts/scrape-restaurants.js && node scripts/send-email.js"
   },
   "dependencies": {
     "@sendgrid/mail": "^7.7.0",
     "resend": "^3.2.0",
+    "express": "^4.21.2",
     "axios": "^1.6.0",
     "cheerio": "^1.0.0-rc.12",
     "dotenv": "^16.3.1"

@@ -8,6 +8,16 @@ const path = require('path');
 const scoreRestaurant = async (restaurant) => {
   let score = 0;
   const issues = [];
+  const maxReviews = parseInt(process.env.MAX_REVIEWS) || 15;
+  
+  // Hard filter: too many reviews (already well‑established online)
+  if (restaurant.totalRatings && restaurant.totalRatings > maxReviews) {
+    issues.push('too_many_reviews');
+    restaurant.qualificationScore = 0;
+    restaurant.issues = issues;
+    restaurant.isQualified = false;
+    return restaurant;
+  }
   
   // Check 1: Low/No Internet Presence (30 points)
   if (!restaurant.website || restaurant.website === 'N/A') {
@@ -358,7 +368,8 @@ async function findEmails(leads) {
         // Multiple strategies to find email
         const emailRegex = /[\w\.-]+@[\w\.-]+\.\w+/g;
         const pageText = $('body').text();
-        const emails = pageText.match(emailRegex) || [];
+        GOOGLE_PLACES_API_KEY=YOUR_NEW_GOOGLE_KEY_HERE
+                const emails = pageText.match(emailRegex) || [];
         
         // Also check contact page
         let contactEmails = [];
@@ -414,10 +425,11 @@ async function findEmails(leads) {
 async function scrapeAndQualifyLeads(area, sources = ['googleMaps', 'yelp'], options = {}) {
   const geocode = parseGeocode(area);
   const searchRadius = parseInt(process.env.SEARCH_RADIUS) || options.radius || 10;
+  const maxReviews = parseInt(process.env.MAX_REVIEWS) || 15;
   
   // Build scraping options
   const scrapeOptions = {
-    excludeDoordash: process.env.EXCLUDE_DOORDASH !== 'false', // Default true
+    excludeDoordash: process.env.EXCLUDE_DOORDASH === 'true', // default: do NOT exclude
     targetIndependent: process.env.TARGET_INDEPENDENT !== 'false', // Default true
     radius: searchRadius
   };
@@ -427,9 +439,11 @@ async function scrapeAndQualifyLeads(area, sources = ['googleMaps', 'yelp'], opt
   } else {
     console.log(`🔍 Scraping restaurants in: ${area}`);
   }
-  
+  console.log(`   🧮 Max reviews allowed: ${maxReviews}`);
   if (scrapeOptions.excludeDoordash) {
     console.log(`   🚫 Excluding restaurants already on DoorDash`);
+  } else {
+    console.log(`   ✅ Including restaurants that are already on DoorDash`);
   }
   if (scrapeOptions.targetIndependent) {
     console.log(`   🎯 Targeting independent restaurants`);
