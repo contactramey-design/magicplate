@@ -12,7 +12,15 @@ npm install
 ### 2. Set Up Environment
 ```bash
 cp .env.example .env
-# Edit .env with your API keys
+SENDGRID_API_KEY=your_sendgrid_api_key_here
+GOOGLE_PLACES_API_KEY=your_google_places_api_key_here
+# OR
+YELP_API_KEY=your_yelp_api_key_here
+GOOGLE_PLACES_API_KEY=YOUR_NEW_KEY_HERE
+RESEND_API_KEY=your_resend_key_here
+FROM_EMAIL=sydney@magicplate.info
+FROM_NAME="Sydney - MagicPlate"
+...
 ```
 
 ### 3. Get API Keys
@@ -48,6 +56,12 @@ cp .env.example .env
 1. Go to [outscraper.com](https://outscraper.com)
 2. Sign up and get API key
 3. Copy to `.env` as `OUTSCRAPER_API_KEY`
+
+**Instagram Graph API** (Optional - For profile discovery):
+1. See [INSTAGRAM-SETUP.md](INSTAGRAM-SETUP.md) for detailed setup instructions
+2. Create Facebook App in [Meta for Developers](https://developers.facebook.com/)
+3. Get access token and App ID
+4. Copy to `.env` as `INSTAGRAM_ACCESS_TOKEN` and `FACEBOOK_APP_ID`
 
 ### 4. Configure Search Area
 

@@ -4,6 +4,190 @@ const cheerio = require('cheerio');
 const fs = require('fs').promises;
 const path = require('path');
 
+// Instagram Graph API integration
+async function findInstagramProfile(restaurant) {
+  const accessToken = process.env.INSTAGRAM_ACCESS_TOKEN;
+  const facebookAppId = process.env.FACEBOOK_APP_ID;
+  
+  // Skip if Instagram API not configured
+  if (!accessToken || !facebookAppId) {
+    return null;
+  }
+  
+  try {
+    // Strategy 1: Search by business name using Facebook Pages API
+    // First, search for Facebook Pages matching the restaurant name
+    const searchQuery = encodeURIComponent(restaurant.name);
+    const locationQuery = restaurant.city ? encodeURIComponent(restaurant.city) : '';
+    
+    // Search Facebook Pages
+    const pagesResponse = await axios.get(`https://graph.facebook.com/v18.0/search`, {
+      params: {
+        q: searchQuery,
+        type: 'page',
+        fields: 'id,name,username,website,instagram_business_account',
+        access_token: accessToken,
+        limit: 5
+      },
+      timeout: 5000
+    });
+    
+    if (pagesResponse.data.data && pagesResponse.data.data.length > 0) {
+      // Find the best matching page
+      const matchingPage = pagesResponse.data.data.find(page => {
+        const pageNameLower = page.name.toLowerCase();
+        const restaurantNameLower = restaurant.name.toLowerCase();
+        return pageNameLower.includes(restaurantNameLower) || 
+               restaurantNameLower.includes(pageNameLower) ||
+               pageNameLower === restaurantNameLower;
+      }) || pagesResponse.data.data[0];
+      
+      // Check if page has Instagram Business Account linked
+      if (matchingPage.instagram_business_account) {
+        const igAccountId = matchingPage.instagram_business_account.id;
+        
+        // Get Instagram account details
+        const igResponse = await axios.get(`https://graph.facebook.com/v18.0/${igAccountId}`, {
+          params: {
+            fields: 'username,profile_picture_url,biography,website,followers_count,media_count',
+            access_token: accessToken
+          },
+          timeout: 5000
+        });
+        
+        return {
+          instagramHandle: igResponse.data.username,
+          instagramUrl: `https://instagram.com/${igResponse.data.username}`,
+          instagramId: igAccountId,
+          profilePicture: igResponse.data.profile_picture_url,
+          bio: igResponse.data.biography,
+          website: igResponse.data.website || restaurant.website,
+          followers: igResponse.data.followers_count,
+          mediaCount: igResponse.data.media_count,
+          facebookPageId: matchingPage.id,
+          facebookPageName: matchingPage.name
+        };
+      }
+      
+      // If no Instagram account linked, return Facebook page info
+      return {
+        facebookPageId: matchingPage.id,
+        facebookPageName: matchingPage.name,
+        facebookUrl: `https://facebook.com/${matchingPage.username || matchingPage.id}`,
+        website: matchingPage.website || restaurant.website
+      };
+    }
+  } catch (error) {
+    // If Graph API fails, try web scraping as fallback
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      console.log(`   ⚠️  Instagram API authentication failed - check access token`);
+    } else if (error.code !== 'ECONNABORTED') {
+      // Don't log timeout errors, they're expected
+      console.log(`   ⚠️  Instagram search failed for ${restaurant.name}: ${error.message}`);
+    }
+  }
+  
+  // Strategy 2: Try to find Instagram handle from website
+  if (restaurant.website) {
+    try {
+      const response = await axios.get(restaurant.website, {
+        timeout: 3000,
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+      });
+      const $ = cheerio.load(response.data);
+      
+      // Look for Instagram links in the page
+      const instagramLinks = [];
+      $('a[href*="instagram.com"]').each((i, el) => {
+        const href = $(el).attr('href');
+        if (href) {
+          const match = href.match(/instagram\.com\/([^\/\?]+)/);
+          if (match && match[1] && !match[1].includes('www')) {
+            instagramLinks.push(match[1].replace('@', ''));
+          }
+        }
+      });
+      
+      // Also check for Instagram handle in text
+      const pageText = $('body').text();
+      const instagramHandleRegex = /@?([a-zA-Z0-9._]+)/g;
+      const textMatches = pageText.match(/instagram[^@]*@([a-zA-Z0-9._]+)/gi);
+      if (textMatches) {
+        textMatches.forEach(match => {
+          const handle = match.match(/@([a-zA-Z0-9._]+)/);
+          if (handle) instagramLinks.push(handle[1]);
+        });
+      }
+      
+      if (instagramLinks.length > 0) {
+        const handle = instagramLinks[0];
+        return {
+          instagramHandle: handle,
+          instagramUrl: `https://instagram.com/${handle}`,
+          foundVia: 'website_scraping'
+        };
+      }
+    } catch (error) {
+      // Website scraping failed, continue
+    }
+  }
+  
+  return null;
+}
+
+// Batch find Instagram profiles with rate limiting
+async function findInstagramProfiles(leads, options = {}) {
+  const { batchSize = 5, delay = 2000 } = options;
+  const accessToken = process.env.INSTAGRAM_ACCESS_TOKEN;
+  
+  if (!accessToken) {
+    console.log('⚠️  Instagram API not configured - skipping Instagram discovery');
+    return leads;
+  }
+  
+  console.log(`\n📱 Finding Instagram profiles...`);
+  
+  for (let i = 0; i < leads.length; i += batchSize) {
+    const batch = leads.slice(i, i + batchSize);
+    
+    await Promise.all(batch.map(async (lead) => {
+      // Skip if already has Instagram data
+      if (lead.instagram && lead.instagramHandle) {
+        return;
+      }
+      
+      try {
+        const instagramData = await findInstagramProfile(lead);
+        if (instagramData) {
+          lead.instagram = instagramData.instagramUrl || lead.instagram;
+          lead.instagramHandle = instagramData.instagramHandle;
+          lead.instagramId = instagramData.instagramId;
+          lead.instagramFollowers = instagramData.followers;
+          lead.instagramBio = instagramData.bio;
+          lead.facebookPageId = instagramData.facebookPageId;
+          lead.facebookPageName = instagramData.facebookPageName;
+          
+          if (instagramData.website && !lead.website) {
+            lead.website = instagramData.website;
+          }
+        }
+      } catch (error) {
+        // Continue processing other leads
+      }
+    }));
+    
+    // Rate limiting delay
+    if (i + batchSize < leads.length) {
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+  
+  const withInstagram = leads.filter(l => l.instagramHandle).length;
+  console.log(`✅ Found ${withInstagram} Instagram profiles`);
+  
+  return leads;
+}
+
 // Scoring system for restaurant qualification
 const scoreRestaurant = async (restaurant) => {
   let score = 0;
@@ -589,13 +773,19 @@ async function scrapeAndQualifyLeads(area, sources = ['googleMaps', 'yelp'], opt
   
   console.log(`\n📊 Total unique leads: ${allLeads.length}`);
   
-  // Step 2: Find emails
+  // Step 2: Find Instagram profiles
+  allLeads = await findInstagramProfiles(allLeads, {
+    batchSize: 5,
+    delay: 2000
+  });
+  
+  // Step 3: Find emails
   console.log(`\n📧 Finding email addresses...`);
   let leadsWithEmails = await findEmails(allLeads);
   const withEmail = leadsWithEmails.filter(l => l.email).length;
   console.log(`✅ Found ${withEmail} emails`);
   
-  // Step 3: Qualify leads (score them)
+  // Step 4: Qualify leads (score them)
   console.log(`\n🎯 Qualifying leads based on criteria...`);
   const qualifiedLeads = [];
   

@@ -20,9 +20,20 @@ const useSendGrid = !!process.env.SENDGRID_API_KEY && !useResend;
 
 const emailTemplates = {
   initialOutreach: (restaurant) => {
-    // Personalize based on their issues
+    // Personalize based on their issues and Instagram data
     const issues = restaurant.issues || [];
     let personalizedHook = '';
+    let instagramMention = '';
+    
+    // Add Instagram personalization if available
+    if (restaurant.instagramHandle) {
+      instagramMention = ` I noticed your Instagram (@${restaurant.instagramHandle}) and thought you might be interested in how we can help elevate your visual presence.`;
+      
+      // If they have low followers, mention growth opportunity
+      if (restaurant.instagramFollowers && restaurant.instagramFollowers < 1000) {
+        instagramMention += ` With professional menu photos, you'll have stunning content that drives engagement and helps grow your following.`;
+      }
+    }
     
     if (issues.includes('not_on_doordash')) {
       personalizedHook = 'We noticed you\'re not on DoorDash yet—this is a huge opportunity to unlock 20-40% more revenue from delivery customers.';
@@ -35,6 +46,9 @@ const emailTemplates = {
     } else {
       personalizedHook = 'We help restaurants like yours transform their menu presentation and digital presence to drive more sales.';
     }
+    
+    // Combine personalized hook with Instagram mention
+    personalizedHook = personalizedHook + instagramMention;
     
     const fromEmail = process.env.FROM_EMAIL || 'sydney@magicplate.info';
     const fromName = process.env.FROM_NAME || 'Sydney Ramey - MagicPlate.ai';
@@ -76,7 +90,8 @@ const emailTemplates = {
           <div class="content">
             <div class="intro">
               <p><strong>Hi there!</strong></p>
-              <p>My name is Sydney, and I'm reaching out from <strong>MagicPlate.ai</strong>. We specialize in food menu restoration – transforming outdated menus into stunning, modern designs that captivate customers and drive sales.</p>
+              <p>My name is Sydney, and I'm reaching out from <strong>MagicPlate.ai</strong>. ${personalizedHook}</p>
+              ${restaurant.instagramHandle ? `<p>I checked out your Instagram (@${restaurant.instagramHandle}) and love what you're doing! Professional menu photos would take your content to the next level.</p>` : ''}
             </div>
             
             <div class="section">
@@ -149,7 +164,8 @@ const emailTemplates = {
     const text = `
 Hi there!
 
-My name is Sydney, and I'm reaching out from MagicPlate.ai. We specialize in food menu restoration – transforming outdated menus into stunning, modern designs that captivate customers and drive sales.
+My name is Sydney, and I'm reaching out from MagicPlate.ai. ${personalizedHook}
+${restaurant.instagramHandle ? `\n\nI checked out your Instagram (@${restaurant.instagramHandle}) and love what you're doing! Professional menu photos would take your content to the next level.` : ''}
 
 THE CHALLENGE:
 We know the challenges: constantly hiring expensive photographers for new dishes, or struggling to make new items look great. A tired menu can silently erode your profits and make it harder to compete with the sleek, high-tech visuals seen elsewhere.
