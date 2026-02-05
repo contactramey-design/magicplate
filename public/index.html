@@ -1055,20 +1055,34 @@
 
     .plate-sparkle {
       position: absolute;
-      width: 10px;
-      height: 10px;
+      width: 12px;
+      height: 12px;
       border-radius: 50%;
       background: var(--c, #fbbf24);
-      box-shadow: 0 0 18px var(--c, #fbbf24);
+      box-shadow: 0 0 20px var(--c, #fbbf24), 0 0 40px var(--c, #fbbf24);
       pointer-events: none;
       transform: translate(-50%, -50%);
-      animation: plateSpark 0.7s ease-out forwards;
+      animation: plateSpark 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
       mix-blend-mode: screen;
+      filter: brightness(1.2) contrast(1.1);
     }
 
     @keyframes plateSpark {
-      0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-      100% { opacity: 0; transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(0.35); }
+      0% { 
+        opacity: 1; 
+        transform: translate(-50%, -50%) scale(1) rotate(0deg);
+        filter: brightness(1.5) contrast(1.3);
+      }
+      50% {
+        opacity: 0.8;
+        transform: translate(calc(-50% + var(--tx) * 0.5), calc(-50% + var(--ty) * 0.5)) scale(1.2) rotate(180deg);
+        filter: brightness(1.8) contrast(1.5);
+      }
+      100% { 
+        opacity: 0; 
+        transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(0.3) rotate(360deg);
+        filter: brightness(0.8) contrast(0.9);
+      }
     }
 
     .plate-win-modal {
@@ -1374,8 +1388,8 @@
   <section class="hero-section">
     <div class="hero-content">
       <img src="/images/sydney-intro.png" alt="Sydney Ramey - MagicPlate.ai" class="intro-image" onerror="this.style.display='none'">
-      <h1 class="hero-text">LET'S TEST OF</h1>
-      <h2 class="hero-subtext">MAGIC PLATE!</h2>
+      <h1 class="hero-text">MAKE EVERY PLATE</h1>
+      <h2 class="hero-subtext">MAGICAL ✨</h2>
       
       <div class="food-showcase">
         <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=550&h=350&fit=crop" alt="Delicious Burger" class="food-image-large">
@@ -1638,105 +1652,192 @@
 
         ctx.clearRect(0, 0, cssW, cssH);
 
-        // Backdrop
-        const bg = ctx.createLinearGradient(0, 0, cssW, cssH);
-        bg.addColorStop(0, 'rgba(255, 251, 235, 0.95)');
-        bg.addColorStop(1, 'rgba(254, 243, 199, 0.92)');
-        ctx.fillStyle = bg;
+        // Professional backdrop with depth
+        const bgGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, cssW * 0.8);
+        bgGradient.addColorStop(0, 'rgba(255, 251, 235, 0.98)');
+        bgGradient.addColorStop(0.4, 'rgba(254, 243, 199, 0.95)');
+        bgGradient.addColorStop(1, 'rgba(240, 230, 180, 0.92)');
+        ctx.fillStyle = bgGradient;
         ctx.fillRect(0, 0, cssW, cssH);
 
-        // Shadow ring
-        const shadow = ctx.createRadialGradient(centerX, centerY - plateRadius * 0.15, plateRadius * 0.2, centerX, centerY, plateRadius * 1.15);
-        shadow.addColorStop(0, 'rgba(0, 0, 0, 0.10)');
-        shadow.addColorStop(1, 'rgba(0, 0, 0, 0.18)');
-        ctx.fillStyle = shadow;
+        // Advanced shadow with multiple layers
+        const shadow1 = ctx.createRadialGradient(centerX, centerY - plateRadius * 0.15, 0, centerX, centerY, plateRadius * 1.2);
+        shadow1.addColorStop(0, 'rgba(0, 0, 0, 0)');
+        shadow1.addColorStop(0.3, 'rgba(0, 0, 0, 0.08)');
+        shadow1.addColorStop(0.7, 'rgba(0, 0, 0, 0.15)');
+        shadow1.addColorStop(1, 'rgba(0, 0, 0, 0.22)');
+        ctx.fillStyle = shadow1;
         ctx.beginPath();
-        ctx.arc(centerX, centerY, plateRadius * 1.06, 0, Math.PI * 2);
+        ctx.arc(centerX, centerY, plateRadius * 1.08, 0, Math.PI * 2);
         ctx.fill();
 
-        // Plate base
-        const plate = ctx.createLinearGradient(centerX - plateRadius, centerY - plateRadius, centerX + plateRadius, centerY + plateRadius);
-        plate.addColorStop(0, '#fffbeb');
-        plate.addColorStop(0.5, '#fef3c7');
-        plate.addColorStop(1, '#fde68a');
-        ctx.fillStyle = plate;
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, plateRadius, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Gold rim
-        ctx.strokeStyle = '#d4af37';
-        ctx.lineWidth = 3;
-        ctx.stroke();
-        ctx.strokeStyle = 'rgba(212, 175, 55, 0.25)';
-        ctx.lineWidth = 7;
-        ctx.stroke();
-
-        // Subtle residues under grime
-        ctx.fillStyle = 'rgba(200, 150, 50, 0.12)';
-        for (let i = 0; i < 12; i++) {
-          const a = Math.random() * Math.PI * 2;
-          const dist = Math.random() * plateRadius * 0.7;
-          const x = centerX + Math.cos(a) * dist;
-          const y = centerY + Math.sin(a) * dist;
-          const s = Math.random() * 34 + 18;
-          ctx.beginPath();
-          ctx.arc(x, y, s, 0, Math.PI * 2);
-          ctx.fill();
-        }
-
-        ctx.fillStyle = 'rgba(139, 69, 19, 0.18)';
-        for (let i = 0; i < 36; i++) {
-          const x = centerX + (Math.random() - 0.5) * plateRadius * 1.7;
-          const y = centerY + (Math.random() - 0.5) * plateRadius * 1.7;
-          const ww = Math.random() * 7 + 2;
-          const hh = Math.random() * 5 + 1;
-          ctx.fillRect(x - ww / 2, y - hh / 2, ww, hh);
-        }
-
-        // Grime layer (this gets erased)
-        const grime = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, plateRadius * 1.25);
-        grime.addColorStop(0, 'rgba(80, 50, 20, 0.42)');
-        grime.addColorStop(0.6, 'rgba(100, 70, 40, 0.55)');
-        grime.addColorStop(1, 'rgba(120, 80, 50, 0.62)');
-        ctx.fillStyle = grime;
+        // Plate base with realistic ceramic texture
+        const plateGradient = ctx.createRadialGradient(
+          centerX - plateRadius * 0.3, centerY - plateRadius * 0.3, 0,
+          centerX + plateRadius * 0.3, centerY + plateRadius * 0.3, plateRadius * 1.5
+        );
+        plateGradient.addColorStop(0, '#ffffff');
+        plateGradient.addColorStop(0.2, '#fffbeb');
+        plateGradient.addColorStop(0.5, '#fef3c7');
+        plateGradient.addColorStop(0.8, '#fde68a');
+        plateGradient.addColorStop(1, '#fcd34d');
+        ctx.fillStyle = plateGradient;
         ctx.beginPath();
         ctx.arc(centerX, centerY, plateRadius, 0, Math.PI * 2);
         ctx.fill();
 
-        // Center gunk
-        ctx.fillStyle = 'rgba(60, 40, 20, 0.55)';
-        ctx.beginPath();
-        ctx.ellipse(centerX, centerY, plateRadius * 0.62, plateRadius * 0.68, 0.15, 0, Math.PI * 2);
-        ctx.fill();
+        // Professional gold rim with shine
+        ctx.save();
+        const rimGradient = ctx.createLinearGradient(
+          centerX - plateRadius, centerY - plateRadius,
+          centerX + plateRadius, centerY + plateRadius
+        );
+        rimGradient.addColorStop(0, '#f4d03f');
+        rimGradient.addColorStop(0.3, '#d4af37');
+        rimGradient.addColorStop(0.5, '#f7dc6f');
+        rimGradient.addColorStop(0.7, '#d4af37');
+        rimGradient.addColorStop(1, '#b8860b');
+        ctx.strokeStyle = rimGradient;
+        ctx.lineWidth = 4;
+        ctx.lineCap = 'round';
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = 'rgba(212, 175, 55, 0.6)';
+        ctx.stroke();
+        
+        // Inner rim highlight
+        ctx.strokeStyle = 'rgba(255, 215, 0, 0.4)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.restore();
 
-        // Stains
-        ctx.fillStyle = 'rgba(70, 50, 30, 0.42)';
-        for (let i = 0; i < 14; i++) {
+        // Food residues with realistic colors and shapes
+        const foodColors = [
+          'rgba(139, 69, 19, 0.25)',  // Brown (sauce)
+          'rgba(220, 20, 60, 0.2)',   // Red (tomato)
+          'rgba(34, 139, 34, 0.18)',  // Green (herbs)
+          'rgba(255, 165, 0, 0.22)',  // Orange (cheese)
+        ];
+        
+        for (let i = 0; i < 18; i++) {
           const a = Math.random() * Math.PI * 2;
-          const dist = Math.random() * plateRadius * 0.8;
+          const dist = Math.random() * plateRadius * 0.75;
           const x = centerX + Math.cos(a) * dist;
           const y = centerY + Math.sin(a) * dist;
-          const s = Math.random() * 44 + 28;
+          const size = Math.random() * 38 + 22;
+          const color = foodColors[Math.floor(Math.random() * foodColors.length)];
+          
+          ctx.fillStyle = color;
           ctx.beginPath();
-          ctx.ellipse(x, y, s, s * 0.7, Math.random() * Math.PI, 0, Math.PI * 2);
+          ctx.ellipse(x, y, size, size * (0.6 + Math.random() * 0.3), Math.random() * Math.PI, 0, Math.PI * 2);
+          ctx.fill();
+          
+          // Add texture to food residue
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+          for (let j = 0; j < 3; j++) {
+            ctx.fillRect(x + (Math.random() - 0.5) * size, y + (Math.random() - 0.5) * size, 2, 2);
+          }
+        }
+
+        // Crumbs with varied sizes
+        ctx.fillStyle = 'rgba(101, 67, 33, 0.25)';
+        for (let i = 0; i < 50; i++) {
+          const x = centerX + (Math.random() - 0.5) * plateRadius * 1.8;
+          const y = centerY + (Math.random() - 0.5) * plateRadius * 1.8;
+          const w = Math.random() * 6 + 1.5;
+          const h = Math.random() * 4 + 1;
+          ctx.fillRect(x - w/2, y - h/2, w, h);
+        }
+
+        // Professional grime layer with depth
+        const grimeGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, plateRadius * 1.3);
+        grimeGradient.addColorStop(0, 'rgba(60, 40, 20, 0.48)');
+        grimeGradient.addColorStop(0.3, 'rgba(80, 55, 30, 0.52)');
+        grimeGradient.addColorStop(0.6, 'rgba(100, 70, 45, 0.58)');
+        grimeGradient.addColorStop(0.9, 'rgba(120, 85, 55, 0.65)');
+        grimeGradient.addColorStop(1, 'rgba(140, 100, 65, 0.7)');
+        ctx.fillStyle = grimeGradient;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, plateRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Center gunk with realistic shape
+        ctx.fillStyle = 'rgba(50, 35, 20, 0.6)';
+        ctx.beginPath();
+        ctx.ellipse(centerX, centerY, plateRadius * 0.65, plateRadius * 0.7, 0.2, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Add texture to center gunk
+        ctx.fillStyle = 'rgba(30, 20, 10, 0.3)';
+        for (let i = 0; i < 8; i++) {
+          const a = Math.random() * Math.PI * 2;
+          const dist = Math.random() * plateRadius * 0.4;
+          ctx.fillRect(centerX + Math.cos(a) * dist - 1, centerY + Math.sin(a) * dist - 1, 2, 2);
+        }
+
+        // Stains with realistic patterns
+        const stainColors = ['rgba(70, 50, 30, 0.45)', 'rgba(90, 60, 40, 0.5)', 'rgba(60, 40, 25, 0.4)'];
+        for (let i = 0; i < 16; i++) {
+          const a = Math.random() * Math.PI * 2;
+          const dist = Math.random() * plateRadius * 0.85;
+          const x = centerX + Math.cos(a) * dist;
+          const y = centerY + Math.sin(a) * dist;
+          const size = Math.random() * 48 + 30;
+          const color = stainColors[Math.floor(Math.random() * stainColors.length)];
+          
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.ellipse(x, y, size, size * (0.65 + Math.random() * 0.25), Math.random() * Math.PI, 0, Math.PI * 2);
+          ctx.fill();
+          
+          // Add darker center to stains
+          ctx.fillStyle = 'rgba(40, 25, 15, 0.3)';
+          ctx.beginPath();
+          ctx.arc(x, y, size * 0.4, 0, Math.PI * 2);
           ctx.fill();
         }
 
-        // Grain
-        ctx.globalAlpha = 0.28;
-        ctx.fillStyle = '#8b8b8b';
-        for (let i = 0; i < 220; i++) {
-          ctx.fillRect(Math.random() * cssW, Math.random() * cssH, Math.random() * 1.6, Math.random() * 1.6);
+        // Professional grain texture
+        ctx.globalAlpha = 0.32;
+        ctx.fillStyle = '#6b6b6b';
+        for (let i = 0; i < 280; i++) {
+          const x = Math.random() * cssW;
+          const y = Math.random() * cssH;
+          const size = Math.random() * 1.8 + 0.5;
+          ctx.fillRect(x, y, size, size);
         }
         ctx.globalAlpha = 1;
 
-        // Vignette
-        const vig = ctx.createRadialGradient(centerX, centerY, plateRadius * 0.5, centerX, centerY, plateRadius * 1.35);
-        vig.addColorStop(0, 'rgba(0,0,0,0)');
-        vig.addColorStop(1, 'rgba(0,0,0,0.28)');
-        ctx.fillStyle = vig;
-        ctx.fillRect(centerX - plateRadius * 1.6, centerY - plateRadius * 1.6, plateRadius * 3.2, plateRadius * 3.2);
+        // Water spots with realistic shine
+        ctx.strokeStyle = 'rgba(120, 120, 120, 0.3)';
+        ctx.lineWidth = 1.5;
+        ctx.lineCap = 'round';
+        for (let i = 0; i < 10; i++) {
+          const startX = centerX + (Math.random() - 0.5) * plateRadius * 1.9;
+          const startY = centerY - plateRadius * 1.1;
+          const endX = startX + (Math.random() - 0.5) * plateRadius * 0.4;
+          const endY = centerY + plateRadius * 1.1;
+          ctx.beginPath();
+          ctx.moveTo(startX, startY);
+          ctx.lineTo(endX, endY);
+          ctx.stroke();
+        }
+
+        // Advanced vignette with multiple layers
+        const vignette1 = ctx.createRadialGradient(centerX, centerY, plateRadius * 0.4, centerX, centerY, plateRadius * 1.4);
+        vignette1.addColorStop(0, 'rgba(0,0,0,0)');
+        vignette1.addColorStop(0.7, 'rgba(0,0,0,0.15)');
+        vignette1.addColorStop(1, 'rgba(0,0,0,0.35)');
+        ctx.fillStyle = vignette1;
+        ctx.fillRect(centerX - plateRadius * 1.7, centerY - plateRadius * 1.7, plateRadius * 3.4, plateRadius * 3.4);
+        
+        // Add subtle rim shadow
+        const rimShadow = ctx.createRadialGradient(centerX, centerY, plateRadius * 0.95, centerX, centerY, plateRadius * 1.1);
+        rimShadow.addColorStop(0, 'rgba(0,0,0,0.2)');
+        rimShadow.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = rimShadow;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, plateRadius * 1.05, 0, Math.PI * 2);
+        ctx.fill();
       }
 
       function getPointerPos(e) {
@@ -1749,17 +1850,25 @@
       }
 
       function sparkle(x, y) {
-        const s = document.createElement('div');
-        s.className = 'plate-sparkle';
-        const colors = ['#fbbf24', '#f59e0b', '#fecaca', '#fed7aa'];
-        const c = colors[(Math.random() * colors.length) | 0];
-        s.style.left = x + 'px';
-        s.style.top = y + 'px';
-        s.style.setProperty('--c', c);
-        s.style.setProperty('--tx', (Math.random() - 0.5) * 70 + 'px');
-        s.style.setProperty('--ty', (Math.random() - 0.5) * 70 - 35 + 'px');
-        canvas.parentElement.appendChild(s);
-        setTimeout(() => s.remove(), 700);
+        // Create multiple sparkles for professional effect
+        for (let i = 0; i < 4; i++) {
+          const s = document.createElement('div');
+          s.className = 'plate-sparkle';
+          const colors = ['#fbbf24', '#f59e0b', '#fecaca', '#fed7aa', '#ffffff'];
+          const c = colors[Math.floor(Math.random() * colors.length)];
+          const offsetX = (Math.random() - 0.5) * 30;
+          const offsetY = (Math.random() - 0.5) * 30;
+          s.style.left = (x + offsetX) + 'px';
+          s.style.top = (y + offsetY) + 'px';
+          s.style.setProperty('--c', c);
+          s.style.setProperty('--tx', (Math.random() - 0.5) * 80 + 'px');
+          s.style.setProperty('--ty', (Math.random() - 0.5) * 80 - 40 + 'px');
+          s.style.width = (8 + Math.random() * 6) + 'px';
+          s.style.height = s.style.width;
+          s.style.boxShadow = `0 0 ${12 + Math.random() * 8}px ${c}`;
+          canvas.parentElement.appendChild(s);
+          setTimeout(() => s.remove(), 800 + Math.random() * 200);
+        }
       }
 
       function start(e) {
