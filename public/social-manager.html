@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Social Media Manager - MagicPlate.ai</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f5f5f5;
+      color: #1a1a1a;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 15px;
+      padding: 40px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #4caf50;
+      margin-bottom: 30px;
+      font-size: 2.5em;
+    }
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      border-bottom: 2px solid rgba(76, 175, 80, 0.2);
+    }
+    .tab {
+      padding: 12px 24px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      color: rgba(26, 26, 26, 0.6);
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s;
+    }
+    .tab.active {
+      color: #4caf50;
+      border-bottom-color: #4caf50;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid rgba(76, 175, 80, 0.2);
+      border-radius: 8px;
+      font-size: 16px;
+      font-family: inherit;
+    }
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #4caf50, #66bb6a);
+      color: white;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    }
+    .status {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      display: none;
+    }
+    .status.success {
+      background: rgba(76, 175, 80, 0.1);
+      color: #4caf50;
+      border: 2px solid rgba(76, 175, 80, 0.3);
+    }
+    .status.error {
+      background: rgba(245, 158, 11, 0.1);
+      color: #f59e0b;
+      border: 2px solid rgba(245, 158, 11, 0.3);
+    }
+    .posts-list {
+      margin-top: 30px;
+    }
+    .post-card {
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      border: 2px solid rgba(76, 175, 80, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📱 Social Media Manager</h1>
+    
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('create')">Create Post</button>
+      <button class="tab" onclick="switchTab('generate')">Generate AI Post</button>
+      <button class="tab" onclick="switchTab('schedule')">Schedule Post</button>
+      <button class="tab" onclick="switchTab('posts')">My Posts</button>
+    </div>
+    
+    <!-- Create Post Tab -->
+    <div id="createTab" class="tab-content active">
+      <form id="createForm">
+        <div class="form-group">
+          <label>Restaurant ID *</label>
+          <input type="number" id="restaurantId" required>
+        </div>
+        <div class="form-group">
+          <label>Platform *</label>
+          <select id="platform" required>
+            <option value="instagram">Instagram</option>
+            <option value="facebook">Facebook</option>
+            <option value="tiktok">TikTok</option>
+            <option value="twitter">Twitter</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Content *</label>
+          <textarea id="content" rows="5" required></textarea>
+        </div>
+        <div class="form-group">
+          <label>Image URL (optional)</label>
+          <input type="url" id="imageUrl">
+        </div>
+        <button type="submit" class="btn btn-primary">Create Post</button>
+        <div id="createStatus" class="status"></div>
+      </form>
+    </div>
+    
+    <!-- Generate AI Post Tab -->
+    <div id="generateTab" class="tab-content">
+      <form id="generateForm">
+        <div class="form-group">
+          <label>Restaurant ID *</label>
+          <input type="number" id="genRestaurantId" required>
+        </div>
+        <div class="form-group">
+          <label>Platform *</label>
+          <select id="genPlatform" required>
+            <option value="instagram">Instagram</option>
+            <option value="facebook">Facebook</option>
+            <option value="tiktok">TikTok</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Post Type *</label>
+          <select id="postType" required>
+            <option value="menu_item">Menu Item</option>
+            <option value="promotion">Promotion</option>
+            <option value="announcement">Announcement</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Item Name (for menu_item)</label>
+          <input type="text" id="itemName">
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="description" rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Generate & Create Post</button>
+        <div id="generateStatus" class="status"></div>
+      </form>
+    </div>
+    
+    <!-- Schedule Post Tab -->
+    <div id="scheduleTab" class="tab-content">
+      <form id="scheduleForm">
+        <div class="form-group">
+          <label>Post ID *</label>
+          <input type="number" id="postId" required>
+        </div>
+        <div class="form-group">
+          <label>Scheduled Date & Time *</label>
+          <input type="datetime-local" id="scheduledTime" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Schedule Post</button>
+        <div id="scheduleStatus" class="status"></div>
+      </form>
+    </div>
+    
+    <!-- My Posts Tab -->
+    <div id="postsTab" class="tab-content">
+      <form id="listForm" style="margin-bottom: 20px;">
+        <div class="form-group">
+          <label>Restaurant ID *</label>
+          <input type="number" id="listRestaurantId" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Load Posts</button>
+      </form>
+      <div id="postsList" class="posts-list"></div>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById(tabName + 'Tab').classList.add('active');
+    }
+    
+    document.getElementById('createForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const status = document.getElementById('createStatus');
+      status.style.display = 'none';
+      
+      try {
+        const response = await fetch('/api/social/posts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            restaurant_id: parseInt(document.getElementById('restaurantId').value),
+            platform: document.getElementById('platform').value,
+            content: document.getElementById('content').value,
+            image_url: document.getElementById('imageUrl').value || null
+          })
+        });
+        
+        const data = await response.json();
+        if (response.ok) {
+          status.className = 'status success';
+          status.innerHTML = `✅ Post created! ID: ${data.post_id}`;
+        } else {
+          throw new Error(data.error);
+        }
+      } catch (error) {
+        status.className = 'status error';
+        status.textContent = `❌ ${error.message}`;
+      }
+      status.style.display = 'block';
+    });
+    
+    document.getElementById('generateForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const status = document.getElementById('generateStatus');
+      status.style.display = 'none';
+      
+      try {
+        const response = await fetch('/api/social/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            restaurant_id: parseInt(document.getElementById('genRestaurantId').value),
+            platform: document.getElementById('genPlatform').value,
+            post_type: document.getElementById('postType').value,
+            context: {
+              item_name: document.getElementById('itemName').value,
+              description: document.getElementById('description').value
+            }
+          })
+        });
+        
+        const data = await response.json();
+        if (response.ok) {
+          status.className = 'status success';
+          status.innerHTML = `✅ AI post generated!<br>Content: ${data.content}<br>Post ID: ${data.post_id}`;
+        } else {
+          throw new Error(data.error);
+        }
+      } catch (error) {
+        status.className = 'status error';
+        status.textContent = `❌ ${error.message}`;
+      }
+      status.style.display = 'block';
+    });
+    
+    document.getElementById('scheduleForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const status = document.getElementById('scheduleStatus');
+      status.style.display = 'none';
+      
+      try {
+        const scheduledTime = new Date(document.getElementById('scheduledTime').value).toISOString();
+        const response = await fetch('/api/social/schedule', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            post_id: parseInt(document.getElementById('postId').value),
+            scheduled_time: scheduledTime
+          })
+        });
+        
+        const data = await response.json();
+        if (response.ok) {
+          status.className = 'status success';
+          status.textContent = `✅ Post scheduled for ${new Date(scheduledTime).toLocaleString()}`;
+        } else {
+          throw new Error(data.error);
+        }
+      } catch (error) {
+        status.className = 'status error';
+        status.textContent = `❌ ${error.message}`;
+      }
+      status.style.display = 'block';
+    });
+    
+    document.getElementById('listForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const list = document.getElementById('postsList');
+      list.innerHTML = 'Loading...';
+      
+      try {
+        const response = await fetch(`/api/social/posts/${document.getElementById('listRestaurantId').value}`);
+        const data = await response.json();
+        
+        if (response.ok) {
+          if (data.posts.length === 0) {
+            list.innerHTML = '<p>No posts found.</p>';
+          } else {
+            list.innerHTML = data.posts.map(post => `
+              <div class="post-card">
+                <h4>${post.platform.toUpperCase()} - ${post.status}</h4>
+                <p>${post.content}</p>
+                <p style="color: #666; font-size: 0.9em; margin-top: 10px;">
+                  Created: ${new Date(post.created_at).toLocaleString()}
+                  ${post.scheduled_time ? ` | Scheduled: ${new Date(post.scheduled_time).toLocaleString()}` : ''}
+                </p>
+              </div>
+            `).join('');
+          }
+        } else {
+          throw new Error(data.error);
+        }
+      } catch (error) {
+        list.innerHTML = `<p style="color: #f59e0b;">Error: ${error.message}</p>`;
+      }
+    });
+  </script>
+</body>
+</html>

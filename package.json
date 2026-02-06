@@ -11,18 +11,36 @@
     "email": "node scripts/send-email.js",
     "email:test": "node scripts/send-email.js --max=5",
     "email:preview": "node scripts/send-email.js --dry-run",
+    "outreach": "node scripts/multi-channel-outreach.js",
+    "outreach:test": "node scripts/multi-channel-outreach.js --max=5",
+    "outreach:preview": "node scripts/multi-channel-outreach.js --dry-run",
+    "outreach:email-only": "node scripts/multi-channel-outreach.js --channels=email",
+    "outreach:whatsapp-only": "node scripts/multi-channel-outreach.js --channels=whatsapp",
     "track": "node scripts/track-responses.js",
     "followups": "node scripts/run-followups.js",
     "requalify": "node scripts/re-qualify-leads.js",
     "clean": "node scripts/clean-leads.js",
-    "start": "node scripts/scrape-restaurants.js && node scripts/send-email.js"
+    "start": "node scripts/scrape-restaurants.js && node scripts/send-email.js",
+    "openclaw:install": "curl -fsSL https://openclaw.ai/install.sh | bash || npm i -g openclaw",
+    "openclaw:onboard": "openclaw onboard",
+    "openclaw:daily": "node openclaw-skills/index.js dailyAutomation",
+    "openclaw:scrape": "node -e \"require('./openclaw-skills').scrapeRestaurants(process.env.SEARCH_AREA || 'Los Angeles, CA', 100)\"",
+    "openclaw:email": "node -e \"require('./openclaw-skills').sendEmails(20)\"",
+    "openclaw:outreach": "node -e \"require('./openclaw-skills').sendOutreach(10, ['email', 'whatsapp'])\""
   },
   "dependencies": {
     "@sendgrid/mail": "^7.7.0",
-    "resend": "^3.2.0",
-    "express": "^4.21.2",
     "axios": "^1.6.0",
     "cheerio": "^1.0.0-rc.12",
-    "dotenv": "^16.3.1"
+    "dotenv": "^16.3.1",
+    "express": "^4.21.2",
+    "form-data": "^4.0.5",
+    "resend": "^3.2.0",
+    "pg": "^8.11.3",
+    "stripe": "^14.7.0",
+    "jsonwebtoken": "^9.0.2",
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "openclaw": "^1.0.0"
   }
 }

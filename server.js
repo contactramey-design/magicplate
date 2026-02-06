@@ -201,6 +201,47 @@ app.post('/api/contact', async (req, res) => {
   }
 });
 
+// Platform API Routes
+// Subscription Management - Signup route must come first
+app.post('/api/subscriptions/signup', require('./api/subscriptions/signup'));
+app.use('/api/subscriptions', require('./api/subscriptions'));
+
+// Restaurant Management
+app.use('/api/restaurants', require('./api/restaurants'));
+
+// HeyGen Integration
+app.use('/api/heygen', require('./api/heygen'));
+
+// Branding & Guidelines
+app.use('/api/branding', require('./api/branding'));
+
+// Multi-Location Management
+app.use('/api/locations', require('./api/locations'));
+
+// Marketing Automation
+app.use('/api/marketing', require('./api/marketing'));
+
+// Digital Menus
+app.use('/api/menus', require('./api/menus'));
+
+// Social Media
+app.use('/api/social', require('./api/social'));
+
+// Email Marketing
+app.use('/api/email', require('./api/email'));
+
+// Support System
+app.use('/api/support', require('./api/support'));
+
+// Cron Jobs
+app.use('/api/cron', require('./api/cron'));
+
+// Training System
+app.use('/api/training', require('./api/training'));
+
+// Analytics & Reporting
+app.use('/api/analytics', require('./api/analytics'));
+
       // SPA-ish fallback (serve index.html)
       app.get('*', (req, res) => {
         res.sendFile(path.join(__dirname, 'public', 'index.html'));

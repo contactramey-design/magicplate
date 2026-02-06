@@ -568,12 +568,21 @@ const scrapeSources = {
 
 async function findEmails(leads) {
   // Enhanced email finding with multiple strategies
+  const { findRestaurantEmails } = require('./improved-email-finder');
   const emailRegex = /[\w\.-]+@[\w\.-]+\.\w+/g;
   const excludedPatterns = ['noreply', 'no-reply', 'privacy', 'example.com', 'test.com', 'placeholder', 'sentry', 'monitoring', 'analytics', 'tracking'];
   
   for (const lead of leads) {
     if (!lead.email && lead.website) {
       const foundEmails = new Set();
+      
+      // Use improved email finder
+      try {
+        const improvedEmails = await findRestaurantEmails(lead);
+        improvedEmails.forEach(e => foundEmails.add(e.toLowerCase()));
+      } catch (error) {
+        // Fall back to original method
+      }
       
       try {
         // Strategy 1: Check main page
@@ -848,7 +857,7 @@ async function main() {
   if (process.env.OUTSCRAPER_API_KEY) sources.push('outscraper');
   
   if (sources.length === 0) {
-    console.error('❌ r8_blo9LeS78GDvRIMJLnNURRyxzk5UdKN2wrclHNo API keys configured. Set at least one: GOOGLE_PLACES_API_KEY, YELP_API_KEY, or OUTSCRAPER_API_KEY in .env');
+    console.error('❌ No API keys configured. Set at least one: GOOGLE_PLACES_API_KEY, YELP_API_KEY, or OUTSCRAPER_API_KEY in .env');
     process.exit(1);
   }
   

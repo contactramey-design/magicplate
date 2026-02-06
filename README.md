@@ -2,6 +2,32 @@
 
 Streamlined lead scraping and email outreach system for testing the MagicPlate.ai market.
 
+## 🦞 OpenClaw Integration (NEW!)
+
+MagicPlate now supports **OpenClaw** - an AI assistant that can automate your entire workflow via WhatsApp, Telegram, or Discord!
+
+**Quick Start:**
+```bash
+# Install OpenClaw
+curl -fsSL https://openclaw.ai/install.sh | bash
+
+# Onboard your assistant
+openclaw onboard
+
+# Start chatting via WhatsApp/Telegram!
+```
+
+**See [OPENCLAW_QUICK_START.md](OPENCLAW_QUICK_START.md) for full setup guide.**
+
+OpenClaw can:
+- ✅ Scrape restaurants on command
+- ✅ Send emails automatically
+- ✅ Multi-channel outreach (Email, WhatsApp, Telegram)
+- ✅ Run daily automations
+- ✅ Manage your entire MagicPlate workflow
+
+**Control everything from your phone via WhatsApp/Telegram!**
+
 ## Quick Start
 
 ### 1. Install Dependencies

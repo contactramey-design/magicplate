@@ -1,0 +1,13 @@
+# Copy these lines to your .env file:
+
+RESEND_API_KEY=re_9Va9PPPZ_LQ6od53eR2RWWr35piKNFrj3
+GOOGLE_PLACES_API_KEY=AIzaSyBg90qetc06qivgBX9b-kJlxVVXuBz_FMI
+LEONARDO_API_KEY=02a4b18f-77d5-42ee-b68b-beb43e277849
+FROM_EMAIL=sydney@magicplate.info
+FROM_NAME="Sydney - MagicPlate"
+
+# Optional - Add if you have these:
+# REPLICATE_API_TOKEN=r8_your_token_here
+# ZAPPY_API_KEY=your_zappy_key_here
+# INSTAGRAM_ACCESS_TOKEN=your_instagram_token_here
+# FACEBOOK_ACCESS_TOKEN=your_facebook_token_here
