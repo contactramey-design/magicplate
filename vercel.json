@@ -15,8 +15,12 @@
   ],
   "crons": [
     {
-      "path": "/api/cron/publish-scheduled",
+      "path": "/api/run-automation",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/publish-scheduled",
+      "schedule": "0 10 * * *"
     }
   ]
 }
