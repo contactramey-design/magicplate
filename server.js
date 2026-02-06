@@ -1,7 +1,42 @@
-require('dotenv').config();
-
 const path = require('path');
-const fs = require('fs').promises;
+const fs = require('fs');
+
+// Load environment variables - check multiple locations
+// Try .env.local first (if exists), then .env
+const envLocalPath = path.join(__dirname, '.env.local');
+const envPath = path.join(__dirname, '.env');
+
+// Load .env first (base config)
+if (fs.existsSync(envPath)) {
+  require('dotenv').config({ path: envPath });
+  console.log('✅ Loaded .env');
+}
+
+// Then load .env.local (overrides .env, but only if values exist)
+if (fs.existsSync(envLocalPath)) {
+  const envBackup = { ...process.env }; // Backup .env values
+  require('dotenv').config({ path: envLocalPath, override: true });
+  
+  // If .env.local has empty values, restore from .env
+  Object.keys(process.env).forEach(key => {
+    if (process.env[key] === '' && envBackup[key] && envBackup[key] !== '') {
+      process.env[key] = envBackup[key];
+    }
+  });
+  console.log('✅ Loaded .env.local (overrides .env where set)');
+}
+
+// Verify Leonardo key
+const leonardoKey = process.env.LEONARDO_API_KEY;
+if (leonardoKey) {
+  console.log(`✅ LEONARDO_API_KEY: Set (${leonardoKey.length} characters)`);
+  console.log(`   Preview: ${leonardoKey.substring(0, 15)}...`);
+} else {
+  console.log('❌ LEONARDO_API_KEY: NOT SET');
+  console.log('   Make sure it\'s in .env.local and saved (Cmd+S)');
+}
+// fsPromises for async file operations
+const fsPromises = require('fs').promises;
 const express = require('express');
 
 const { sendEmail } = require('./config/email-config');
@@ -9,7 +44,7 @@ const { sendEmail } = require('./config/email-config');
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
-app.use(express.json({ limit: '1mb' }));
+app.use(express.json({ limit: '50mb' })); // Increased for image uploads
 
 // Serve the homepage + assets
 app.use(express.static(path.join(__dirname, 'public')));
@@ -18,7 +53,7 @@ const LEADS_FILE = path.join(__dirname, 'data', 'captured-leads.json');
 
 async function readLeads() {
   try {
-    const raw = await fs.readFile(LEADS_FILE, 'utf8');
+    const raw = await fsPromises.readFile(LEADS_FILE, 'utf8');
     return JSON.parse(raw);
   } catch {
     return [];
@@ -26,8 +61,8 @@ async function readLeads() {
 }
 
 async function writeLeads(leads) {
-  await fs.mkdir(path.dirname(LEADS_FILE), { recursive: true });
-  await fs.writeFile(LEADS_FILE, JSON.stringify(leads, null, 2));
+  await fsPromises.mkdir(path.dirname(LEADS_FILE), { recursive: true });
+  await fsPromises.writeFile(LEADS_FILE, JSON.stringify(leads, null, 2));
 }
 
 function isValidEmail(email) {
@@ -87,10 +122,89 @@ app.post('/api/leads', async (req, res) => {
   }
 });
 
-// SPA-ish fallback (serve index.html)
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+// Diagnostic endpoint to check API configuration
+app.get('/api/check-config', (req, res) => {
+  require('dotenv').config(); // Reload env vars
+  res.json({
+    leonardo: {
+      configured: !!process.env.LEONARDO_API_KEY,
+      length: process.env.LEONARDO_API_KEY?.length || 0,
+      preview: process.env.LEONARDO_API_KEY ? 
+        process.env.LEONARDO_API_KEY.substring(0, 10) + '...' : 'Not set'
+    },
+    together: {
+      configured: !!process.env.TOGETHER_API_KEY,
+      length: process.env.TOGETHER_API_KEY?.length || 0
+    },
+    replicate: {
+      configured: !!process.env.REPLICATE_API_TOKEN,
+      length: process.env.REPLICATE_API_TOKEN?.length || 0
+    },
+    envFile: {
+      exists: require('fs').existsSync(require('path').join(__dirname, '.env')),
+      path: require('path').join(__dirname, '.env')
+    }
+  });
 });
+
+// Image enhancement API endpoint (for local development)
+app.post('/api/enhance-image', async (req, res) => {
+  try {
+    // Reload env vars in case they were updated
+    require('dotenv').config();
+    
+    // Import and use the enhance-image handler
+    const enhanceImageHandler = require('./api/enhance-image');
+    return await enhanceImageHandler(req, res);
+  } catch (error) {
+    console.error('Enhance image route error:', error);
+    console.error('Stack:', error.stack);
+    return res.status(500).json({ 
+      error: 'Enhancement failed', 
+      message: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+});
+
+// Contact form endpoint
+app.post('/api/contact', async (req, res) => {
+  try {
+    const { name, email, restaurant, message } = req.body;
+    
+    if (!name || !email || !message) {
+      return res.status(400).json({ error: 'Name, email, and message are required' });
+    }
+    
+    // Send email using your email service
+    await sendEmail({
+      to: 'sydney@magicplate.info',
+      from: { email: process.env.FROM_EMAIL || 'sydney@magicplate.info', name: 'MagicPlate Contact Form' },
+      subject: `New Contact Form Submission from ${name}${restaurant ? ` - ${restaurant}` : ''}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111;">
+          <h2>New Contact Form Submission</h2>
+          <p><strong>Name:</strong> ${name}</p>
+          <p><strong>Email:</strong> ${email}</p>
+          ${restaurant ? `<p><strong>Restaurant:</strong> ${restaurant}</p>` : ''}
+          <p><strong>Message:</strong></p>
+          <p>${message.replace(/\n/g, '<br>')}</p>
+        </div>
+      `,
+      text: `New Contact Form Submission\n\nName: ${name}\nEmail: ${email}\n${restaurant ? `Restaurant: ${restaurant}\n` : ''}Message: ${message}`
+    });
+    
+    res.json({ success: true, message: 'Message sent successfully' });
+  } catch (error) {
+    console.error('Contact form error:', error);
+    res.status(500).json({ error: 'Failed to send message' });
+  }
+});
+
+      // SPA-ish fallback (serve index.html)
+      app.get('*', (req, res) => {
+        res.sendFile(path.join(__dirname, 'public', 'index.html'));
+      });
 
 app.listen(PORT, () => {
   console.log(`MagicPlate dev server running on http://localhost:${PORT}`);
