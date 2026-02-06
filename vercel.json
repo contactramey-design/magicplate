@@ -1,24 +1,32 @@
 {
-  "buildCommand": null,
-  "outputDirectory": "public",
-  "framework": null,
-  "rewrites": [
+  "version": 2,
+  "builds": [
     {
-      "source": "/api/leads",
-      "destination": "/api/leads"
+      "src": "server.js",
+      "use": "@vercel/node"
     },
     {
-      "source": "/api/enhance-image",
-      "destination": "/api/enhance-image"
+      "src": "public/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/server.js"
     },
     {
-      "source": "/api/run-automation",
-      "destination": "/api/run-automation"
+      "src": "/(.*)",
+      "dest": "/public/$1"
+    },
+    {
+      "src": "/",
+      "dest": "/public/index.html"
     }
   ],
   "crons": [
     {
-      "path": "/api/run-automation",
+      "path": "/api/cron/publish-scheduled",
       "schedule": "0 9 * * *"
     }
   ]

@@ -247,7 +247,13 @@ app.use('/api/analytics', require('./api/analytics'));
         res.sendFile(path.join(__dirname, 'public', 'index.html'));
       });
 
-app.listen(PORT, () => {
-  console.log(`MagicPlate dev server running on http://localhost:${PORT}`);
-});
+// For Vercel serverless functions
+module.exports = app;
+
+// For local development
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`MagicPlate dev server running on http://localhost:${PORT}`);
+  });
+}
 
