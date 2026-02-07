@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HeyGen Avatar Manager - MagicPlate.ai</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f5f5f5;
+      color: #1a1a1a;
+      padding: 20px;
+    }
+    .header {
+      background: white;
+      padding: 20px 40px;
+      border-bottom: 1px solid rgba(76, 175, 80, 0.2);
+      margin-bottom: 30px;
+      border-radius: 10px;
+    }
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      color: #4caf50;
+      text-decoration: none;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .page-header {
+      background: white;
+      padding: 40px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .page-header h1 {
+      color: #4caf50;
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+    .page-header p {
+      color: #666;
+      font-size: 1.1em;
+    }
+    .section {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .section h2 {
+      color: #1a1a1a;
+      font-size: 1.8em;
+      margin-bottom: 20px;
+    }
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #4caf50, #66bb6a);
+      color: white;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    }
+    .btn-secondary {
+      background: rgba(76, 175, 80, 0.1);
+      color: #4caf50;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #1a1a1a;
+    }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid rgba(76, 175, 80, 0.2);
+      border-radius: 8px;
+      font-size: 16px;
+      font-family: inherit;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #4caf50;
+    }
+    .avatars-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .avatar-card {
+      border: 2px solid rgba(76, 175, 80, 0.2);
+      border-radius: 15px;
+      padding: 20px;
+      transition: all 0.3s;
+    }
+    .avatar-card:hover {
+      border-color: #4caf50;
+      box-shadow: 0 5px 20px rgba(76, 175, 80, 0.2);
+    }
+    .avatar-card h3 {
+      color: #4caf50;
+      margin-bottom: 10px;
+    }
+    .status {
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+      display: none;
+    }
+    .status.success {
+      background: rgba(76, 175, 80, 0.1);
+      color: #4caf50;
+      border: 2px solid rgba(76, 175, 80, 0.3);
+    }
+    .status.error {
+      background: rgba(245, 158, 11, 0.1);
+      color: #f59e0b;
+      border: 2px solid rgba(245, 158, 11, 0.3);
+    }
+    .video-preview {
+      margin-top: 15px;
+      padding: 15px;
+      background: #f9f9f9;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-content">
+      <a href="/dashboard.html" class="logo">← Back to Dashboard</a>
+      <a href="/" class="logo">MagicPlate.ai</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="page-header">
+      <h1>🎬 HeyGen Avatar Manager</h1>
+      <p>Create and manage personalized virtual host avatars for your restaurant</p>
+    </div>
+
+    <!-- Create Avatar Section -->
+    <div class="section">
+      <h2>Create New Avatar</h2>
+      <form id="createAvatarForm">
+        <div class="form-group">
+          <label>Restaurant ID *</label>
+          <input type="number" id="restaurantId" required placeholder="Enter your restaurant ID">
+        </div>
+        <div class="form-group">
+          <label>Avatar Name</label>
+          <input type="text" id="avatarName" placeholder="e.g., Main Host, Welcome Avatar">
+        </div>
+        <div class="form-group">
+          <label>Base Avatar ID (Optional)</label>
+          <input type="text" id="baseAvatarId" placeholder="Leave empty to use default">
+        </div>
+        <button type="submit" class="btn btn-primary">Create Avatar</button>
+        <div id="createStatus" class="status"></div>
+      </form>
+    </div>
+
+    <!-- List Avatars Section -->
+    <div class="section">
+      <h2>Your Avatars</h2>
+      <div class="form-group">
+        <label>Restaurant ID</label>
+        <input type="number" id="listRestaurantId" placeholder="Enter restaurant ID to list avatars">
+        <button type="button" class="btn btn-secondary" onclick="listAvatars()" style="margin-top: 10px;">Load Avatars</button>
+      </div>
+      <div id="avatarsList" class="avatars-grid"></div>
+    </div>
+
+    <!-- Generate Video Section -->
+    <div class="section">
+      <h2>Generate Video</h2>
+      <form id="generateVideoForm">
+        <div class="form-group">
+          <label>Avatar ID *</label>
+          <input type="text" id="videoAvatarId" required placeholder="Enter avatar ID">
+        </div>
+        <div class="form-group">
+          <label>Video Type</label>
+          <select id="videoType">
+            <option value="welcome">Welcome Video</option>
+            <option value="promotional">Promotional Video</option>
+            <option value="training">Training Video</option>
+            <option value="menu_highlight">Menu Highlight</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Script *</label>
+          <textarea id="videoScript" rows="6" required placeholder="Enter the script for your avatar video..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Generate Video</button>
+        <div id="videoStatus" class="status"></div>
+      </form>
+    </div>
+
+    <!-- Video Templates Section -->
+    <div class="section">
+      <h2>Video Templates</h2>
+      <button type="button" class="btn btn-secondary" onclick="loadTemplates()">Load Templates</button>
+      <div id="templatesList" style="margin-top: 20px;"></div>
+    </div>
+  </div>
+
+  <script>
+    // Get restaurant ID from URL or use default
+    const urlParams = new URLSearchParams(window.location.search);
+    const defaultRestaurantId = urlParams.get('restaurant_id') || '1';
+
+    // Set default restaurant ID
+    document.getElementById('restaurantId').value = defaultRestaurantId;
+    document.getElementById('listRestaurantId').value = defaultRestaurantId;
+
+    // Create Avatar
+    document.getElementById('createAvatarForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const statusDiv = document.getElementById('createStatus');
+      statusDiv.style.display = 'none';
+
+      const restaurantId = document.getElementById('restaurantId').value;
+      const avatarName = document.getElementById('avatarName').value;
+      const baseAvatarId = document.getElementById('baseAvatarId').value;
+
+      try {
+        const response = await fetch('/api/heygen/create-avatar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            restaurant_id: parseInt(restaurantId),
+            avatar_name: avatarName || undefined,
+            base_avatar_id: baseAvatarId || undefined
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          statusDiv.className = 'status success';
+          statusDiv.innerHTML = `
+            <h3>✅ Avatar Created Successfully!</h3>
+            <p>Avatar ID: ${data.avatar_id || data.id}</p>
+            <p>${data.message || 'Your avatar is ready to use.'}</p>
+          `;
+          statusDiv.style.display = 'block';
+          listAvatars(); // Refresh list
+        } else {
+          throw new Error(data.error || 'Failed to create avatar');
+        }
+      } catch (error) {
+        statusDiv.className = 'status error';
+        statusDiv.textContent = `❌ Error: ${error.message}`;
+        statusDiv.style.display = 'block';
+      }
+    });
+
+    // List Avatars
+    async function listAvatars() {
+      const restaurantId = document.getElementById('listRestaurantId').value;
+      if (!restaurantId) {
+        alert('Please enter a restaurant ID');
+        return;
+      }
+
+      const avatarsList = document.getElementById('avatarsList');
+      avatarsList.innerHTML = '<p>Loading avatars...</p>';
+
+      try {
+        const response = await fetch(`/api/heygen/restaurant/${restaurantId}/avatars`);
+        const data = await response.json();
+
+        if (response.ok && data.avatars && data.avatars.length > 0) {
+          avatarsList.innerHTML = data.avatars.map(avatar => `
+            <div class="avatar-card">
+              <h3>${avatar.avatar_name || 'Unnamed Avatar'}</h3>
+              <p><strong>Avatar ID:</strong> ${avatar.avatar_id || avatar.id}</p>
+              <p><strong>HeyGen ID:</strong> ${avatar.heygen_avatar_id || 'N/A'}</p>
+              <p><strong>Created:</strong> ${new Date(avatar.created_at).toLocaleDateString()}</p>
+            </div>
+          `).join('');
+        } else {
+          avatarsList.innerHTML = '<p>No avatars found. Create one above!</p>';
+        }
+      } catch (error) {
+        avatarsList.innerHTML = `<p style="color: #f59e0b;">Error loading avatars: ${error.message}</p>`;
+      }
+    }
+
+    // Generate Video
+    document.getElementById('generateVideoForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const statusDiv = document.getElementById('videoStatus');
+      statusDiv.style.display = 'none';
+
+      const avatarId = document.getElementById('videoAvatarId').value;
+      const videoType = document.getElementById('videoType').value;
+      const script = document.getElementById('videoScript').value;
+
+      try {
+        const response = await fetch('/api/heygen/generate-video', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            avatar_id: avatarId,
+            script: script,
+            video_type: videoType,
+            metadata: {}
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          statusDiv.className = 'status success';
+          statusDiv.innerHTML = `
+            <h3>✅ Video Generation Started!</h3>
+            <p>Video ID: ${data.video_id || data.id}</p>
+            <p>Status: ${data.status || 'processing'}</p>
+            ${data.video_url ? `<div class="video-preview"><a href="${data.video_url}" target="_blank">View Video</a></div>` : ''}
+            <p style="margin-top: 10px; font-size: 0.9em; color: #666;">Videos typically take 2-5 minutes to generate. Check back soon!</p>
+          `;
+          statusDiv.style.display = 'block';
+        } else {
+          throw new Error(data.error || 'Failed to generate video');
+        }
+      } catch (error) {
+        statusDiv.className = 'status error';
+        statusDiv.textContent = `❌ Error: ${error.message}`;
+        statusDiv.style.display = 'block';
+      }
+    });
+
+    // Load Templates
+    async function loadTemplates() {
+      const templatesList = document.getElementById('templatesList');
+      templatesList.innerHTML = '<p>Loading templates...</p>';
+
+      try {
+        const response = await fetch('/api/heygen/templates');
+        const data = await response.json();
+
+        if (response.ok && data.templates) {
+          templatesList.innerHTML = data.templates.map(template => `
+            <div class="avatar-card" style="margin-bottom: 15px;">
+              <h3>${template.name}</h3>
+              <p style="color: #666; margin-bottom: 10px;">${template.description}</p>
+              <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-top: 10px;">
+                <strong>Template Script:</strong>
+                <pre style="margin-top: 10px; white-space: pre-wrap; font-size: 0.9em;">${template.script_template}</pre>
+              </div>
+              <button onclick="useTemplate('${template.script_template}')" class="btn btn-secondary" style="margin-top: 10px;">Use This Template</button>
+            </div>
+          `).join('');
+        } else {
+          templatesList.innerHTML = '<p>No templates available.</p>';
+        }
+      } catch (error) {
+        templatesList.innerHTML = `<p style="color: #f59e0b;">Error loading templates: ${error.message}</p>`;
+      }
+    }
+
+    function useTemplate(script) {
+      document.getElementById('videoScript').value = script;
+      document.getElementById('generateVideoForm').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Auto-load avatars on page load
+    if (defaultRestaurantId) {
+      setTimeout(() => listAvatars(), 500);
+    }
+  </script>
+</body>
+</html>

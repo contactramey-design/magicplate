@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multi-Location Management - MagicPlate.ai</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f5f5f5;
+      color: #1a1a1a;
+      padding: 20px;
+    }
+    .header {
+      background: white;
+      padding: 20px 40px;
+      border-bottom: 1px solid rgba(76, 175, 80, 0.2);
+      margin-bottom: 30px;
+      border-radius: 10px;
+    }
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      color: #4caf50;
+      text-decoration: none;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .page-header {
+      background: white;
+      padding: 40px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .page-header h1 {
+      color: #4caf50;
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+    .section {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .section h2 {
+      color: #1a1a1a;
+      font-size: 1.8em;
+      margin-bottom: 20px;
+    }
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #4caf50, #66bb6a);
+      color: white;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    }
+    .btn-secondary {
+      background: rgba(76, 175, 80, 0.1);
+      color: #4caf50;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #1a1a1a;
+    }
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid rgba(76, 175, 80, 0.2);
+      border-radius: 8px;
+      font-size: 16px;
+      font-family: inherit;
+    }
+    .locations-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .location-card {
+      border: 2px solid rgba(76, 175, 80, 0.2);
+      border-radius: 15px;
+      padding: 20px;
+      transition: all 0.3s;
+    }
+    .location-card:hover {
+      border-color: #4caf50;
+      box-shadow: 0 5px 20px rgba(76, 175, 80, 0.2);
+    }
+    .status {
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+      display: none;
+    }
+    .status.success {
+      background: rgba(76, 175, 80, 0.1);
+      color: #4caf50;
+      border: 2px solid rgba(76, 175, 80, 0.3);
+    }
+    .status.error {
+      background: rgba(245, 158, 11, 0.1);
+      color: #f59e0b;
+      border: 2px solid rgba(245, 158, 11, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-content">
+      <a href="/dashboard.html" class="logo">← Back to Dashboard</a>
+      <a href="/" class="logo">MagicPlate.ai</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="page-header">
+      <h1>📍 Multi-Location Management</h1>
+      <p>Manage multiple restaurant locations from one central dashboard</p>
+    </div>
+
+    <!-- List Locations Section -->
+    <div class="section">
+      <h2>Your Locations</h2>
+      <div class="form-group">
+        <label>Restaurant ID</label>
+        <input type="number" id="restaurantId" placeholder="Enter restaurant ID" value="1">
+        <button type="button" class="btn btn-primary" onclick="loadLocations()" style="margin-top: 10px;">Load Locations</button>
+      </div>
+      <div id="locationsList" class="locations-grid"></div>
+    </div>
+
+    <!-- Create Location Section -->
+    <div class="section">
+      <h2>Add New Location</h2>
+      <form id="createLocationForm">
+        <div class="form-group">
+          <label>Restaurant ID *</label>
+          <input type="number" id="createRestaurantId" required value="1">
+        </div>
+        <div class="form-group">
+          <label>Location Name *</label>
+          <input type="text" id="locationName" required placeholder="e.g., Downtown Location, Main Street">
+        </div>
+        <div class="form-group">
+          <label>Address *</label>
+          <input type="text" id="address" required placeholder="123 Main Street">
+        </div>
+        <div class="form-group">
+          <label>City</label>
+          <input type="text" id="city" placeholder="City">
+        </div>
+        <div class="form-group">
+          <label>State</label>
+          <input type="text" id="state" placeholder="State">
+        </div>
+        <div class="form-group">
+          <label>ZIP Code</label>
+          <input type="text" id="zipCode" placeholder="12345">
+        </div>
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="tel" id="phone" placeholder="(555) 123-4567">
+        </div>
+        <div class="form-group">
+          <label>Manager Email</label>
+          <input type="email" id="managerEmail" placeholder="manager@restaurant.com">
+        </div>
+        <button type="submit" class="btn btn-primary">Create Location</button>
+        <div id="createStatus" class="status"></div>
+      </form>
+    </div>
+
+    <!-- Sync Content Section -->
+    <div class="section">
+      <h2>Sync Content to Location</h2>
+      <form id="syncContentForm">
+        <div class="form-group">
+          <label>Location ID *</label>
+          <input type="number" id="syncLocationId" required placeholder="Enter location ID">
+        </div>
+        <div class="form-group">
+          <label>Content Type</label>
+          <select id="contentType">
+            <option value="menu">Menu</option>
+            <option value="social_post">Social Media Post</option>
+            <option value="promotion">Promotion</option>
+            <option value="announcement">Announcement</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Content Data (JSON)</label>
+          <textarea id="contentData" rows="6" placeholder='{"title": "Special Menu", "items": [...]}'></textarea>
+        </div>
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="useAI" checked> Use AI to customize content for this location
+          </label>
+        </div>
+        <button type="submit" class="btn btn-primary">Sync Content</button>
+        <div id="syncStatus" class="status"></div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Load Locations
+    async function loadLocations() {
+      const restaurantId = document.getElementById('restaurantId').value;
+      if (!restaurantId) {
+        alert('Please enter a restaurant ID');
+        return;
+      }
+
+      const locationsList = document.getElementById('locationsList');
+      locationsList.innerHTML = '<p>Loading locations...</p>';
+
+      try {
+        const response = await fetch(`/api/locations/${restaurantId}`);
+        const data = await response.json();
+
+        if (response.ok && data.locations && data.locations.length > 0) {
+          locationsList.innerHTML = data.locations.map(location => `
+            <div class="location-card">
+              <h3 style="color: #4caf50; margin-bottom: 10px;">${location.name}</h3>
+              <p><strong>Location ID:</strong> ${location.location_id}</p>
+              <p><strong>Address:</strong> ${location.address}</p>
+              ${location.city ? `<p><strong>City:</strong> ${location.city}, ${location.state || ''}</p>` : ''}
+              ${location.phone ? `<p><strong>Phone:</strong> ${location.phone}</p>` : ''}
+              ${location.manager_email ? `<p><strong>Manager:</strong> ${location.manager_email}</p>` : ''}
+              <p style="color: #666; font-size: 0.9em; margin-top: 10px;">Created: ${new Date(location.created_at).toLocaleDateString()}</p>
+            </div>
+          `).join('');
+        } else {
+          locationsList.innerHTML = '<p>No locations found. Create one below!</p>';
+        }
+      } catch (error) {
+        locationsList.innerHTML = `<p style="color: #f59e0b;">Error loading locations: ${error.message}</p>`;
+      }
+    }
+
+    // Create Location
+    document.getElementById('createLocationForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const statusDiv = document.getElementById('createStatus');
+      statusDiv.style.display = 'none';
+
+      const restaurantId = document.getElementById('createRestaurantId').value;
+      const locationData = {
+        name: document.getElementById('locationName').value,
+        address: document.getElementById('address').value,
+        city: document.getElementById('city').value || null,
+        state: document.getElementById('state').value || null,
+        zip_code: document.getElementById('zipCode').value || null,
+        phone: document.getElementById('phone').value || null,
+        manager_email: document.getElementById('managerEmail').value || null
+      };
+
+      try {
+        const response = await fetch(`/api/locations/${restaurantId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(locationData)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          statusDiv.className = 'status success';
+          statusDiv.innerHTML = `
+            <h3>✅ Location Created Successfully!</h3>
+            <p>Location ID: ${data.location_id}</p>
+            <p>${data.message || 'Your location has been added.'}</p>
+          `;
+          statusDiv.style.display = 'block';
+          loadLocations(); // Refresh list
+          document.getElementById('createLocationForm').reset();
+        } else {
+          throw new Error(data.error || 'Failed to create location');
+        }
+      } catch (error) {
+        statusDiv.className = 'status error';
+        statusDiv.textContent = `❌ Error: ${error.message}`;
+        statusDiv.style.display = 'block';
+      }
+    });
+
+    // Sync Content
+    document.getElementById('syncContentForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const statusDiv = document.getElementById('syncStatus');
+      statusDiv.style.display = 'none';
+
+      const locationId = document.getElementById('syncLocationId').value;
+      const contentType = document.getElementById('contentType').value;
+      const useAI = document.getElementById('useAI').checked;
+      let contentData;
+
+      try {
+        contentData = JSON.parse(document.getElementById('contentData').value);
+      } catch (error) {
+        statusDiv.className = 'status error';
+        statusDiv.textContent = '❌ Error: Invalid JSON in content data';
+        statusDiv.style.display = 'block';
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/locations/${locationId}/sync`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            content_type: contentType,
+            content_data: contentData,
+            use_ai: useAI
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          statusDiv.className = 'status success';
+          statusDiv.innerHTML = `
+            <h3>✅ Content Synced Successfully!</h3>
+            <p>${data.ai_customized ? '✨ AI-customized for this location' : 'Content synced to location'}</p>
+            ${data.customized_content ? `<div style="margin-top: 15px; padding: 15px; background: #f9f9f9; border-radius: 8px;"><strong>Customized Content:</strong><pre style="margin-top: 10px; white-space: pre-wrap;">${JSON.stringify(data.customized_content, null, 2)}</pre></div>` : ''}
+          `;
+          statusDiv.style.display = 'block';
+        } else {
+          throw new Error(data.error || 'Failed to sync content');
+        }
+      } catch (error) {
+        statusDiv.className = 'status error';
+        statusDiv.textContent = `❌ Error: ${error.message}`;
+        statusDiv.style.display = 'block';
+      }
+    });
+
+    // Auto-load locations on page load
+    const urlParams = new URLSearchParams(window.location.search);
+    const restaurantId = urlParams.get('restaurant_id');
+    if (restaurantId) {
+      document.getElementById('restaurantId').value = restaurantId;
+      document.getElementById('createRestaurantId').value = restaurantId;
+      setTimeout(() => loadLocations(), 500);
+    }
+  </script>
+</body>
+</html>
