@@ -93,4 +93,7 @@ router.post('/generate-description', require('./generate-description'));
 // POST /api/menus/seo-optimize - Batch SEO optimization for menu items
 router.post('/seo-optimize', require('./seo-optimize'));
 
+// POST /api/menus/ingest - Ingest menu from PDF, photo, or text
+router.post('/ingest', require('./ingest'));
+
 module.exports = router;
