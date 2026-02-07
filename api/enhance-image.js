@@ -79,14 +79,12 @@ function styleBlock(style) {
   }
 }
 
+// Import the new prompt system
+const { getAIGatewayPrompt } = require('../lib/photo-enhancement-prompt');
+
 function buildRegenPrompt(style) {
-  return (
-    'Professional restaurant food photography. Re-generate a premium marketing photo of the same dish concept as the reference image. ' +
-    'Hero subject centered, appetizing proportions, realistic texture, crisp detail, glossy highlights, natural shadows. ' +
-    'Clean composition with intentional negative space, shallow depth of field, creamy bokeh background. ' +
-    'Ultra-realistic, editorial commercial food photo, high detail, sharp focus on food. ' +
-    styleBlock(style)
-  );
+  // Use the comprehensive ethical food photography prompt
+  return getAIGatewayPrompt(style);
 }
 
 function baseNegativePrompt() {
