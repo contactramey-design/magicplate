@@ -296,40 +296,76 @@
         <a href="/email-campaigns.html" class="btn">Create Campaign</a>
       </div>
       <!-- Professional & Enterprise Features -->
-      <div class="feature-card professional-only enterprise-only" id="heygenCard" style="display: none;" onclick="window.location.href='/api/heygen'">
+      <div class="feature-card professional-only enterprise-only" id="heygenCard" onclick="window.location.href='/api/heygen'">
         <div class="icon">🎬</div>
         <h3>HeyGen Avatar Videos</h3>
         <p id="heygenDescription">Create personalized virtual host videos for your restaurant. Welcome customers with your custom avatar.</p>
         <a href="/api/heygen" class="btn">Manage Avatars</a>
       </div>
-      <div class="feature-card professional-only enterprise-only" id="locationsCard" style="display: none;" onclick="window.location.href='/api/locations'">
+      <div class="feature-card professional-only enterprise-only" id="locationsCard" onclick="window.location.href='/api/locations'">
         <div class="icon">📍</div>
         <h3>Multi-Location Management</h3>
         <p id="locationsDescription">Manage multiple restaurant locations from one dashboard. Sync content and customize per location.</p>
         <a href="/api/locations" class="btn">Manage Locations</a>
       </div>
+      <div class="feature-card professional-only enterprise-only" id="seoCard" onclick="window.location.href='/api/menus/generate-description'">
+        <div class="icon">🔍</div>
+        <h3>SEO Optimization Tools</h3>
+        <p>Optimize your menu descriptions and content for search engines. Improve your Google Business Profile and local SEO.</p>
+        <a href="/api/menus/generate-description" class="btn">Optimize Content</a>
+      </div>
+      <div class="feature-card professional-only enterprise-only" id="menuNotificationsCard" onclick="window.location.href='/api/marketing/menu/notify'">
+        <div class="icon">🔔</div>
+        <h3>Menu Update Notifications</h3>
+        <p>Automatically notify customers when you add new items or update your menu. Keep your audience engaged and informed.</p>
+        <a href="/api/marketing/menu/notify" class="btn">Set Up Notifications</a>
+      </div>
+      <div class="feature-card professional-only enterprise-only" id="prioritySupportCard">
+        <div class="icon">💬</div>
+        <h3>Priority Support</h3>
+        <p>Get priority email and chat support. Faster response times and dedicated assistance when you need it.</p>
+        <a href="/api/support" class="btn">Contact Support</a>
+      </div>
       <!-- Enterprise Only Features -->
-      <div class="feature-card enterprise-only" id="brandingCard" style="display: none;" onclick="window.location.href='/api/branding'">
+      <div class="feature-card enterprise-only" id="brandingCard" onclick="window.location.href='/api/branding'">
         <div class="icon">🎨</div>
         <h3>Brand Consistency Dashboard</h3>
         <p>Centralized brand guidelines management. Ensure all locations maintain consistent branding and messaging.</p>
         <a href="/api/branding" class="btn">Manage Brand</a>
       </div>
-      <div class="feature-card enterprise-only" id="trainingCard" style="display: none;" onclick="window.location.href='/api/training'">
+      <div class="feature-card enterprise-only" id="trainingCard" onclick="window.location.href='/api/training'">
         <div class="icon">🎓</div>
         <h3>Franchise Training System</h3>
         <p>Complete training system with HeyGen video modules. Track completion across all locations.</p>
         <a href="/api/training" class="btn">Training Modules</a>
       </div>
-      <div class="feature-card enterprise-only" id="analyticsCard" style="display: none;" onclick="window.location.href='/api/analytics'">
+      <div class="feature-card enterprise-only" id="analyticsCard" onclick="window.location.href='/api/analytics'">
         <div class="icon">📊</div>
-        <h3>Advanced Analytics</h3>
+        <h3>Advanced Analytics & Reporting</h3>
         <p>Comprehensive analytics with multi-location comparison, ROI reporting, and performance metrics.</p>
         <a href="/api/analytics" class="btn">View Analytics</a>
       </div>
+      <div class="feature-card enterprise-only" id="apiAccessCard">
+        <div class="icon">🔌</div>
+        <h3>API Access</h3>
+        <p>Full API access to integrate MagicPlate with your existing systems, POS, and custom applications.</p>
+        <a href="/api" class="btn">API Documentation</a>
+      </div>
+      <div class="feature-card enterprise-only" id="whiteLabelCard">
+        <div class="icon">🏷️</div>
+        <h3>White-Label Options</h3>
+        <p>White-label the platform with your branding. Perfect for franchise systems wanting to maintain their own brand identity.</p>
+        <a href="/api/branding" class="btn">Configure White-Label</a>
+      </div>
+      <div class="feature-card enterprise-only" id="accountManagerCard">
+        <div class="icon">👤</div>
+        <h3>Dedicated Account Manager</h3>
+        <p>Your own dedicated account manager for personalized support, strategic guidance, and priority assistance.</p>
+        <a href="/api/support" class="btn">Contact Manager</a>
+      </div>
     </div>
 
-    <div style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-top: 40px;">
+    <div id="upgradeSection" style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-top: 40px;">
       <h2 style="margin-bottom: 20px;">Upgrade Your Plan</h2>
       <p style="color: #666; margin-bottom: 20px;">Unlock more features and higher limits with a plan upgrade.</p>
       <div style="display: flex; gap: 15px; flex-wrap: wrap;">
@@ -411,52 +447,76 @@
 
     // Show tier-specific features
     function showTierFeatures() {
+      // Get all tier-specific cards
+      const professionalCards = document.querySelectorAll('.professional-only');
+      const enterpriseCards = document.querySelectorAll('.enterprise-only');
+      
       // Hide all tier-specific cards first
-      document.querySelectorAll('.professional-only, .enterprise-only').forEach(card => {
-        card.style.display = 'none';
-      });
+      professionalCards.forEach(card => card.style.display = 'none');
+      enterpriseCards.forEach(card => card.style.display = 'none');
 
-      // Show Professional features
+      // Show Professional features (for both professional and enterprise tiers)
       if (tier === 'professional' || tier === 'enterprise') {
-        document.querySelectorAll('.professional-only').forEach(card => {
+        professionalCards.forEach(card => {
           card.style.display = 'block';
         });
         
-        // Update HeyGen description for Professional (1 avatar)
-        const heygenDesc = document.getElementById('heygenDescription');
-        if (heygenDesc && tier === 'professional') {
-          heygenDesc.textContent = 'One custom HeyGen avatar welcome video included. Personalized virtual host to greet your customers.';
-        }
-        
-        // Update Locations description for Professional (up to 3)
-        const locationsDesc = document.getElementById('locationsDescription');
-        if (locationsDesc && tier === 'professional') {
-          locationsDesc.textContent = 'Manage up to 3 restaurant locations from one dashboard. Perfect for small chains.';
+        // Update descriptions for Professional tier
+        if (tier === 'professional') {
+          const heygenDesc = document.getElementById('heygenDescription');
+          if (heygenDesc) {
+            heygenDesc.textContent = 'One custom HeyGen avatar welcome video included. Personalized virtual host to greet your customers and showcase your brand.';
+          }
+          
+          const locationsDesc = document.getElementById('locationsDescription');
+          if (locationsDesc) {
+            locationsDesc.textContent = 'Manage up to 3 restaurant locations from one dashboard. Perfect for small chains or multi-location operations.';
+          }
         }
       }
 
       // Show Enterprise features
       if (tier === 'enterprise') {
-        document.querySelectorAll('.enterprise-only').forEach(card => {
+        enterpriseCards.forEach(card => {
           card.style.display = 'block';
         });
         
-        // Update HeyGen description for Enterprise (unlimited)
+        // Update descriptions for Enterprise tier
         const heygenDesc = document.getElementById('heygenDescription');
         if (heygenDesc) {
-          heygenDesc.textContent = 'Create unlimited custom HeyGen avatars per location. Personalized virtual hosts for each restaurant.';
+          heygenDesc.textContent = 'Create unlimited custom HeyGen avatars per location. Personalized virtual hosts that represent each restaurant\'s unique character.';
         }
         
-        // Update Locations description for Enterprise (unlimited)
         const locationsDesc = document.getElementById('locationsDescription');
         if (locationsDesc) {
-          locationsDesc.textContent = 'Manage unlimited restaurant locations from one central dashboard. Perfect for franchises and chains.';
+          locationsDesc.textContent = 'Manage unlimited restaurant locations from one central dashboard. Perfect for franchises, chains, and large restaurant groups.';
         }
       }
     }
 
-    // Show tier-specific features on load
+    // Show tier-specific features on load (including test mode)
     showTierFeatures();
+    
+    // Hide upgrade section for Enterprise tier
+    if (tier === 'enterprise') {
+      const upgradeSection = document.getElementById('upgradeSection');
+      if (upgradeSection) {
+        upgradeSection.style.display = 'none';
+      }
+    }
+    
+    // Show upgrade section for Professional tier (to Enterprise)
+    if (tier === 'professional') {
+      const upgradeSection = document.getElementById('upgradeSection');
+      if (upgradeSection) {
+        const upgradeContent = upgradeSection.querySelector('div');
+        if (upgradeContent) {
+          upgradeContent.innerHTML = `
+            <a href="/enterprise.html" class="btn">Upgrade to Enterprise Plan</a>
+          `;
+        }
+      }
+    }
   </script>
 </body>
 </html>
