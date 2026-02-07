@@ -179,6 +179,144 @@
       </div>
     </div>
 
+    <!-- Batch Menu Optimization -->
+    <div class="section">
+      <h2>Batch Menu Optimization</h2>
+      <form id="batchOptimizeForm">
+        <div class="form-group">
+          <label>Restaurant ID *</label>
+          <input type="number" id="batchRestaurantId" required value="1" placeholder="Enter restaurant ID">
+        </div>
+        <div class="form-group">
+          <label>Location (for local SEO)</label>
+          <input type="text" id="location" placeholder="e.g., Kansas City, MO">
+        </div>
+        <div class="form-group">
+          <label>Menu Items (JSON Array)</label>
+          <textarea id="menuItemsJson" rows="10" placeholder='[{"name": "Burger", "description": "Our burger", "price": 12.99, "ingredients": ["beef", "lettuce", "tomato"]}, ...]'></textarea>
+          <p style="color: #666; font-size: 0.9em; margin-top: 5px;">Paste your menu items as JSON array. Each item should have: name, description (optional), price (optional), ingredients (optional array)</p>
+        </div>
+        <button type="submit" class="btn btn-primary">Optimize All Items</button>
+        <div id="batchStatus" class="status"></div>
+      </form>
+      <div id="batchResults" style="display: none; margin-top: 20px;"></div>
+    </div>
+
+    <!-- Google Business Profile Section -->
+    <div class="section">
+      <h2>Google Business Profile Integration</h2>
+      <form id="gbpForm">
+        <div class="form-group">
+          <label>Restaurant ID *</label>
+          <input type="number" id="gbpRestaurantId" required value="1" placeholder="Enter restaurant ID">
+        </div>
+        <div class="form-group">
+          <label>Google Place ID</label>
+          <input type="text" id="placeId" placeholder="Enter your Google Place ID">
+          <p style="color: #666; font-size: 0.9em; margin-top: 5px;">Find your Place ID: <a href="https://developers.google.com/maps/documentation/places/web-service/place-id" target="_blank">How to find Place ID</a></p>
+        </div>
+        <div class="form-group">
+          <label>Update Type</label>
+          <select id="updateType">
+            <option value="description">Business Description</option>
+            <option value="menu">Menu Items</option>
+            <option value="photos">Photo Upload</option>
+            <option value="hours">Business Hours</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Update Google Business Profile</button>
+        <div id="gbpStatus" class="status"></div>
+      </form>
+      <div style="margin-top: 20px;">
+        <a href="#" onclick="loadGBPSetupInstructions(); return false;" class="btn btn-secondary">View Setup Instructions</a>
+        <div id="gbpInstructions" style="display: none; margin-top: 15px; padding: 20px; background: #f9f9f9; border-radius: 8px;"></div>
+      </div>
+    </div>
+
+    <!-- Review Response Generator -->
+    <div class="section">
+      <h2>Generate SEO-Friendly Review Responses</h2>
+      <form id="reviewResponseForm">
+        <div class="form-group">
+          <label>Restaurant ID *</label>
+          <input type="number" id="reviewRestaurantId" required value="1" placeholder="Enter restaurant ID">
+        </div>
+        <div class="form-group">
+          <label>Review Text *</label>
+          <textarea id="reviewText" rows="4" required placeholder="Paste the customer review here..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Rating</label>
+          <select id="reviewRating">
+            <option value="5">5 Stars</option>
+            <option value="4">4 Stars</option>
+            <option value="3">3 Stars</option>
+            <option value="2">2 Stars</option>
+            <option value="1">1 Star</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Generate Response</button>
+        <div id="reviewStatus" class="status"></div>
+      </form>
+      <div id="reviewResponse" class="result-box" style="display: none;">
+        <h3>Generated Review Response</h3>
+        <div id="responseText" style="margin-bottom: 15px;"></div>
+        <div id="responseKeywords" style="font-size: 0.9em; color: #666;"></div>
+      </div>
+    </div>
+
+    <!-- Citation Builder -->
+    <div class="section">
+      <h2>Local SEO Citation Builder</h2>
+      <form id="citationForm">
+        <div class="form-group">
+          <label>Restaurant ID *</label>
+          <input type="number" id="citationRestaurantId" required value="1" placeholder="Enter restaurant ID">
+        </div>
+        <div class="form-group">
+          <label>Directory</label>
+          <select id="directory">
+            <option value="Google Business Profile">Google Business Profile</option>
+            <option value="Yelp">Yelp</option>
+            <option value="TripAdvisor">TripAdvisor</option>
+            <option value="Facebook Business">Facebook Business</option>
+            <option value="Yellow Pages">Yellow Pages</option>
+            <option value="Foursquare">Foursquare</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Generate Citation Content</button>
+        <div id="citationStatus" class="status"></div>
+      </form>
+      <div id="citationResult" class="result-box" style="display: none;">
+        <h3>Citation Content for <span id="citationDirectoryName"></span></h3>
+        <div id="citationContent"></div>
+      </div>
+      <div style="margin-top: 20px;">
+        <button type="button" class="btn btn-secondary" onclick="loadDirectories()">View All Recommended Directories</button>
+        <div id="directoriesList" style="display: none; margin-top: 15px;"></div>
+      </div>
+    </div>
+
+    <!-- SEO Analytics Dashboard -->
+    <div class="section">
+      <h2>SEO Performance Tracking</h2>
+      <div class="form-group">
+        <label>Restaurant ID</label>
+        <input type="number" id="analyticsRestaurantId" value="1" placeholder="Enter restaurant ID">
+        <button type="button" class="btn btn-primary" onclick="loadSEOAnalytics()" style="margin-top: 10px;">Load Analytics</button>
+      </div>
+      <div id="seoAnalytics" style="display: none; margin-top: 20px;">
+        <div class="result-box">
+          <h3>SEO Metrics</h3>
+          <div id="analyticsMetrics"></div>
+        </div>
+        <div class="result-box" style="margin-top: 20px;">
+          <h3>AI-Powered Recommendations</h3>
+          <div id="analyticsRecommendations"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- SEO Tips Section -->
     <div class="section">
       <h2>SEO Best Practices</h2>
@@ -190,6 +328,8 @@
         <li><strong>Include Dietary Information:</strong> Gluten-free, vegan, vegetarian options</li>
         <li><strong>Update Google Business Profile:</strong> Keep your menu and hours current</li>
         <li><strong>Add Photos:</strong> High-quality photos improve search visibility</li>
+        <li><strong>Build Citations:</strong> List your business on major directories (Yelp, TripAdvisor, etc.)</li>
+        <li><strong>Respond to Reviews:</strong> SEO-friendly responses help with local rankings</li>
       </ul>
     </div>
   </div>
@@ -240,11 +380,340 @@
       }
     });
 
+    // Batch Optimization
+    document.getElementById('batchOptimizeForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const statusDiv = document.getElementById('batchStatus');
+      const resultsDiv = document.getElementById('batchResults');
+      statusDiv.style.display = 'none';
+      resultsDiv.style.display = 'none';
+
+      const restaurantId = document.getElementById('batchRestaurantId').value;
+      const location = document.getElementById('location').value;
+      let menuItems;
+
+      try {
+        menuItems = JSON.parse(document.getElementById('menuItemsJson').value);
+      } catch (error) {
+        statusDiv.className = 'status error';
+        statusDiv.textContent = '❌ Error: Invalid JSON format. Please check your menu items JSON.';
+        statusDiv.style.display = 'block';
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/menus/seo-optimize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            restaurant_id: parseInt(restaurantId),
+            menu_items: menuItems,
+            location: location || undefined,
+            optimize_type: 'full'
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          statusDiv.className = 'status success';
+          statusDiv.innerHTML = `
+            <h3>✅ Batch Optimization Complete!</h3>
+            <p>Optimized ${data.summary.items_optimized} of ${data.summary.total_items} items</p>
+            <p>Average SEO Score: ${data.summary.average_seo_score}/100</p>
+          `;
+          statusDiv.style.display = 'block';
+
+          // Display results
+          resultsDiv.innerHTML = `
+            <h3 style="color: #4caf50; margin-bottom: 15px;">Optimized Items</h3>
+            ${data.optimized_items.map((item, idx) => `
+              <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #4caf50;">
+                <h4 style="color: #4caf50; margin-bottom: 10px;">${item.name}</h4>
+                <p><strong>SEO Score:</strong> ${item.seo_score}/100</p>
+                <p><strong>Description:</strong> ${item.description}</p>
+                ${item.keywords.length > 0 ? `<p><strong>Keywords:</strong> ${item.keywords.join(', ')}</p>` : ''}
+                ${item.improvements.length > 0 ? `<p><strong>Improvements:</strong> ${item.improvements.join(', ')}</p>` : ''}
+                ${item.meta_description ? `<p style="font-size: 0.9em; color: #666;"><strong>Meta Description:</strong> ${item.meta_description}</p>` : ''}
+              </div>
+            `).join('')}
+          `;
+          resultsDiv.style.display = 'block';
+        } else {
+          throw new Error(data.error || 'Failed to optimize items');
+        }
+      } catch (error) {
+        statusDiv.className = 'status error';
+        statusDiv.textContent = `❌ Error: ${error.message}`;
+        statusDiv.style.display = 'block';
+      }
+    });
+
+    // Google Business Profile
+    document.getElementById('gbpForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const statusDiv = document.getElementById('gbpStatus');
+      statusDiv.style.display = 'none';
+
+      const restaurantId = document.getElementById('gbpRestaurantId').value;
+      const placeId = document.getElementById('placeId').value;
+      const updateType = document.getElementById('updateType').value;
+
+      try {
+        const response = await fetch('/api/marketing/seo/google-business/update-profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            restaurant_id: parseInt(restaurantId),
+            place_id: placeId,
+            updates: { type: updateType }
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          statusDiv.className = 'status success';
+          statusDiv.innerHTML = `
+            <h3>✅ Update Prepared!</h3>
+            <p>${data.message}</p>
+            ${data.instructions ? `
+              <div style="margin-top: 15px; padding: 15px; background: rgba(76, 175, 80, 0.1); border-radius: 8px;">
+                <strong>Note:</strong> ${data.instructions.note}
+                <ul style="margin-top: 10px; padding-left: 20px;">
+                  ${data.instructions.steps.map(step => `<li>${step}</li>`).join('')}
+                </ul>
+              </div>
+            ` : ''}
+          `;
+          statusDiv.style.display = 'block';
+        } else {
+          throw new Error(data.error || 'Failed to update GBP');
+        }
+      } catch (error) {
+        statusDiv.className = 'status error';
+        statusDiv.textContent = `❌ Error: ${error.message}`;
+        statusDiv.style.display = 'block';
+      }
+    });
+
+    async function loadGBPSetupInstructions() {
+      const instructionsDiv = document.getElementById('gbpInstructions');
+      if (instructionsDiv.style.display === 'block') {
+        instructionsDiv.style.display = 'none';
+        return;
+      }
+
+      instructionsDiv.innerHTML = '<p>Loading instructions...</p>';
+      instructionsDiv.style.display = 'block';
+
+      try {
+        const response = await fetch('/api/marketing/seo/google-business/setup-instructions');
+        const data = await response.json();
+
+        if (response.ok) {
+          instructionsDiv.innerHTML = `
+            <h3 style="color: #4caf50; margin-bottom: 15px;">${data.title}</h3>
+            ${data.steps.map(step => `
+              <div style="margin-bottom: 15px; padding: 15px; background: white; border-radius: 8px; border-left: 4px solid #4caf50;">
+                <h4 style="color: #4caf50; margin-bottom: 5px;">Step ${step.step}: ${step.title}</h4>
+                <p style="color: #666; margin-bottom: 10px;">${step.description}</p>
+                <a href="${step.url}" target="_blank" style="color: #4caf50; text-decoration: none;">→ ${step.url}</a>
+              </div>
+            `).join('')}
+            <div style="margin-top: 20px; padding: 15px; background: rgba(76, 175, 80, 0.1); border-radius: 8px;">
+              <strong>Required APIs:</strong> ${data.required_apis.join(', ')}
+            </div>
+          `;
+        }
+      } catch (error) {
+        instructionsDiv.innerHTML = `<p style="color: #f59e0b;">Error loading instructions: ${error.message}</p>`;
+      }
+    }
+
+    // Review Response Generator
+    document.getElementById('reviewResponseForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const statusDiv = document.getElementById('reviewStatus');
+      const responseDiv = document.getElementById('reviewResponse');
+      statusDiv.style.display = 'none';
+      responseDiv.style.display = 'none';
+
+      const restaurantId = document.getElementById('reviewRestaurantId').value;
+      const reviewText = document.getElementById('reviewText').value;
+      const rating = parseInt(document.getElementById('reviewRating').value);
+
+      try {
+        const response = await fetch('/api/marketing/seo/google-business/generate-review-response', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            restaurant_id: parseInt(restaurantId),
+            review_text: reviewText,
+            review_rating: rating,
+            use_ai: true
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          document.getElementById('responseText').innerHTML = `<p style="font-size: 1.1em; line-height: 1.8;">${data.review_response}</p>`;
+          if (data.keywords && data.keywords.length > 0) {
+            document.getElementById('responseKeywords').innerHTML = `<strong>SEO Keywords:</strong> ${data.keywords.join(', ')}`;
+          }
+          responseDiv.style.display = 'block';
+          statusDiv.className = 'status success';
+          statusDiv.innerHTML = data.ai_generated ? '<p>✅ SEO-optimized review response generated using AI!</p>' : '<p>✅ Review response generated!</p>';
+          statusDiv.style.display = 'block';
+        } else {
+          throw new Error(data.error || 'Failed to generate response');
+        }
+      } catch (error) {
+        statusDiv.className = 'status error';
+        statusDiv.textContent = `❌ Error: ${error.message}`;
+        statusDiv.style.display = 'block';
+      }
+    });
+
+    // Citation Builder
+    document.getElementById('citationForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const statusDiv = document.getElementById('citationStatus');
+      const resultDiv = document.getElementById('citationResult');
+      statusDiv.style.display = 'none';
+      resultDiv.style.display = 'none';
+
+      const restaurantId = document.getElementById('citationRestaurantId').value;
+      const directory = document.getElementById('directory').value;
+
+      try {
+        const response = await fetch('/api/marketing/seo/citations/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            restaurant_id: parseInt(restaurantId),
+            directory: directory,
+            use_ai: true
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          document.getElementById('citationDirectoryName').textContent = directory;
+          const content = data.citation_content;
+          document.getElementById('citationContent').innerHTML = `
+            <p><strong>Description:</strong> ${content.description || 'N/A'}</p>
+            <p><strong>Categories:</strong> ${content.categories ? content.categories.join(', ') : 'N/A'}</p>
+            <p><strong>Keywords:</strong> ${content.keywords ? content.keywords.join(', ') : 'N/A'}</p>
+            <p><strong>Call to Action:</strong> ${content.call_to_action || 'N/A'}</p>
+          `;
+          resultDiv.style.display = 'block';
+          statusDiv.className = 'status success';
+          statusDiv.innerHTML = data.ai_generated ? '<p>✅ Citation content generated using AI!</p>' : '<p>✅ Citation content generated!</p>';
+          statusDiv.style.display = 'block';
+        } else {
+          throw new Error(data.error || 'Failed to generate citation');
+        }
+      } catch (error) {
+        statusDiv.className = 'status error';
+        statusDiv.textContent = `❌ Error: ${error.message}`;
+        statusDiv.style.display = 'block';
+      }
+    });
+
+    async function loadDirectories() {
+      const directoriesList = document.getElementById('directoriesList');
+      if (directoriesList.style.display === 'block') {
+        directoriesList.style.display = 'none';
+        return;
+      }
+
+      directoriesList.innerHTML = '<p>Loading directories...</p>';
+      directoriesList.style.display = 'block';
+
+      try {
+        const response = await fetch('/api/marketing/seo/citations/directories');
+        const data = await response.json();
+
+        if (response.ok && data.directories) {
+          directoriesList.innerHTML = data.directories.map(dir => `
+            <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid ${dir.priority === 'critical' ? '#4caf50' : dir.priority === 'high' ? '#2196F3' : '#FF9800'};">
+              <h4 style="color: #4caf50; margin-bottom: 5px;">${dir.name} <span style="font-size: 0.8em; color: #666;">(${dir.priority} priority)</span></h4>
+              <p style="color: #666; font-size: 0.9em; margin-bottom: 10px;">${dir.description}</p>
+              <a href="${dir.signup_url || dir.url}" target="_blank" style="color: #4caf50; text-decoration: none;">→ Sign up / Update listing</a>
+            </div>
+          `).join('');
+        }
+      } catch (error) {
+        directoriesList.innerHTML = `<p style="color: #f59e0b;">Error loading directories: ${error.message}</p>`;
+      }
+    }
+
+    // SEO Analytics
+    async function loadSEOAnalytics() {
+      const restaurantId = document.getElementById('analyticsRestaurantId').value;
+      if (!restaurantId) {
+        alert('Please enter a restaurant ID');
+        return;
+      }
+
+      const analyticsDiv = document.getElementById('seoAnalytics');
+      const metricsDiv = document.getElementById('analyticsMetrics');
+      const recommendationsDiv = document.getElementById('analyticsRecommendations');
+      
+      analyticsDiv.style.display = 'block';
+      metricsDiv.innerHTML = '<p>Loading analytics...</p>';
+      recommendationsDiv.innerHTML = '';
+
+      try {
+        const response = await fetch(`/api/marketing/seo/analytics/${restaurantId}?use_ai=true`);
+        const data = await response.json();
+
+        if (response.ok) {
+          metricsDiv.innerHTML = `
+            <p><strong>Items Optimized:</strong> ${data.metrics.items_optimized || 0}</p>
+            <p><strong>Average SEO Score:</strong> ${data.metrics.average_seo_score || 0}/100</p>
+            <p><strong>Keywords Targeted:</strong> ${data.metrics.keywords_targeted?.length || 0}</p>
+            <p><strong>Citations Completed:</strong> ${data.metrics.citations_completed || 0}</p>
+            <p><strong>Google Business Updated:</strong> ${data.metrics.google_business_updated ? 'Yes' : 'No'}</p>
+            ${data.metrics.keywords_targeted && data.metrics.keywords_targeted.length > 0 ? `
+              <p style="margin-top: 15px;"><strong>Top Keywords:</strong> ${data.metrics.keywords_targeted.slice(0, 10).join(', ')}</p>
+            ` : ''}
+          `;
+
+          if (data.recommendations && data.recommendations.length > 0) {
+            const recs = typeof data.recommendations === 'string' 
+              ? data.recommendations.split('\n').filter(r => r.trim())
+              : data.recommendations;
+            
+            recommendationsDiv.innerHTML = `
+              <ul style="line-height: 2; padding-left: 20px;">
+                ${recs.map(rec => `<li>${rec}</li>`).join('')}
+              </ul>
+            `;
+          } else {
+            recommendationsDiv.innerHTML = '<p>No recommendations available at this time.</p>';
+          }
+        } else {
+          throw new Error(data.error || 'Failed to load analytics');
+        }
+      } catch (error) {
+        metricsDiv.innerHTML = `<p style="color: #f59e0b;">Error loading analytics: ${error.message}</p>`;
+      }
+    }
+
     // Auto-fill restaurant ID from URL
     const urlParams = new URLSearchParams(window.location.search);
     const restaurantId = urlParams.get('restaurant_id');
     if (restaurantId) {
       document.getElementById('restaurantId').value = restaurantId;
+      document.getElementById('batchRestaurantId').value = restaurantId;
+      document.getElementById('gbpRestaurantId').value = restaurantId;
+      document.getElementById('reviewRestaurantId').value = restaurantId;
+      document.getElementById('citationRestaurantId').value = restaurantId;
+      document.getElementById('analyticsRestaurantId').value = restaurantId;
     }
   </script>
 </body>

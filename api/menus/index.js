@@ -90,4 +90,7 @@ router.delete('/:menu_id', async (req, res) => {
 // POST /api/menus/generate-description - Generate menu description using AI
 router.post('/generate-description', require('./generate-description'));
 
+// POST /api/menus/seo-optimize - Batch SEO optimization for menu items
+router.post('/seo-optimize', require('./seo-optimize'));
+
 module.exports = router;

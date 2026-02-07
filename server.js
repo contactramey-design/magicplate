@@ -223,6 +223,9 @@ app.use('/api/locations', require('./api/locations'));
 // Marketing Automation
 app.use('/api/marketing', require('./api/marketing'));
 
+// SEO Marketing Routes
+app.use('/api/marketing/seo', require('./api/marketing/seo'));
+
 // Digital Menus
 app.use('/api/menus', require('./api/menus'));
 
