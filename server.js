@@ -148,8 +148,21 @@ app.get('/api/check-config', (req, res) => {
 });
 
 // Image enhancement API endpoint (for local development)
+// Handle OPTIONS for CORS preflight
+app.options('/api/enhance-image', (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.status(200).end();
+});
+
 app.post('/api/enhance-image', async (req, res) => {
   try {
+    // Set CORS headers
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    
     // Reload env vars in case they were updated
     require('dotenv').config();
     
