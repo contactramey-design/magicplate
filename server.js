@@ -147,6 +147,9 @@ app.get('/api/check-config', (req, res) => {
   });
 });
 
+// Test enhancement setup
+app.get('/api/test-enhancement', require('./api/test-enhancement'));
+
 // Image enhancement API endpoint (for local development)
 // Handle OPTIONS for CORS preflight
 app.options('/api/enhance-image', (req, res) => {

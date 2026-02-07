@@ -471,13 +471,15 @@ module.exports = async (req, res) => {
     require('dotenv').config({ path: envPath, override: true });
   }
   
-  // Re-read API keys after reloading env
-  const currentLeonardoKey = process.env.LEONARDO_API_KEY;
-  const currentTogetherKey = process.env.TOGETHER_API_KEY;
-  const currentReplicateToken = process.env.REPLICATE_API_TOKEN;
-  
-  console.log('🔑 API Keys on request:');
-  console.log('  LEONARDO_API_KEY:', currentLeonardoKey ? `✅ Set (${currentLeonardoKey.length} chars)` : '❌ NOT SET');
+    // Re-read API keys after reloading env
+    const currentLeonardoKey = process.env.LEONARDO_API_KEY;
+    const currentTogetherKey = process.env.TOGETHER_API_KEY;
+    const currentReplicateToken = process.env.REPLICATE_API_TOKEN;
+    
+    console.log('🔑 API Keys on request:');
+    console.log('  LEONARDO_API_KEY:', currentLeonardoKey ? `✅ Set (${currentLeonardoKey.length} chars)` : '❌ NOT SET');
+    console.log('  TOGETHER_API_KEY:', currentTogetherKey ? `✅ Set (${currentTogetherKey.length} chars)` : '❌ NOT SET');
+    console.log('  REPLICATE_API_TOKEN:', currentReplicateToken ? `✅ Set (${currentReplicateToken.length} chars)` : '❌ NOT SET');
   
   try {
     const imageData = req.body.image; // base64 string
@@ -556,16 +558,17 @@ module.exports = async (req, res) => {
     console.log('- REPLICATE_API_TOKEN:', REPLICATE_API_TOKEN ? 'Set (length: ' + REPLICATE_API_TOKEN.length + ')' : 'Not set');
     
     try {
+      // Use the reloaded keys (currentLeonardoKey, etc.)
       if (currentLeonardoKey) {
-        console.log('Using Leonardo.ai for enhancement...');
+        console.log('✅ Using Leonardo.ai for enhancement...');
         result = await enhanceImageWithLeonardo(imageBuffer, imageName, style);
         serviceUsed = 'leonardo';
       } else if (currentTogetherKey) {
-        console.log('Using Together.ai for enhancement...');
+        console.log('✅ Using Together.ai for enhancement...');
         result = await enhanceImageWithTogether(imageBuffer, imageName, style);
         serviceUsed = 'together';
       } else if (currentReplicateToken) {
-        console.log('Using Replicate for enhancement...');
+        console.log('✅ Using Replicate for enhancement...');
         result = await enhanceImageWithReplicate(imageBuffer, imageName);
         serviceUsed = 'replicate';
       } else {
