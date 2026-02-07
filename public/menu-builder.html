@@ -199,17 +199,32 @@
         const itemDiv = document.getElementById(`item-${i}`);
         if (!itemDiv) continue;
         
-        const name = itemDiv.querySelector(`[name="item-name-${i}"]`)?.value;
+        const name = itemDiv.querySelector(`[name="item-name-${i}"]`)?.value?.trim();
         const price = itemDiv.querySelector(`[name="item-price-${i}"]`)?.value;
-        const description = itemDiv.querySelector(`[name="item-desc-${i}"]`)?.value;
-        const image = itemDiv.querySelector(`[name="item-image-${i}"]`)?.value;
+        const description = itemDiv.querySelector(`[name="item-desc-${i}"]`)?.value?.trim();
+        const image = itemDiv.querySelector(`[name="item-image-${i}"]`)?.value?.trim();
+        
+        // Validate and fix image URL if provided
+        let imageUrl = null;
+        if (image) {
+          if (image.match(/^https?:\/\/.+/)) {
+            imageUrl = image;
+          } else if (image.startsWith('//')) {
+            imageUrl = `https:${image}`;
+          } else if (image.startsWith('/')) {
+            imageUrl = image; // Relative URL is fine
+          } else {
+            // Try to add https:// if it looks like a domain
+            imageUrl = `https://${image}`;
+          }
+        }
         
         if (name && price) {
           items.push({
             name,
             price: parseFloat(price),
             description: description || '',
-            image: image || null
+            image: imageUrl
           });
         }
       }
