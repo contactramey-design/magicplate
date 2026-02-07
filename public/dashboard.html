@@ -270,7 +270,7 @@
     </div>
 
     <h2 style="margin-bottom: 20px;">Quick Actions</h2>
-    <div class="features-grid">
+    <div class="features-grid" id="quickActionsGrid">
       <div class="feature-card" onclick="window.location.href='/menu-builder.html'">
         <div class="icon">📱</div>
         <h3>Create Digital Menu</h3>
@@ -294,6 +294,38 @@
         <h3>Email Campaigns</h3>
         <p>Create and send personalized email campaigns to your customers. Drive engagement and repeat visits.</p>
         <a href="/email-campaigns.html" class="btn">Create Campaign</a>
+      </div>
+      <!-- Professional & Enterprise Features -->
+      <div class="feature-card professional-only enterprise-only" id="heygenCard" style="display: none;" onclick="window.location.href='/api/heygen'">
+        <div class="icon">🎬</div>
+        <h3>HeyGen Avatar Videos</h3>
+        <p id="heygenDescription">Create personalized virtual host videos for your restaurant. Welcome customers with your custom avatar.</p>
+        <a href="/api/heygen" class="btn">Manage Avatars</a>
+      </div>
+      <div class="feature-card professional-only enterprise-only" id="locationsCard" style="display: none;" onclick="window.location.href='/api/locations'">
+        <div class="icon">📍</div>
+        <h3>Multi-Location Management</h3>
+        <p id="locationsDescription">Manage multiple restaurant locations from one dashboard. Sync content and customize per location.</p>
+        <a href="/api/locations" class="btn">Manage Locations</a>
+      </div>
+      <!-- Enterprise Only Features -->
+      <div class="feature-card enterprise-only" id="brandingCard" style="display: none;" onclick="window.location.href='/api/branding'">
+        <div class="icon">🎨</div>
+        <h3>Brand Consistency Dashboard</h3>
+        <p>Centralized brand guidelines management. Ensure all locations maintain consistent branding and messaging.</p>
+        <a href="/api/branding" class="btn">Manage Brand</a>
+      </div>
+      <div class="feature-card enterprise-only" id="trainingCard" style="display: none;" onclick="window.location.href='/api/training'">
+        <div class="icon">🎓</div>
+        <h3>Franchise Training System</h3>
+        <p>Complete training system with HeyGen video modules. Track completion across all locations.</p>
+        <a href="/api/training" class="btn">Training Modules</a>
+      </div>
+      <div class="feature-card enterprise-only" id="analyticsCard" style="display: none;" onclick="window.location.href='/api/analytics'">
+        <div class="icon">📊</div>
+        <h3>Advanced Analytics</h3>
+        <p>Comprehensive analytics with multi-location comparison, ROI reporting, and performance metrics.</p>
+        <a href="/api/analytics" class="btn">View Analytics</a>
       </div>
     </div>
 
@@ -376,6 +408,55 @@
     updateProgress(0, tierLimits.enhancements, 'enhancementsProgress', 'enhancementsText');
     updateProgress(0, tierLimits.posts, 'postsProgress', 'postsText');
     updateProgress(0, tierLimits.menus, 'menusProgress', 'menusText');
+
+    // Show tier-specific features
+    function showTierFeatures() {
+      // Hide all tier-specific cards first
+      document.querySelectorAll('.professional-only, .enterprise-only').forEach(card => {
+        card.style.display = 'none';
+      });
+
+      // Show Professional features
+      if (tier === 'professional' || tier === 'enterprise') {
+        document.querySelectorAll('.professional-only').forEach(card => {
+          card.style.display = 'block';
+        });
+        
+        // Update HeyGen description for Professional (1 avatar)
+        const heygenDesc = document.getElementById('heygenDescription');
+        if (heygenDesc && tier === 'professional') {
+          heygenDesc.textContent = 'One custom HeyGen avatar welcome video included. Personalized virtual host to greet your customers.';
+        }
+        
+        // Update Locations description for Professional (up to 3)
+        const locationsDesc = document.getElementById('locationsDescription');
+        if (locationsDesc && tier === 'professional') {
+          locationsDesc.textContent = 'Manage up to 3 restaurant locations from one dashboard. Perfect for small chains.';
+        }
+      }
+
+      // Show Enterprise features
+      if (tier === 'enterprise') {
+        document.querySelectorAll('.enterprise-only').forEach(card => {
+          card.style.display = 'block';
+        });
+        
+        // Update HeyGen description for Enterprise (unlimited)
+        const heygenDesc = document.getElementById('heygenDescription');
+        if (heygenDesc) {
+          heygenDesc.textContent = 'Create unlimited custom HeyGen avatars per location. Personalized virtual hosts for each restaurant.';
+        }
+        
+        // Update Locations description for Enterprise (unlimited)
+        const locationsDesc = document.getElementById('locationsDescription');
+        if (locationsDesc) {
+          locationsDesc.textContent = 'Manage unlimited restaurant locations from one central dashboard. Perfect for franchises and chains.';
+        }
+      }
+    }
+
+    // Show tier-specific features on load
+    showTierFeatures();
   </script>
 </body>
 </html>

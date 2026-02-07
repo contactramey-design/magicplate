@@ -178,24 +178,26 @@
     document.getElementById('menuForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       
-      // Clear any previous validation errors
-      const form = e.target;
-      const inputs = form.querySelectorAll('input, textarea');
-      inputs.forEach(input => {
-        input.setCustomValidity('');
-      });
-      
-      // Check HTML5 validation
-      if (!form.checkValidity()) {
-        form.reportValidity();
-        return;
-      }
-      
       const statusDiv = document.getElementById('status');
       statusDiv.style.display = 'none';
       
-      const restaurantId = document.getElementById('restaurantId').value;
-      const menuName = document.getElementById('menuName').value;
+      // Manual validation instead of HTML5 validation
+      const restaurantId = document.getElementById('restaurantId').value.trim();
+      const menuName = document.getElementById('menuName').value.trim();
+      
+      if (!restaurantId || isNaN(restaurantId)) {
+        statusDiv.className = 'status error';
+        statusDiv.textContent = '❌ Error: Please enter a valid Restaurant ID';
+        statusDiv.style.display = 'block';
+        return;
+      }
+      
+      if (!menuName) {
+        statusDiv.className = 'status error';
+        statusDiv.textContent = '❌ Error: Please enter a Menu Name';
+        statusDiv.style.display = 'block';
+        return;
+      }
       
       // Collect menu items
       const items = [];
@@ -209,12 +211,12 @@
         const imageInput = itemDiv.querySelector(`[name="item-image-${i}"]`);
         
         const name = nameInput?.value?.trim();
-        const price = priceInput?.value;
+        const price = priceInput?.value?.trim();
         const description = descInput?.value?.trim();
         const image = imageInput?.value?.trim();
         
         // Skip if required fields are missing
-        if (!name || !price) {
+        if (!name || !price || isNaN(parseFloat(price))) {
           continue;
         }
         
