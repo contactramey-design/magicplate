@@ -165,7 +165,7 @@
         </div>
         <div class="form-group">
           <label>Image URL (optional)</label>
-          <input type="url" name="item-image-${itemCount}">
+          <input type="text" name="item-image-${itemCount}" placeholder="https://example.com/image.jpg" onblur="validateUrl(this)">
         </div>
       `;
       itemsList.appendChild(itemDiv);
@@ -173,6 +173,15 @@
     
     function removeItem(id) {
       document.getElementById(`item-${id}`).remove();
+    }
+    
+    function validateUrl(input) {
+      const value = input.value.trim();
+      if (value && !value.match(/^https?:\/\/.+/)) {
+        input.setCustomValidity('Please enter a valid URL starting with http:// or https://');
+      } else {
+        input.setCustomValidity('');
+      }
     }
     
     document.getElementById('menuForm').addEventListener('submit', async (e) => {
