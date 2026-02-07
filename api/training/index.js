@@ -18,13 +18,40 @@ router.get('/modules', async (req, res) => {
   }
 });
 
-// POST /api/training/modules - Create training module
+// POST /api/training/modules - Create training module with AI-generated content
 router.post('/modules', async (req, res) => {
   try {
-    const { restaurant_id, title, description, content, module_type, avatar_id } = req.body;
+    const { restaurant_id, title, description, topic, module_type, avatar_id, use_ai = true } = req.body;
     
-    if (!restaurant_id || !title || !content) {
-      return res.status(400).json({ error: 'restaurant_id, title, and content are required' });
+    if (!restaurant_id || (!title && !topic)) {
+      return res.status(400).json({ error: 'restaurant_id and (title or topic) are required' });
+    }
+    
+    const aiGateway = require('../../lib/ai-gateway');
+    const { findById } = require('../../lib/db');
+    
+    // Get restaurant data
+    let restaurant = {};
+    try {
+      restaurant = await findById('restaurants', parseInt(restaurant_id)) || {};
+    } catch (error) {
+      console.error('Error fetching restaurant:', error);
+    }
+    
+    // Generate content using AI Gateway if enabled
+    let content = description || '';
+    let ai_generated = false;
+    
+    if (use_ai && aiGateway.isConfigured() && topic) {
+      try {
+        content = await aiGateway.generateTrainingModule(restaurant, topic);
+        ai_generated = true;
+      } catch (aiError) {
+        console.error('AI Gateway error, using provided content:', aiError);
+        content = description || `Training module: ${title || topic}`;
+      }
+    } else {
+      content = description || `Training module: ${title || topic}`;
     }
     
     // TODO: Create module in database
@@ -34,7 +61,7 @@ router.post('/modules', async (req, res) => {
       try {
         video_result = await generateTrainingVideo({
           module_id: 'new_module_id',
-          title,
+          title: title || topic,
           content,
           avatar_id
         });
@@ -47,8 +74,11 @@ router.post('/modules', async (req, res) => {
     res.json({
       module_id: 'new_id',
       restaurant_id,
-      title,
+      title: title || topic,
+      topic,
+      content,
       module_type: module_type || 'custom',
+      ai_generated,
       video: video_result,
       message: 'Training module created successfully'
     });

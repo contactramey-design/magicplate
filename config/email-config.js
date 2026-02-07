@@ -18,6 +18,9 @@ if (process.env.RESEND_API_KEY) {
 const useResend = !!process.env.RESEND_API_KEY;
 const useSendGrid = !!process.env.SENDGRID_API_KEY && !useResend;
 
+// AI Gateway for email personalization
+const aiGateway = require('../lib/ai-gateway');
+
 const emailTemplates = {
   initialOutreach: (restaurant) => {
     // Personalize based on their issues and Instagram data
@@ -212,6 +215,24 @@ MagicPlate.ai - Where every plate becomes a masterpiece
 Visit: https://magicplate.info
     `;
     
+    // Enhance with AI Gateway if configured
+    let finalHtml = html;
+    let finalText = text;
+    
+    if (aiGateway.isConfigured()) {
+      try {
+        const personalizedHtml = await aiGateway.personalizeEmail(restaurant, html);
+        if (personalizedHtml && personalizedHtml.trim()) {
+          finalHtml = personalizedHtml;
+          // Extract text from HTML for text version
+          finalText = personalizedHtml.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+        }
+      } catch (aiError) {
+        console.error('AI personalization error, using template:', aiError);
+        // Continue with original template
+      }
+    }
+    
     return {
       to: restaurant.email || restaurant.potentialEmails?.[0],
       from: {
@@ -219,8 +240,8 @@ Visit: https://magicplate.info
         name: fromName
       },
       subject: `Elevate Your Menu, Boost Revenue & Outshine the Competition`,
-      html: html,
-      text: text
+      html: finalHtml,
+      text: finalText
     };
   }
 };

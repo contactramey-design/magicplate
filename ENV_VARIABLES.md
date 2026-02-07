@@ -30,6 +30,20 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 STRIPE_PUBLISHABLE_KEY=pk_live_...
 ```
 
+### AI Gateway (Content Generation)
+```bash
+# Vercel AI Gateway - Unified interface for all AI operations
+# Get from: https://vercel.com/dashboard -> Your Project -> Settings -> AI Gateway
+AI_GATEWAY_URL=https://gateway.ai.cloudflare.com/v1
+AI_GATEWAY_API_KEY=your_ai_gateway_api_key_here
+
+# Provider API Keys (for AI Gateway to route to)
+# At least one is required:
+OPENAI_API_KEY=sk-...  # For GPT-4, GPT-3.5
+ANTHROPIC_API_KEY=sk-ant-...  # For Claude (recommended)
+GOOGLE_GEMINI_API_KEY=...  # For Gemini (optional)
+```
+
 ### Image Enhancement APIs
 ```bash
 # Leonardo.ai (primary)

@@ -87,4 +87,7 @@ router.delete('/:menu_id', async (req, res) => {
   }
 });
 
+// POST /api/menus/generate-description - Generate menu description using AI
+router.post('/generate-description', require('./generate-description'));
+
 module.exports = router;

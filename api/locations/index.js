@@ -74,21 +74,56 @@ router.put('/:location_id', async (req, res) => {
   }
 });
 
-// POST /api/locations/:location_id/sync - Sync content to location
+// POST /api/locations/:location_id/sync - Sync content to location with AI customization
 router.post('/:location_id/sync', async (req, res) => {
   try {
     const { location_id } = req.params;
-    const { content_type, content_id } = req.body;
+    const { content_type, content_data, use_ai = true } = req.body;
     
-    // TODO: Implement content synchronization
-    // Push content from restaurant level to location
+    if (!content_type || !content_data) {
+      return res.status(400).json({ error: 'content_type and content_data are required' });
+    }
+    
+    const aiGateway = require('../../lib/ai-gateway');
+    
+    // Get location and restaurant data
+    const location = await findById('locations', parseInt(location_id), 'location_id');
+    if (!location) {
+      return res.status(404).json({ error: 'Location not found' });
+    }
+    
+    let restaurant = {};
+    try {
+      restaurant = await findById('restaurants', location.restaurant_id) || {};
+    } catch (error) {
+      console.error('Error fetching restaurant:', error);
+    }
+    
+    // Customize content for location using AI Gateway
+    let customizedContent = content_data;
+    let ai_customized = false;
+    
+    if (use_ai && aiGateway.isConfigured()) {
+      try {
+        customizedContent = await aiGateway.syncLocationContent(location, content_data, restaurant);
+        ai_customized = true;
+      } catch (aiError) {
+        console.error('AI customization error, using base content:', aiError);
+        customizedContent = content_data;
+      }
+    }
+    
+    // TODO: Save customized content to location
+    // This would update location-specific content while maintaining brand consistency
     
     res.json({
-      location_id,
+      location_id: parseInt(location_id),
       content_type,
-      content_id,
+      base_content: content_data,
+      customized_content: customizedContent,
+      ai_customized,
       synced_at: new Date().toISOString(),
-      message: 'Content synced successfully'
+      message: 'Content synced and customized successfully'
     });
   } catch (error) {
     console.error('Error syncing content:', error);

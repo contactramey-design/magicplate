@@ -40,6 +40,72 @@ router.get('/:restaurant_id/dashboard', async (req, res) => {
   }
 });
 
+// GET /api/analytics/:restaurant_id/insights - AI-powered insights and recommendations
+router.get('/:restaurant_id/insights', async (req, res) => {
+  try {
+    const { restaurant_id } = req.params;
+    const { use_ai = true } = req.query;
+    
+    const aiGateway = require('../../lib/ai-gateway');
+    const { findById } = require('../../lib/db');
+    
+    // Get restaurant data
+    let restaurant = {};
+    try {
+      restaurant = await findById('restaurants', parseInt(restaurant_id)) || {};
+    } catch (error) {
+      console.error('Error fetching restaurant:', error);
+    }
+    
+    // TODO: Fetch actual analytics data from database
+    const analytics = {
+      usage: {
+        image_enhancements: 0,
+        social_posts: 0,
+        email_campaigns: 0,
+        videos_generated: 0
+      },
+      performance: {
+        social_engagement: 0,
+        email_open_rate: 0,
+        email_click_rate: 0,
+        menu_views: 0
+      },
+      roi: {
+        estimated_revenue_impact: 0,
+        cost_savings: 0
+      }
+    };
+    
+    // Generate AI insights if enabled
+    let insights = null;
+    let ai_generated = false;
+    
+    if (use_ai && aiGateway.isConfigured()) {
+      try {
+        insights = await aiGateway.generateInsights(restaurant, analytics);
+        ai_generated = true;
+      } catch (aiError) {
+        console.error('AI insights generation error:', aiError);
+        insights = 'AI insights unavailable. Please check AI Gateway configuration.';
+      }
+    } else {
+      insights = 'AI insights disabled. Enable AI Gateway for detailed analysis.';
+    }
+    
+    res.json({
+      restaurant_id: parseInt(restaurant_id),
+      analytics,
+      insights,
+      ai_generated,
+      generated_at: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error generating insights:', error);
+    res.status(500).json({ error: 'Failed to generate insights' });
+  }
+});
+
 // GET /api/analytics/:restaurant_id/reports - Generate reports
 router.get('/:restaurant_id/reports', async (req, res) => {
   try {
