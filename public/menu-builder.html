@@ -165,7 +165,7 @@
         </div>
         <div class="form-group">
           <label>Image URL (optional)</label>
-          <input type="text" name="item-image-${itemCount}" placeholder="https://example.com/image.jpg" onblur="validateUrl(this)">
+          <input type="text" name="item-image-${itemCount}" placeholder="https://example.com/image.jpg">
         </div>
       `;
       itemsList.appendChild(itemDiv);
@@ -175,17 +175,21 @@
       document.getElementById(`item-${id}`).remove();
     }
     
-    function validateUrl(input) {
-      const value = input.value.trim();
-      if (value && !value.match(/^https?:\/\/.+/)) {
-        input.setCustomValidity('Please enter a valid URL starting with http:// or https://');
-      } else {
-        input.setCustomValidity('');
-      }
-    }
-    
     document.getElementById('menuForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      
+      // Clear any previous validation errors
+      const form = e.target;
+      const inputs = form.querySelectorAll('input, textarea');
+      inputs.forEach(input => {
+        input.setCustomValidity('');
+      });
+      
+      // Check HTML5 validation
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
       
       const statusDiv = document.getElementById('status');
       statusDiv.style.display = 'none';
@@ -199,12 +203,22 @@
         const itemDiv = document.getElementById(`item-${i}`);
         if (!itemDiv) continue;
         
-        const name = itemDiv.querySelector(`[name="item-name-${i}"]`)?.value?.trim();
-        const price = itemDiv.querySelector(`[name="item-price-${i}"]`)?.value;
-        const description = itemDiv.querySelector(`[name="item-desc-${i}"]`)?.value?.trim();
-        const image = itemDiv.querySelector(`[name="item-image-${i}"]`)?.value?.trim();
+        const nameInput = itemDiv.querySelector(`[name="item-name-${i}"]`);
+        const priceInput = itemDiv.querySelector(`[name="item-price-${i}"]`);
+        const descInput = itemDiv.querySelector(`[name="item-desc-${i}"]`);
+        const imageInput = itemDiv.querySelector(`[name="item-image-${i}"]`);
         
-        // Validate and fix image URL if provided
+        const name = nameInput?.value?.trim();
+        const price = priceInput?.value;
+        const description = descInput?.value?.trim();
+        const image = imageInput?.value?.trim();
+        
+        // Skip if required fields are missing
+        if (!name || !price) {
+          continue;
+        }
+        
+        // Validate and fix image URL if provided (no validation errors, just fix it)
         let imageUrl = null;
         if (image) {
           if (image.match(/^https?:\/\/.+/)) {
@@ -219,14 +233,12 @@
           }
         }
         
-        if (name && price) {
-          items.push({
-            name,
-            price: parseFloat(price),
-            description: description || '',
-            image: imageUrl
-          });
-        }
+        items.push({
+          name,
+          price: parseFloat(price),
+          description: description || '',
+          image: imageUrl
+        });
       }
       
       try {
