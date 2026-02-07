@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Documentation - MagicPlate.ai</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f5f5f5;
+      color: #1a1a1a;
+      padding: 20px;
+    }
+    .header {
+      background: white;
+      padding: 20px 40px;
+      border-bottom: 1px solid rgba(76, 175, 80, 0.2);
+      margin-bottom: 30px;
+      border-radius: 10px;
+    }
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      color: #4caf50;
+      text-decoration: none;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .page-header {
+      background: white;
+      padding: 40px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .page-header h1 {
+      color: #4caf50;
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+    .section {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .section h2 {
+      color: #1a1a1a;
+      font-size: 1.8em;
+      margin-bottom: 20px;
+      border-bottom: 2px solid rgba(76, 175, 80, 0.2);
+      padding-bottom: 10px;
+    }
+    .api-endpoint {
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      border-left: 4px solid #4caf50;
+    }
+    .api-endpoint h3 {
+      color: #4caf50;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .method {
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 0.85em;
+      font-weight: 700;
+      color: white;
+    }
+    .method.get { background: #4caf50; }
+    .method.post { background: #2196F3; }
+    .method.put { background: #FF9800; }
+    .method.delete { background: #f44336; }
+    .code-block {
+      background: #1a1a1a;
+      color: #4caf50;
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 10px 0;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+    }
+    .endpoint-path {
+      font-family: 'Courier New', monospace;
+      color: #666;
+      margin-left: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+    }
+    table th, table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid rgba(76, 175, 80, 0.2);
+    }
+    table th {
+      background: rgba(76, 175, 80, 0.1);
+      color: #4caf50;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-content">
+      <a href="/dashboard.html" class="logo">← Back to Dashboard</a>
+      <a href="/" class="logo">MagicPlate.ai</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="page-header">
+      <h1>🔌 API Documentation</h1>
+      <p>Full API access to integrate MagicPlate with your existing systems, POS, and custom applications</p>
+    </div>
+
+    <!-- Authentication -->
+    <div class="section">
+      <h2>Authentication</h2>
+      <p>All API requests require authentication. Include your API key in the request headers:</p>
+      <div class="code-block">
+Authorization: Bearer YOUR_API_KEY
+      </div>
+      <p style="margin-top: 15px; color: #666;">To get your API key, contact support or check your Enterprise dashboard settings.</p>
+    </div>
+
+    <!-- Base URL -->
+    <div class="section">
+      <h2>Base URL</h2>
+      <div class="code-block">
+https://magicplate.info/api
+      </div>
+    </div>
+
+    <!-- Restaurants API -->
+    <div class="section">
+      <h2>Restaurants API</h2>
+      
+      <div class="api-endpoint">
+        <h3>
+          <span class="method get">GET</span>
+          <span class="endpoint-path">/restaurants</span>
+        </h3>
+        <p>List all restaurants</p>
+        <div class="code-block">
+GET /api/restaurants
+        </div>
+      </div>
+
+      <div class="api-endpoint">
+        <h3>
+          <span class="method post">POST</span>
+          <span class="endpoint-path">/restaurants</span>
+        </h3>
+        <p>Create a new restaurant</p>
+        <div class="code-block">
+POST /api/restaurants
+Content-Type: application/json
+
+{
+  "name": "Restaurant Name",
+  "cuisine": "Italian",
+  "subscription_tier": "professional"
+}
+        </div>
+      </div>
+
+      <div class="api-endpoint">
+        <h3>
+          <span class="method get">GET</span>
+          <span class="endpoint-path">/restaurants/:id</span>
+        </h3>
+        <p>Get restaurant details</p>
+      </div>
+    </div>
+
+    <!-- Menus API -->
+    <div class="section">
+      <h2>Menus API</h2>
+      
+      <div class="api-endpoint">
+        <h3>
+          <span class="method post">POST</span>
+          <span class="endpoint-path">/menus</span>
+        </h3>
+        <p>Create a digital menu</p>
+        <div class="code-block">
+POST /api/menus
+Content-Type: application/json
+
+{
+  "restaurant_id": 1,
+  "name": "Main Menu",
+  "items": [
+    {
+      "name": "Grilled Salmon",
+      "price": 24.99,
+      "description": "Fresh Atlantic salmon"
+    }
+  ]
+}
+        </div>
+      </div>
+
+      <div class="api-endpoint">
+        <h3>
+          <span class="method post">POST</span>
+          <span class="endpoint-path">/menus/generate-description</span>
+        </h3>
+        <p>Generate SEO-optimized menu description using AI</p>
+      </div>
+    </div>
+
+    <!-- HeyGen API -->
+    <div class="section">
+      <h2>HeyGen Avatar API</h2>
+      
+      <div class="api-endpoint">
+        <h3>
+          <span class="method post">POST</span>
+          <span class="endpoint-path">/heygen/create-avatar</span>
+        </h3>
+        <p>Create a restaurant avatar</p>
+      </div>
+
+      <div class="api-endpoint">
+        <h3>
+          <span class="method post">POST</span>
+          <span class="endpoint-path">/heygen/generate-video</span>
+        </h3>
+        <p>Generate a video with an avatar</p>
+      </div>
+    </div>
+
+    <!-- Locations API -->
+    <div class="section">
+      <h2>Locations API</h2>
+      
+      <div class="api-endpoint">
+        <h3>
+          <span class="method get">GET</span>
+          <span class="endpoint-path">/locations/:restaurant_id</span>
+        </h3>
+        <p>List all locations for a restaurant</p>
+      </div>
+
+      <div class="api-endpoint">
+        <h3>
+          <span class="method post">POST</span>
+          <span class="endpoint-path">/locations/:restaurant_id</span>
+        </h3>
+        <p>Create a new location</p>
+      </div>
+
+      <div class="api-endpoint">
+        <h3>
+          <span class="method post">POST</span>
+          <span class="endpoint-path">/locations/:location_id/sync</span>
+        </h3>
+        <p>Sync content to a location with AI customization</p>
+      </div>
+    </div>
+
+    <!-- Analytics API -->
+    <div class="section">
+      <h2>Analytics API</h2>
+      
+      <div class="api-endpoint">
+        <h3>
+          <span class="method get">GET</span>
+          <span class="endpoint-path">/analytics/:restaurant_id/dashboard</span>
+        </h3>
+        <p>Get analytics dashboard data</p>
+      </div>
+
+      <div class="api-endpoint">
+        <h3>
+          <span class="method get">GET</span>
+          <span class="endpoint-path">/analytics/:restaurant_id/insights</span>
+        </h3>
+        <p>Get AI-powered insights and recommendations</p>
+      </div>
+    </div>
+
+    <!-- Response Format -->
+    <div class="section">
+      <h2>Response Format</h2>
+      <p>All API responses are in JSON format:</p>
+      <div class="code-block">
+{
+  "success": true,
+  "data": { ... },
+  "message": "Operation completed successfully"
+}
+      </div>
+      
+      <h3 style="margin-top: 20px; margin-bottom: 10px;">Error Responses</h3>
+      <div class="code-block">
+{
+  "error": "Error message",
+  "details": "Additional error details"
+}
+      </div>
+    </div>
+
+    <!-- Rate Limits -->
+    <div class="section">
+      <h2>Rate Limits</h2>
+      <table>
+        <tr>
+          <th>Plan</th>
+          <th>Requests per Minute</th>
+          <th>Requests per Day</th>
+        </tr>
+        <tr>
+          <td>Starter</td>
+          <td>10</td>
+          <td>1,000</td>
+        </tr>
+        <tr>
+          <td>Professional</td>
+          <td>60</td>
+          <td>10,000</td>
+        </tr>
+        <tr>
+          <td>Enterprise</td>
+          <td>Unlimited</td>
+          <td>Unlimited</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Support -->
+    <div class="section">
+      <h2>Need Help?</h2>
+      <p>For API support, integration assistance, or to request additional endpoints:</p>
+      <ul style="line-height: 2; padding-left: 20px; margin-top: 15px;">
+        <li><strong>Email:</strong> <a href="mailto:sydney@magicplate.info">sydney@magicplate.info</a></li>
+        <li><strong>Phone:</strong> <a href="tel:8056689973">(805) 668-9973</a></li>
+        <li><strong>Support Portal:</strong> <a href="/support-center.html">Create a Support Ticket</a></li>
+      </ul>
+    </div>
+  </div>
+</body>
+</html>

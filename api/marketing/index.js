@@ -85,24 +85,8 @@ router.post('/email/campaigns', async (req, res) => {
 });
 
 // Menu Marketing Routes
-// POST /api/marketing/menu/notify
-router.post('/menu/notify', async (req, res) => {
-  try {
-    const { restaurant_id, menu_changes, notification_type } = req.body;
-    
-    // TODO: Send notifications about menu updates
-    // Generate email, social posts, etc.
-    
-    res.json({
-      restaurant_id,
-      notifications_sent: 0,
-      message: 'Menu update notifications sent'
-    });
-  } catch (error) {
-    console.error('Error sending menu notifications:', error);
-    res.status(500).json({ error: 'Failed to send menu notifications' });
-  }
-});
+const menuNotifyRouter = require('./menu/notify');
+router.use('/menu', menuNotifyRouter);
 
 // SEO Routes
 // POST /api/marketing/seo/optimize-menu

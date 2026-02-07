@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Menu Update Notifications - MagicPlate.ai</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f5f5f5;
+      color: #1a1a1a;
+      padding: 20px;
+    }
+    .header {
+      background: white;
+      padding: 20px 40px;
+      border-bottom: 1px solid rgba(76, 175, 80, 0.2);
+      margin-bottom: 30px;
+      border-radius: 10px;
+    }
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      color: #4caf50;
+      text-decoration: none;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .page-header {
+      background: white;
+      padding: 40px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .page-header h1 {
+      color: #4caf50;
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+    .section {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .section h2 {
+      color: #1a1a1a;
+      font-size: 1.8em;
+      margin-bottom: 20px;
+    }
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #4caf50, #66bb6a);
+      color: white;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #1a1a1a;
+    }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid rgba(76, 175, 80, 0.2);
+      border-radius: 8px;
+      font-size: 16px;
+      font-family: inherit;
+    }
+    .customer-email-input {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .customer-email-input input {
+      flex: 1;
+    }
+    .email-list {
+      margin-top: 15px;
+      padding: 15px;
+      background: #f9f9f9;
+      border-radius: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .email-tag {
+      display: inline-block;
+      background: #4caf50;
+      color: white;
+      padding: 5px 12px;
+      border-radius: 20px;
+      margin: 5px;
+      font-size: 0.9em;
+    }
+    .email-tag button {
+      background: none;
+      border: none;
+      color: white;
+      margin-left: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .status {
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+      display: none;
+    }
+    .status.success {
+      background: rgba(76, 175, 80, 0.1);
+      color: #4caf50;
+      border: 2px solid rgba(76, 175, 80, 0.3);
+    }
+    .status.error {
+      background: rgba(245, 158, 11, 0.1);
+      color: #f59e0b;
+      border: 2px solid rgba(245, 158, 11, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-content">
+      <a href="/dashboard.html" class="logo">← Back to Dashboard</a>
+      <a href="/" class="logo">MagicPlate.ai</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="page-header">
+      <h1>🔔 Menu Update Notifications</h1>
+      <p>Automatically notify customers when you add new items or update your menu</p>
+    </div>
+
+    <!-- Send Notification Section -->
+    <div class="section">
+      <h2>Send Menu Update Notification</h2>
+      <form id="notifyForm">
+        <div class="form-group">
+          <label>Restaurant ID *</label>
+          <input type="number" id="restaurantId" required value="1" placeholder="Enter restaurant ID">
+        </div>
+        <div class="form-group">
+          <label>Menu ID (Optional)</label>
+          <input type="number" id="menuId" placeholder="Enter menu ID if you want to link to a specific menu">
+        </div>
+        <div class="form-group">
+          <label>Notification Type *</label>
+          <select id="notificationType" required>
+            <option value="new_item">New Menu Item</option>
+            <option value="menu_update">Menu Updated</option>
+            <option value="special_offer">Special Offer</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Custom Message (Optional)</label>
+          <textarea id="customMessage" rows="4" placeholder="Enter a custom message or leave blank to use default"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Customer Email Addresses *</label>
+          <div class="customer-email-input">
+            <input type="email" id="emailInput" placeholder="customer@example.com">
+            <button type="button" class="btn btn-primary" onclick="addEmail()">Add Email</button>
+          </div>
+          <div id="emailList" class="email-list" style="display: none;"></div>
+          <p style="color: #666; font-size: 0.9em; margin-top: 10px;">Add customer email addresses one at a time</p>
+        </div>
+        <button type="submit" class="btn btn-primary">Send Notifications</button>
+        <div id="notifyStatus" class="status"></div>
+      </form>
+    </div>
+
+    <!-- Notification Settings Section -->
+    <div class="section">
+      <h2>Notification Settings</h2>
+      <div class="form-group">
+        <label>Restaurant ID</label>
+        <input type="number" id="settingsRestaurantId" value="1" placeholder="Enter restaurant ID">
+        <button type="button" class="btn btn-primary" onclick="loadSettings()" style="margin-top: 10px;">Load Settings</button>
+      </div>
+      <div id="settingsDisplay" style="margin-top: 20px; padding: 20px; background: #f9f9f9; border-radius: 8px; display: none;">
+        <h3 style="color: #4caf50; margin-bottom: 15px;">Current Settings</h3>
+        <div id="settingsContent"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let customerEmails = [];
+
+    function addEmail() {
+      const emailInput = document.getElementById('emailInput');
+      const email = emailInput.value.trim();
+      
+      if (email && email.includes('@') && !customerEmails.includes(email)) {
+        customerEmails.push(email);
+        emailInput.value = '';
+        updateEmailList();
+      } else if (customerEmails.includes(email)) {
+        alert('This email is already in the list');
+      } else {
+        alert('Please enter a valid email address');
+      }
+    }
+
+    function removeEmail(email) {
+      customerEmails = customerEmails.filter(e => e !== email);
+      updateEmailList();
+    }
+
+    function updateEmailList() {
+      const emailList = document.getElementById('emailList');
+      if (customerEmails.length > 0) {
+        emailList.innerHTML = customerEmails.map(email => `
+          <span class="email-tag">
+            ${email}
+            <button onclick="removeEmail('${email}')" type="button">×</button>
+          </span>
+        `).join('');
+        emailList.style.display = 'block';
+      } else {
+        emailList.style.display = 'none';
+      }
+    }
+
+    // Allow Enter key to add email
+    document.getElementById('emailInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        addEmail();
+      }
+    });
+
+    // Send Notification
+    document.getElementById('notifyForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const statusDiv = document.getElementById('notifyStatus');
+      statusDiv.style.display = 'none';
+
+      if (customerEmails.length === 0) {
+        statusDiv.className = 'status error';
+        statusDiv.textContent = '❌ Please add at least one customer email address';
+        statusDiv.style.display = 'block';
+        return;
+      }
+
+      const restaurantId = document.getElementById('restaurantId').value;
+      const menuId = document.getElementById('menuId').value;
+      const notificationType = document.getElementById('notificationType').value;
+      const customMessage = document.getElementById('customMessage').value;
+
+      try {
+        const response = await fetch('/api/marketing/menu/notify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            restaurant_id: parseInt(restaurantId),
+            menu_id: menuId ? parseInt(menuId) : undefined,
+            notification_type: notificationType,
+            customer_emails: customerEmails,
+            custom_message: customMessage || undefined
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          statusDiv.className = 'status success';
+          statusDiv.innerHTML = `
+            <h3>✅ Notifications Sent Successfully!</h3>
+            <p>${data.emails_sent} email(s) sent to customers.</p>
+            ${data.email_errors && data.email_errors.length > 0 ? `<p style="color: #f59e0b; margin-top: 10px;">Some emails failed: ${data.email_errors.map(e => e.email).join(', ')}</p>` : ''}
+          `;
+          statusDiv.style.display = 'block';
+          customerEmails = [];
+          updateEmailList();
+          document.getElementById('notifyForm').reset();
+        } else {
+          throw new Error(data.error || 'Failed to send notifications');
+        }
+      } catch (error) {
+        statusDiv.className = 'status error';
+        statusDiv.textContent = `❌ Error: ${error.message}`;
+        statusDiv.style.display = 'block';
+      }
+    });
+
+    // Load Settings
+    async function loadSettings() {
+      const restaurantId = document.getElementById('settingsRestaurantId').value;
+      if (!restaurantId) {
+        alert('Please enter a restaurant ID');
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/marketing/menu/notify/${restaurantId}`);
+        const data = await response.json();
+
+        if (response.ok) {
+          document.getElementById('settingsDisplay').style.display = 'block';
+          document.getElementById('settingsContent').innerHTML = `
+            <p><strong>Auto-Notify:</strong> ${data.auto_notify ? 'Enabled' : 'Disabled'}</p>
+            <p><strong>Available Notification Types:</strong> ${data.notification_types.join(', ')}</p>
+            <p><strong>Customer List Size:</strong> ${data.customer_list_size} customers</p>
+          `;
+        } else {
+          throw new Error(data.error || 'Failed to load settings');
+        }
+      } catch (error) {
+        alert('Error loading settings: ' + error.message);
+      }
+    }
+
+    // Auto-fill restaurant ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const restaurantId = urlParams.get('restaurant_id');
+    if (restaurantId) {
+      document.getElementById('restaurantId').value = restaurantId;
+      document.getElementById('settingsRestaurantId').value = restaurantId;
+    }
+  </script>
+</body>
+</html>

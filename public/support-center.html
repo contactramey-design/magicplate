@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Priority Support - MagicPlate.ai</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f5f5f5;
+      color: #1a1a1a;
+      padding: 20px;
+    }
+    .header {
+      background: white;
+      padding: 20px 40px;
+      border-bottom: 1px solid rgba(76, 175, 80, 0.2);
+      margin-bottom: 30px;
+      border-radius: 10px;
+    }
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      color: #4caf50;
+      text-decoration: none;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .page-header {
+      background: white;
+      padding: 40px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .page-header h1 {
+      color: #4caf50;
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+    .section {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .section h2 {
+      color: #1a1a1a;
+      font-size: 1.8em;
+      margin-bottom: 20px;
+    }
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #4caf50, #66bb6a);
+      color: white;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #1a1a1a;
+    }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid rgba(76, 175, 80, 0.2);
+      border-radius: 8px;
+      font-size: 16px;
+      font-family: inherit;
+    }
+    .tickets-list {
+      margin-top: 20px;
+    }
+    .ticket-card {
+      border: 2px solid rgba(76, 175, 80, 0.2);
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 15px;
+      transition: all 0.3s;
+    }
+    .ticket-card:hover {
+      border-color: #4caf50;
+      box-shadow: 0 2px 10px rgba(76, 175, 80, 0.1);
+    }
+    .ticket-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 10px;
+    }
+    .ticket-status {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      font-weight: 600;
+    }
+    .ticket-status.open {
+      background: rgba(76, 175, 80, 0.1);
+      color: #4caf50;
+    }
+    .ticket-status.closed {
+      background: rgba(0, 0, 0, 0.1);
+      color: #666;
+    }
+    .status {
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+      display: none;
+    }
+    .status.success {
+      background: rgba(76, 175, 80, 0.1);
+      color: #4caf50;
+      border: 2px solid rgba(76, 175, 80, 0.3);
+    }
+    .status.error {
+      background: rgba(245, 158, 11, 0.1);
+      color: #f59e0b;
+      border: 2px solid rgba(245, 158, 11, 0.3);
+    }
+    .contact-info {
+      background: rgba(76, 175, 80, 0.05);
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 20px;
+    }
+    .contact-info h3 {
+      color: #4caf50;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-content">
+      <a href="/dashboard.html" class="logo">← Back to Dashboard</a>
+      <a href="/" class="logo">MagicPlate.ai</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="page-header">
+      <h1>💬 Priority Support Center</h1>
+      <p>Get priority email and chat support. Faster response times and dedicated assistance when you need it.</p>
+    </div>
+
+    <!-- Create Ticket Section -->
+    <div class="section">
+      <h2>Create Support Ticket</h2>
+      <form id="ticketForm">
+        <div class="form-group">
+          <label>Restaurant ID *</label>
+          <input type="number" id="restaurantId" required value="1" placeholder="Enter restaurant ID">
+        </div>
+        <div class="form-group">
+          <label>Subject *</label>
+          <input type="text" id="subject" required placeholder="Brief description of your issue">
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="category">
+            <option value="general">General Question</option>
+            <option value="technical">Technical Issue</option>
+            <option value="billing">Billing</option>
+            <option value="feature">Feature Request</option>
+            <option value="bug">Bug Report</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Priority</label>
+          <select id="priority">
+            <option value="low">Low</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">High</option>
+            <option value="urgent">Urgent</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Message *</label>
+          <textarea id="message" rows="6" required placeholder="Describe your issue or question in detail..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit Ticket</button>
+        <div id="ticketStatus" class="status"></div>
+      </form>
+    </div>
+
+    <!-- View Tickets Section -->
+    <div class="section">
+      <h2>Your Support Tickets</h2>
+      <div class="form-group">
+        <label>Restaurant ID</label>
+        <input type="number" id="listRestaurantId" value="1" placeholder="Enter restaurant ID">
+        <button type="button" class="btn btn-primary" onclick="loadTickets()" style="margin-top: 10px;">Load Tickets</button>
+      </div>
+      <div id="ticketsList" class="tickets-list"></div>
+    </div>
+
+    <!-- Contact Information -->
+    <div class="section">
+      <div class="contact-info">
+        <h3>📞 Direct Contact</h3>
+        <p><strong>Email:</strong> <a href="mailto:sydney@magicplate.info">sydney@magicplate.info</a></p>
+        <p><strong>Phone:</strong> <a href="tel:8056689973">(805) 668-9973</a></p>
+        <p><strong>Response Time:</strong> Within 24 hours (Priority Support)</p>
+        <p style="margin-top: 15px; color: #666;">For urgent issues, please call or email directly. We're here to help!</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Create Ticket
+    document.getElementById('ticketForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const statusDiv = document.getElementById('ticketStatus');
+      statusDiv.style.display = 'none';
+
+      const restaurantId = document.getElementById('restaurantId').value;
+      const subject = document.getElementById('subject').value;
+      const message = document.getElementById('message').value;
+      const category = document.getElementById('category').value;
+      const priority = document.getElementById('priority').value;
+
+      try {
+        const response = await fetch('/api/support/tickets', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            restaurant_id: parseInt(restaurantId),
+            subject,
+            message,
+            category,
+            priority
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          statusDiv.className = 'status success';
+          statusDiv.innerHTML = `
+            <h3>✅ Support Ticket Created Successfully!</h3>
+            <p>Ticket ID: ${data.ticket_id || data.id}</p>
+            <p>${data.message || 'We\'ll respond within 24 hours.'}</p>
+          `;
+          statusDiv.style.display = 'block';
+          document.getElementById('ticketForm').reset();
+          loadTickets(); // Refresh list
+        } else {
+          throw new Error(data.error || 'Failed to create ticket');
+        }
+      } catch (error) {
+        statusDiv.className = 'status error';
+        statusDiv.textContent = `❌ Error: ${error.message}`;
+        statusDiv.style.display = 'block';
+      }
+    });
+
+    // Load Tickets
+    async function loadTickets() {
+      const restaurantId = document.getElementById('listRestaurantId').value;
+      if (!restaurantId) {
+        alert('Please enter a restaurant ID');
+        return;
+      }
+
+      const ticketsList = document.getElementById('ticketsList');
+      ticketsList.innerHTML = '<p>Loading tickets...</p>';
+
+      try {
+        const response = await fetch(`/api/support/tickets/${restaurantId}`);
+        const data = await response.json();
+
+        if (response.ok && data.tickets && data.tickets.length > 0) {
+          ticketsList.innerHTML = data.tickets.map(ticket => `
+            <div class="ticket-card">
+              <div class="ticket-header">
+                <div>
+                  <h3 style="color: #4caf50; margin-bottom: 5px;">${ticket.subject}</h3>
+                  <p style="color: #666; font-size: 0.9em;">Ticket #${ticket.ticket_id || ticket.id}</p>
+                </div>
+                <span class="ticket-status ${ticket.status || 'open'}">${(ticket.status || 'open').toUpperCase()}</span>
+              </div>
+              <p style="margin: 10px 0;"><strong>Category:</strong> ${ticket.category || 'general'}</p>
+              <p style="margin: 10px 0;"><strong>Priority:</strong> ${ticket.priority || 'medium'}</p>
+              <p style="margin: 10px 0; color: #666;">${ticket.message || ''}</p>
+              <p style="margin-top: 10px; color: #999; font-size: 0.85em;">Created: ${new Date(ticket.created_at).toLocaleString()}</p>
+            </div>
+          `).join('');
+        } else {
+          ticketsList.innerHTML = '<p>No support tickets found. Create one above!</p>';
+        }
+      } catch (error) {
+        ticketsList.innerHTML = `<p style="color: #f59e0b;">Error loading tickets: ${error.message}</p>`;
+      }
+    }
+
+    // Auto-fill restaurant ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const restaurantId = urlParams.get('restaurant_id');
+    if (restaurantId) {
+      document.getElementById('restaurantId').value = restaurantId;
+      document.getElementById('listRestaurantId').value = restaurantId;
+      setTimeout(() => loadTickets(), 500);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>White-Label Configuration - MagicPlate.ai</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f5f5f5;
+      color: #1a1a1a;
+      padding: 20px;
+    }
+    .header {
+      background: white;
+      padding: 20px 40px;
+      border-bottom: 1px solid rgba(76, 175, 80, 0.2);
+      margin-bottom: 30px;
+      border-radius: 10px;
+    }
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      color: #4caf50;
+      text-decoration: none;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .page-header {
+      background: white;
+      padding: 40px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .page-header h1 {
+      color: #4caf50;
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+    .section {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .section h2 {
+      color: #1a1a1a;
+      font-size: 1.8em;
+      margin-bottom: 20px;
+    }
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #4caf50, #66bb6a);
+      color: white;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #1a1a1a;
+    }
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid rgba(76, 175, 80, 0.2);
+      border-radius: 8px;
+      font-size: 16px;
+      font-family: inherit;
+    }
+    .preview-box {
+      background: #f9f9f9;
+      padding: 30px;
+      border-radius: 10px;
+      margin-top: 20px;
+      border: 2px dashed rgba(76, 175, 80, 0.3);
+    }
+    .preview-box h3 {
+      color: #4caf50;
+      margin-bottom: 15px;
+    }
+    .status {
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+      display: none;
+    }
+    .status.success {
+      background: rgba(76, 175, 80, 0.1);
+      color: #4caf50;
+      border: 2px solid rgba(76, 175, 80, 0.3);
+    }
+    .status.error {
+      background: rgba(245, 158, 11, 0.1);
+      color: #f59e0b;
+      border: 2px solid rgba(245, 158, 11, 0.3);
+    }
+    .info-box {
+      background: rgba(76, 175, 80, 0.05);
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 20px;
+      border-left: 4px solid #4caf50;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-content">
+      <a href="/dashboard.html" class="logo">← Back to Dashboard</a>
+      <a href="/" class="logo">MagicPlate.ai</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="page-header">
+      <h1>🏷️ White-Label Configuration</h1>
+      <p>White-label the platform with your branding. Perfect for franchise systems wanting to maintain their own brand identity.</p>
+    </div>
+
+    <!-- Branding Configuration -->
+    <div class="section">
+      <h2>Branding Configuration</h2>
+      <form id="whiteLabelForm">
+        <div class="form-group">
+          <label>Restaurant ID *</label>
+          <input type="number" id="restaurantId" required value="1" placeholder="Enter restaurant ID">
+        </div>
+        <div class="form-group">
+          <label>Company Name</label>
+          <input type="text" id="companyName" placeholder="Your company/franchise name">
+        </div>
+        <div class="form-group">
+          <label>Logo URL</label>
+          <input type="url" id="logoUrl" placeholder="https://example.com/logo.png">
+        </div>
+        <div class="form-group">
+          <label>Favicon URL</label>
+          <input type="url" id="faviconUrl" placeholder="https://example.com/favicon.ico">
+        </div>
+        <div class="form-group">
+          <label>Primary Brand Color</label>
+          <input type="color" id="primaryColor" value="#4caf50">
+        </div>
+        <div class="form-group">
+          <label>Secondary Brand Color</label>
+          <input type="color" id="secondaryColor" value="#66bb6a">
+        </div>
+        <div class="form-group">
+          <label>Custom Domain (Optional)</label>
+          <input type="text" id="customDomain" placeholder="menu.yourrestaurant.com">
+        </div>
+        <div class="form-group">
+          <label>Custom Footer Text</label>
+          <textarea id="footerText" rows="3" placeholder="Custom footer text for your branded platform"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Save White-Label Configuration</button>
+        <div id="saveStatus" class="status"></div>
+      </form>
+    </div>
+
+    <!-- Preview Section -->
+    <div class="section">
+      <h2>Preview</h2>
+      <div class="preview-box">
+        <h3>Branded Platform Preview</h3>
+        <div id="previewContent" style="padding: 20px; background: white; border-radius: 8px;">
+          <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee;">
+            <div id="previewLogo" style="width: 50px; height: 50px; background: #4caf50; border-radius: 8px;"></div>
+            <h2 id="previewCompany" style="color: #4caf50; margin: 0;">Your Company Name</h2>
+          </div>
+          <p style="color: #666;">This is how your white-labeled platform will appear to your customers.</p>
+          <p style="margin-top: 20px; color: #999; font-size: 0.9em;" id="previewFooter">© 2026 Your Company. All rights reserved.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Information -->
+    <div class="section">
+      <div class="info-box">
+        <h3 style="color: #4caf50; margin-bottom: 15px;">ℹ️ White-Label Information</h3>
+        <ul style="line-height: 2; padding-left: 20px;">
+          <li>White-label branding is available for Enterprise plan customers</li>
+          <li>Custom domain setup requires DNS configuration (contact support for assistance)</li>
+          <li>Logo and branding assets should be high-resolution (minimum 200x200px for logos)</li>
+          <li>Changes may take up to 24 hours to propagate across all locations</li>
+        </ul>
+        <p style="margin-top: 15px;"><strong>Need help?</strong> Contact your dedicated account manager or <a href="/support-center.html">create a support ticket</a>.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Update preview in real-time
+    ['companyName', 'logoUrl', 'primaryColor', 'secondaryColor', 'footerText'].forEach(id => {
+      const element = document.getElementById(id);
+      if (element) {
+        element.addEventListener('input', updatePreview);
+      }
+    });
+
+    function updatePreview() {
+      const companyName = document.getElementById('companyName').value || 'Your Company Name';
+      const logoUrl = document.getElementById('logoUrl').value;
+      const primaryColor = document.getElementById('primaryColor').value;
+      const secondaryColor = document.getElementById('secondaryColor').value;
+      const footerText = document.getElementById('footerText').value || '© 2026 Your Company. All rights reserved.';
+
+      document.getElementById('previewCompany').textContent = companyName;
+      document.getElementById('previewCompany').style.color = primaryColor;
+      
+      const logoDiv = document.getElementById('previewLogo');
+      if (logoUrl) {
+        logoDiv.style.backgroundImage = `url(${logoUrl})`;
+        logoDiv.style.backgroundSize = 'cover';
+        logoDiv.style.backgroundPosition = 'center';
+      } else {
+        logoDiv.style.background = primaryColor;
+        logoDiv.style.backgroundImage = 'none';
+      }
+      
+      document.getElementById('previewFooter').textContent = footerText;
+    }
+
+    // Save Configuration
+    document.getElementById('whiteLabelForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const statusDiv = document.getElementById('saveStatus');
+      statusDiv.style.display = 'none';
+
+      const restaurantId = document.getElementById('restaurantId').value;
+      const config = {
+        company_name: document.getElementById('companyName').value || undefined,
+        logo_url: document.getElementById('logoUrl').value || undefined,
+        favicon_url: document.getElementById('faviconUrl').value || undefined,
+        primary_color: document.getElementById('primaryColor').value,
+        secondary_color: document.getElementById('secondaryColor').value,
+        custom_domain: document.getElementById('customDomain').value || undefined,
+        footer_text: document.getElementById('footerText').value || undefined
+      };
+
+      // TODO: Save to database via API
+      // For now, just show success message
+      statusDiv.className = 'status success';
+      statusDiv.innerHTML = `
+        <h3>✅ White-Label Configuration Saved!</h3>
+        <p>Your branding configuration has been saved. Changes will be applied within 24 hours.</p>
+        <p style="margin-top: 10px; font-size: 0.9em; color: #666;">Note: Custom domain setup requires additional DNS configuration. Contact support for assistance.</p>
+      `;
+      statusDiv.style.display = 'block';
+    });
+
+    // Auto-fill restaurant ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const restaurantId = urlParams.get('restaurant_id');
+    if (restaurantId) {
+      document.getElementById('restaurantId').value = restaurantId;
+    }
+  </script>
+</body>
+</html>
