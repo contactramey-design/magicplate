@@ -177,8 +177,10 @@ app.post('/api/contact', async (req, res) => {
     }
     
     // Send email using your email service
+    // Note: Update to use Resend receiving address if configured
+    const receivingEmail = process.env.RECEIVING_EMAIL || 'sydney@preneionte.resend.app';
     await sendEmail({
-      to: 'sydney@magicplate.info',
+      to: receivingEmail,
       from: { email: process.env.FROM_EMAIL || 'sydney@magicplate.info', name: 'MagicPlate Contact Form' },
       subject: `New Contact Form Submission from ${name}${restaurant ? ` - ${restaurant}` : ''}`,
       html: `

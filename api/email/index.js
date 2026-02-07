@@ -3,6 +3,9 @@ const express = require('express');
 const router = express.Router();
 const { createCampaign, sendCampaign, listCampaigns } = require('./campaigns');
 
+// Email receiving webhook
+router.use('/', require('./receive'));
+
 // POST /api/email/campaigns - Create campaign
 router.post('/campaigns', async (req, res) => {
   try {
