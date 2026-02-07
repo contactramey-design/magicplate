@@ -83,8 +83,26 @@ function styleBlock(style) {
 const { getAIGatewayPrompt } = require('../lib/photo-enhancement-prompt');
 
 function buildRegenPrompt(style) {
-  // Use the comprehensive ethical food photography prompt
-  return getAIGatewayPrompt(style);
+  try {
+    // Use the comprehensive ethical food photography prompt
+    const prompt = getAIGatewayPrompt(style);
+    // Ensure prompt is not too long (Leonardo has limits)
+    if (prompt && prompt.length > 1000) {
+      console.warn('Prompt is very long, truncating to 1000 chars');
+      return prompt.substring(0, 1000);
+    }
+    return prompt;
+  } catch (error) {
+    console.error('Error generating prompt, using fallback:', error);
+    // Fallback to original prompt if new system fails
+    return (
+      'Professional restaurant food photography. Re-generate a premium marketing photo of the same dish concept as the reference image. ' +
+      'Hero subject centered, appetizing proportions, realistic texture, crisp detail, glossy highlights, natural shadows. ' +
+      'Clean composition with intentional negative space, shallow depth of field, creamy bokeh background. ' +
+      'Ultra-realistic, editorial commercial food photo, high detail, sharp focus on food. ' +
+      styleBlock(style)
+    );
+  }
 }
 
 function baseNegativePrompt() {
@@ -697,11 +715,41 @@ Check: http://localhost:3000/api/check-config
     });
     
   } catch (error) {
-    console.error('Enhancement error:', error);
+    console.error('❌ Enhancement error:', error);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
+    
+    // Log API-specific errors
+    if (error.response) {
+      console.error('API Response Status:', error.response.status);
+      console.error('API Response Data:', JSON.stringify(error.response.data, null, 2));
+    }
+    
+    // Provide user-friendly error message
+    let userMessage = error.message || 'Enhancement failed';
+    
+    // Check for specific error types
+    if (error.message?.includes('API key') || error.message?.includes('not configured')) {
+      userMessage = 'Image enhancement API not configured. Please check your API keys.';
+    } else if (error.response?.status === 401) {
+      userMessage = 'API authentication failed. Please check your API keys.';
+    } else if (error.response?.status === 402) {
+      userMessage = 'Insufficient API credits. Please add credits to your account.';
+    } else if (error.response?.data?.detail) {
+      userMessage = error.response.data.detail;
+    } else if (error.response?.data?.error) {
+      userMessage = error.response.data.error;
+    }
+    
     return res.status(500).json({ 
       error: 'Enhancement failed', 
-      message: error.message,
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      message: userMessage,
+      details: process.env.NODE_ENV === 'development' ? {
+        originalError: error.message,
+        stack: error.stack,
+        apiResponse: error.response?.data,
+        apiStatus: error.response?.status
+      } : undefined
     });
   }
 };

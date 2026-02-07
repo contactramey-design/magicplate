@@ -518,7 +518,14 @@
         const data = await response.json();
         
         if (!response.ok) {
-          throw new Error(data.error || data.message || 'Enhancement failed');
+          // Show detailed error message
+          const errorMsg = data.message || data.error || `Enhancement failed (${response.status})`;
+          console.error('Enhancement API error:', {
+            status: response.status,
+            statusText: response.statusText,
+            data: data
+          });
+          throw new Error(errorMsg);
         }
         
         // Show results
