@@ -1771,72 +1771,62 @@
     function initBeforeAfterSlider() {
       const wrapper = document.querySelector('.before-after-wrapper');
       const slider = document.querySelector('.slider-control');
-      const handle = document.querySelector('.slider-handle');
+      const handle = document.getElementById('sliderHandle');
       const afterImage = document.getElementById('afterImage');
       const beforeImage = document.getElementById('beforeImage');
       
       if (!wrapper || !slider || !handle || !afterImage || !beforeImage) {
-        console.warn('Slider elements not found');
+        console.warn('Slider elements not found:', {
+          wrapper: !!wrapper,
+          slider: !!slider,
+          handle: !!handle,
+          afterImage: !!afterImage,
+          beforeImage: !!beforeImage
+        });
         return;
       }
       
       let isDragging = false;
       let currentPosition = 50; // Start at 50%
       
-      function updateSlider(position, smooth = false) {
+      function updateSlider(position) {
         currentPosition = Math.max(0, Math.min(100, position));
         
         // Update slider control position
         slider.style.left = currentPosition + '%';
         
-        // Update handle position (handle is centered on slider, so it moves with it)
-        // The handle's transform already centers it, so we just need to position the slider
-        
-        // Update clip-path for after image
-        if (smooth) {
-          afterImage.style.transition = 'clip-path 0.1s ease-out';
-        } else {
-          afterImage.style.transition = 'none';
-        }
+        // Update clip-path for after image (reveal from left to right)
         afterImage.style.clipPath = `inset(0 ${100 - currentPosition}% 0 0)`;
       }
       
       function handleMove(e) {
         if (!isDragging) return;
         e.preventDefault();
-        e.stopPropagation();
         
         const rect = wrapper.getBoundingClientRect();
         const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
         if (!clientX) return;
         
         const x = clientX - rect.left;
-        const position = Math.max(0, Math.min(100, (x / rect.width) * 100));
-        updateSlider(position, false);
+        const position = (x / rect.width) * 100;
+        updateSlider(position);
       }
       
-      function handleEnd(e) {
+      function handleEnd() {
         if (!isDragging) return;
         isDragging = false;
         handle.style.cursor = 'grab';
-        handle.classList.remove('dragging');
-        afterImage.style.transition = 'clip-path 0.1s ease-out';
         
         document.removeEventListener('mousemove', handleMove);
         document.removeEventListener('touchmove', handleMove);
         document.removeEventListener('mouseup', handleEnd);
         document.removeEventListener('touchend', handleEnd);
-        document.removeEventListener('touchcancel', handleEnd);
       }
       
       function handleStart(e) {
         e.preventDefault();
-        e.stopPropagation();
-        
         isDragging = true;
         handle.style.cursor = 'grabbing';
-        handle.classList.add('dragging');
-        afterImage.style.transition = 'none';
         
         handleMove(e);
         
@@ -1844,10 +1834,9 @@
         document.addEventListener('touchmove', handleMove, { passive: false });
         document.addEventListener('mouseup', handleEnd);
         document.addEventListener('touchend', handleEnd);
-        document.addEventListener('touchcancel', handleEnd);
       }
       
-      // Click on wrapper to move slider (with smooth animation)
+      // Click on wrapper to move slider
       function handleWrapperClick(e) {
         // Don't trigger if clicking on handle or slider control
         if (e.target === handle || e.target === slider || handle.contains(e.target) || slider.contains(e.target)) {
@@ -1856,8 +1845,8 @@
         
         const rect = wrapper.getBoundingClientRect();
         const x = e.clientX - rect.left;
-        const position = Math.max(0, Math.min(100, (x / rect.width) * 100));
-        updateSlider(position, true);
+        const position = (x / rect.width) * 100;
+        updateSlider(position);
       }
       
       // Mouse events
@@ -1871,10 +1860,10 @@
       // Click on wrapper to move slider
       wrapper.addEventListener('click', handleWrapperClick);
       
-      // Initialize position
-      updateSlider(50, false);
+      // Initialize position at 50%
+      updateSlider(50);
       
-      console.log('Slider initialized successfully');
+      console.log('✅ Slider initialized successfully');
     }
   </script>
 
