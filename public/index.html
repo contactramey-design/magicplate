@@ -481,6 +481,9 @@
       visibility: visible !important;
       pointer-events: auto;
       user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
     }
     
     .before-after-wrapper:hover {
@@ -503,6 +506,9 @@
       position: relative;
       width: 100%;
       height: 100%;
+      user-select: none;
+      -webkit-user-select: none;
+      pointer-events: none;
     }
     
     .before-image,
@@ -514,6 +520,9 @@
       height: 100%;
       object-fit: cover;
       display: block;
+      user-select: none;
+      -webkit-user-select: none;
+      pointer-events: none;
     }
     
     .after-image {
@@ -1795,18 +1804,30 @@
         afterImage.style.clipPath = `inset(0 ${100 - currentPosition}% 0 0)`;
       }
       
+      // Prevent text selection on drag
+      function preventSelection(e) {
+        e.preventDefault();
+        return false;
+      }
+      
       // Mouse events
       handle.addEventListener('mousedown', (e) => {
         isDragging = true;
         handle.style.cursor = 'grabbing';
         e.preventDefault();
+        e.stopPropagation();
+        // Prevent text selection
+        document.addEventListener('selectstart', preventSelection);
+        document.body.style.userSelect = 'none';
+        document.body.style.webkitUserSelect = 'none';
       });
       
       document.addEventListener('mousemove', (e) => {
         if (!isDragging) return;
+        e.preventDefault();
         const rect = wrapper.getBoundingClientRect();
         const x = e.clientX - rect.left;
-        const percent = (x / rect.width) * 100;
+        const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
         updateSlider(percent);
       });
       
@@ -1814,6 +1835,10 @@
         if (isDragging) {
           isDragging = false;
           handle.style.cursor = 'grab';
+          // Re-enable text selection
+          document.removeEventListener('selectstart', preventSelection);
+          document.body.style.userSelect = '';
+          document.body.style.webkitUserSelect = '';
         }
       });
       
@@ -1821,13 +1846,15 @@
       handle.addEventListener('touchstart', (e) => {
         isDragging = true;
         e.preventDefault();
+        e.stopPropagation();
       });
       
       document.addEventListener('touchmove', (e) => {
         if (!isDragging) return;
+        e.preventDefault();
         const rect = wrapper.getBoundingClientRect();
         const x = e.touches[0].clientX - rect.left;
-        const percent = (x / rect.width) * 100;
+        const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
         updateSlider(percent);
       });
       
@@ -1842,7 +1869,7 @@
         }
         const rect = wrapper.getBoundingClientRect();
         const x = e.clientX - rect.left;
-        const percent = (x / rect.width) * 100;
+        const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
         updateSlider(percent);
       });
       
