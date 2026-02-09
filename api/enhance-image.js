@@ -650,6 +650,8 @@ Check: http://localhost:3000/api/check-config
           errorMessage = 'Leonardo API key is invalid or missing. Please check your LEONARDO_API_KEY.';
         } else if (apiError.response?.status === 402) {
           errorMessage = 'Leonardo account has insufficient credits. Please add credits to your account.';
+        } else if (apiError.response?.status === 403) {
+          errorMessage = 'Leonardo API access forbidden. This could mean: (1) Invalid API key, (2) Insufficient credits, (3) Rate limit exceeded, or (4) Account restrictions. Please check your Leonardo account and API key.';
         } else if (apiError.response?.status === 404) {
           errorMessage = 'Leonardo API endpoint not found. Please check the API documentation.';
         }

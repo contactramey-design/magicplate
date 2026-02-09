@@ -553,7 +553,17 @@
         
         if (!response.ok) {
           // Show detailed error message
-          const errorMsg = data.message || data.error || `Enhancement failed (${response.status})`;
+          let errorMsg = data.message || data.error || `Enhancement failed (${response.status})`;
+          
+          // Provide helpful messages for common errors
+          if (response.status === 403) {
+            errorMsg = 'Access forbidden. This usually means: (1) API key issue, (2) Insufficient credits, or (3) Rate limit exceeded. Please check your API configuration.';
+          } else if (response.status === 401) {
+            errorMsg = 'Authentication failed. Please check your API key configuration.';
+          } else if (response.status === 402) {
+            errorMsg = 'Insufficient credits. Please add credits to your AI service account.';
+          }
+          
           console.error('Enhancement API error:', {
             status: response.status,
             statusText: response.statusText,
