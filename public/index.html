@@ -479,6 +479,7 @@
       z-index: 100;
       opacity: 1 !important;
       visibility: visible !important;
+      pointer-events: auto;
     }
     
     .before-after-wrapper:hover {
@@ -530,6 +531,7 @@
       z-index: 10;
       cursor: col-resize;
       box-shadow: 0 0 20px rgba(76, 175, 80, 0.6);
+      pointer-events: auto;
     }
     
     .slider-handle {
@@ -551,9 +553,11 @@
       cursor: grab;
       transition: all 0.2s ease;
       z-index: 11;
+      pointer-events: auto;
     }
     
-    .slider-handle:active {
+    .slider-handle:active,
+    .slider-handle.dragging {
       cursor: grabbing;
       transform: translate(-50%, -50%) scale(1.15);
       box-shadow: 
@@ -1769,66 +1773,108 @@
       const slider = document.querySelector('.slider-control');
       const handle = document.querySelector('.slider-handle');
       const afterImage = document.getElementById('afterImage');
+      const beforeImage = document.getElementById('beforeImage');
       
-      if (!wrapper || !slider || !handle || !afterImage) return;
+      if (!wrapper || !slider || !handle || !afterImage || !beforeImage) {
+        console.warn('Slider elements not found');
+        return;
+      }
       
       let isDragging = false;
       let currentPosition = 50; // Start at 50%
       
-      function updateSlider(position) {
+      function updateSlider(position, smooth = false) {
         currentPosition = Math.max(0, Math.min(100, position));
+        
+        // Update slider control position
         slider.style.left = currentPosition + '%';
-        handle.style.left = currentPosition + '%';
+        
+        // Update handle position (handle is centered on slider, so it moves with it)
+        // The handle's transform already centers it, so we just need to position the slider
+        
+        // Update clip-path for after image
+        if (smooth) {
+          afterImage.style.transition = 'clip-path 0.1s ease-out';
+        } else {
+          afterImage.style.transition = 'none';
+        }
         afterImage.style.clipPath = `inset(0 ${100 - currentPosition}% 0 0)`;
       }
       
       function handleMove(e) {
         if (!isDragging) return;
         e.preventDefault();
+        e.stopPropagation();
         
         const rect = wrapper.getBoundingClientRect();
-        const x = (e.clientX || e.touches[0].clientX) - rect.left;
-        const position = (x / rect.width) * 100;
-        updateSlider(position);
+        const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+        if (!clientX) return;
+        
+        const x = clientX - rect.left;
+        const position = Math.max(0, Math.min(100, (x / rect.width) * 100));
+        updateSlider(position, false);
       }
       
-      function handleEnd() {
+      function handleEnd(e) {
+        if (!isDragging) return;
         isDragging = false;
         handle.style.cursor = 'grab';
+        handle.classList.remove('dragging');
+        afterImage.style.transition = 'clip-path 0.1s ease-out';
+        
         document.removeEventListener('mousemove', handleMove);
         document.removeEventListener('touchmove', handleMove);
         document.removeEventListener('mouseup', handleEnd);
         document.removeEventListener('touchend', handleEnd);
+        document.removeEventListener('touchcancel', handleEnd);
       }
       
       function handleStart(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
         isDragging = true;
         handle.style.cursor = 'grabbing';
+        handle.classList.add('dragging');
+        afterImage.style.transition = 'none';
+        
         handleMove(e);
+        
         document.addEventListener('mousemove', handleMove);
         document.addEventListener('touchmove', handleMove, { passive: false });
         document.addEventListener('mouseup', handleEnd);
         document.addEventListener('touchend', handleEnd);
+        document.addEventListener('touchcancel', handleEnd);
+      }
+      
+      // Click on wrapper to move slider (with smooth animation)
+      function handleWrapperClick(e) {
+        // Don't trigger if clicking on handle or slider control
+        if (e.target === handle || e.target === slider || handle.contains(e.target) || slider.contains(e.target)) {
+          return;
+        }
+        
+        const rect = wrapper.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const position = Math.max(0, Math.min(100, (x / rect.width) * 100));
+        updateSlider(position, true);
       }
       
       // Mouse events
       handle.addEventListener('mousedown', handleStart);
-      wrapper.addEventListener('mousedown', (e) => {
-        if (e.target === wrapper || e.target === slider) {
-          handleStart(e);
-        }
-      });
+      slider.addEventListener('mousedown', handleStart);
       
       // Touch events
       handle.addEventListener('touchstart', handleStart, { passive: false });
-      wrapper.addEventListener('touchstart', (e) => {
-        if (e.target === wrapper || e.target === slider) {
-          handleStart(e);
-        }
-      }, { passive: false });
+      slider.addEventListener('touchstart', handleStart, { passive: false });
+      
+      // Click on wrapper to move slider
+      wrapper.addEventListener('click', handleWrapperClick);
       
       // Initialize position
-      updateSlider(50);
+      updateSlider(50, false);
+      
+      console.log('Slider initialized successfully');
     }
   </script>
 
