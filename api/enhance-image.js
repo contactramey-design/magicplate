@@ -294,21 +294,35 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
     };
     const contentType = contentTypeMap[extension] || 'image/jpeg';
     
-    const uploadResponse = await axios.put(presignedUrl, imageBuffer, {
-      headers: {
-        'Content-Type': contentType,
-        'Content-Length': imageBuffer.length.toString()
-      },
-      maxContentLength: Infinity,
-      maxBodyLength: Infinity,
-      timeout: 120000 // 2 minutes max (presigned URLs expire)
-    });
-    
-    console.log('Image uploaded to S3 successfully, status:', uploadResponse.status);
-    console.log('Init image ID:', initImageId);
+    try {
+      const uploadResponse = await axios.put(presignedUrl, imageBuffer, {
+        headers: {
+          'Content-Type': contentType,
+          'Content-Length': imageBuffer.length.toString()
+        },
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity,
+        timeout: 120000 // 2 minutes max (presigned URLs expire)
+      });
+      
+      console.log('Image uploaded to S3 successfully, status:', uploadResponse.status);
+      console.log('Init image ID:', initImageId);
+    } catch (s3Error) {
+      console.error('S3 upload error:', s3Error.response?.status, s3Error.response?.data || s3Error.message);
+      if (s3Error.response?.status === 403) {
+        throw new Error('S3 upload forbidden (403). The presigned URL may have expired or access was denied. Please try uploading again.');
+      }
+      throw new Error(`Failed to upload image to S3: ${s3Error.response?.data || s3Error.message}`);
+    }
   } catch (uploadError) {
     console.error('Leonardo upload error:', uploadError.response?.data || uploadError.message);
     console.error('Upload error status:', uploadError.response?.status);
+    
+    // Handle 403 specifically
+    if (uploadError.response?.status === 403) {
+      throw new Error('Leonardo API access forbidden (403). Please check: (1) Your API key is valid, (2) You have sufficient credits, (3) Your account is not restricted.');
+    }
+    
     throw new Error(`Failed to upload image: ${uploadError.response?.data?.detail || uploadError.response?.data?.error || uploadError.message}`);
   }
 
