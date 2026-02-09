@@ -235,13 +235,30 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
     throw new Error('LEONARDO_API_KEY not configured');
   }
 
+  // Extract file extension from filename
+  const getExtension = (filename) => {
+    if (!filename) return 'jpg';
+    const parts = filename.toLowerCase().split('.');
+    if (parts.length < 2) return 'jpg';
+    const ext = parts[parts.length - 1];
+    // Normalize extension
+    if (ext === 'jpeg') return 'jpg';
+    if (['jpg', 'png', 'webp'].includes(ext)) return ext;
+    return 'jpg'; // Default to jpg
+  };
+
+  const extension = getExtension(imageName);
+
   // Step 1: Get presigned URL from Leonardo
   let initImageId;
   try {
     console.log('Requesting presigned URL from Leonardo...');
+    console.log('File extension:', extension);
     const initResponse = await axios.post(
       'https://cloud.leonardo.ai/api/rest/v1/init-image',
-      {},
+      {
+        extension: extension
+      },
       {
         headers: {
           'Authorization': `Bearer ${LEONARDO_API_KEY}`,
