@@ -1773,19 +1773,12 @@
       }, 100);
     });
     
-    // Before/After Image Slider - Simple and Direct
+    // Before/After Image Slider - Using working pattern from photo-enhancer
     function initBeforeAfterSlider() {
       const wrapper = document.querySelector('.before-after-wrapper');
       const slider = document.querySelector('.slider-control');
       const handle = document.getElementById('sliderHandle');
       const afterImage = document.getElementById('afterImage');
-      
-      console.log('Initializing slider...', {
-        wrapper: !!wrapper,
-        slider: !!slider,
-        handle: !!handle,
-        afterImage: !!afterImage
-      });
       
       if (!wrapper || !slider || !handle || !afterImage) {
         console.error('❌ Slider elements missing!');
@@ -1798,59 +1791,78 @@
       function updateSlider(position) {
         currentPosition = Math.max(0, Math.min(100, position));
         slider.style.left = currentPosition + '%';
+        afterImage.classList.add('no-transition');
         afterImage.style.clipPath = `inset(0 ${100 - currentPosition}% 0 0)`;
       }
       
-      function getPosition(e) {
-        const rect = wrapper.getBoundingClientRect();
-        const x = (e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0)) - rect.left;
-        return Math.max(0, Math.min(100, (x / rect.width) * 100));
-      }
-      
-      function onMove(e) {
-        if (!isDragging) return;
-        e.preventDefault();
-        afterImage.classList.add('no-transition');
-        updateSlider(getPosition(e));
-      }
-      
-      function onEnd() {
-        if (!isDragging) return;
-        isDragging = false;
-        handle.style.cursor = 'grab';
-        afterImage.classList.remove('no-transition');
-        document.removeEventListener('mousemove', onMove);
-        document.removeEventListener('touchmove', onMove);
-        document.removeEventListener('mouseup', onEnd);
-        document.removeEventListener('touchend', onEnd);
-      }
-      
-      function onStart(e) {
-        e.preventDefault();
+      // Mouse drag start
+      handle.addEventListener('mousedown', (e) => {
         isDragging = true;
         handle.style.cursor = 'grabbing';
-        updateSlider(getPosition(e));
-        document.addEventListener('mousemove', onMove);
-        document.addEventListener('touchmove', onMove, { passive: false });
-        document.addEventListener('mouseup', onEnd);
-        document.addEventListener('touchend', onEnd);
-      }
-      
-      // Click wrapper to move
-      wrapper.addEventListener('click', (e) => {
-        if (handle.contains(e.target) || slider.contains(e.target)) return;
-        updateSlider(getPosition(e));
+        e.preventDefault();
+        e.stopPropagation();
       });
       
-      // Drag handle or slider
-      handle.addEventListener('mousedown', onStart);
-      slider.addEventListener('mousedown', onStart);
-      handle.addEventListener('touchstart', onStart, { passive: false });
-      slider.addEventListener('touchstart', onStart, { passive: false });
+      // Mouse move
+      document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const rect = wrapper.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
+        updateSlider(percent);
+      });
       
-      // Initialize
+      // Mouse up
+      document.addEventListener('mouseup', () => {
+        if (isDragging) {
+          isDragging = false;
+          handle.style.cursor = 'grab';
+          afterImage.classList.remove('no-transition');
+        }
+      });
+      
+      // Touch start
+      handle.addEventListener('touchstart', (e) => {
+        isDragging = true;
+        e.preventDefault();
+        e.stopPropagation();
+      });
+      
+      // Touch move
+      document.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        const rect = wrapper.getBoundingClientRect();
+        const x = e.touches[0].clientX - rect.left;
+        const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
+        updateSlider(percent);
+      });
+      
+      // Touch end
+      document.addEventListener('touchend', () => {
+        if (isDragging) {
+          isDragging = false;
+          afterImage.classList.remove('no-transition');
+        }
+      });
+      
+      // Click on wrapper to move slider
+      wrapper.addEventListener('click', (e) => {
+        if (e.target === handle || e.target === slider || handle.contains(e.target) || slider.contains(e.target)) {
+          return;
+        }
+        const rect = wrapper.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
+        afterImage.classList.remove('no-transition');
+        updateSlider(percent);
+      });
+      
+      // Initialize at 50%
       updateSlider(50);
-      console.log('✅ Slider ready!');
+      afterImage.classList.remove('no-transition');
+      
+      console.log('✅ Slider initialized and ready!');
     }
   </script>
 
