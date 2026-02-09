@@ -547,6 +547,7 @@
       box-shadow: 0 0 20px rgba(76, 175, 80, 0.6);
       pointer-events: auto;
       user-select: none;
+      -webkit-user-select: none;
     }
     
     .slider-handle {
@@ -567,9 +568,13 @@
         0 4px 20px rgba(0,0,0,0.4);
       cursor: grab;
       transition: transform 0.2s ease;
-      z-index: 11;
+      z-index: 20;
       pointer-events: auto;
       user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      touch-action: none;
     }
     
     .slider-handle:active,
@@ -1810,7 +1815,7 @@
         return false;
       }
       
-      // Mouse events
+      // Mouse events on handle
       handle.addEventListener('mousedown', (e) => {
         isDragging = true;
         handle.style.cursor = 'grabbing';
@@ -1822,16 +1827,28 @@
         document.body.style.webkitUserSelect = 'none';
       });
       
+      // Also allow dragging from slider control
+      slider.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        handle.style.cursor = 'grabbing';
+        e.preventDefault();
+        e.stopPropagation();
+        document.addEventListener('selectstart', preventSelection);
+        document.body.style.userSelect = 'none';
+        document.body.style.webkitUserSelect = 'none';
+      });
+      
       document.addEventListener('mousemove', (e) => {
         if (!isDragging) return;
         e.preventDefault();
+        e.stopPropagation();
         const rect = wrapper.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
         updateSlider(percent);
       });
       
-      document.addEventListener('mouseup', () => {
+      document.addEventListener('mouseup', (e) => {
         if (isDragging) {
           isDragging = false;
           handle.style.cursor = 'grab';
@@ -1842,8 +1859,15 @@
         }
       });
       
-      // Touch events
+      // Touch events on handle
       handle.addEventListener('touchstart', (e) => {
+        isDragging = true;
+        e.preventDefault();
+        e.stopPropagation();
+      });
+      
+      // Also allow dragging from slider control
+      slider.addEventListener('touchstart', (e) => {
         isDragging = true;
         e.preventDefault();
         e.stopPropagation();
@@ -1852,6 +1876,7 @@
       document.addEventListener('touchmove', (e) => {
         if (!isDragging) return;
         e.preventDefault();
+        e.stopPropagation();
         const rect = wrapper.getBoundingClientRect();
         const x = e.touches[0].clientX - rect.left;
         const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
