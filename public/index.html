@@ -518,7 +518,11 @@
     
     .after-image {
       clip-path: inset(0 50% 0 0);
-      transition: clip-path 0.1s ease-out;
+      transition: clip-path 0.05s ease-out;
+    }
+    
+    .after-image.no-transition {
+      transition: none !important;
     }
     
     .slider-control {
