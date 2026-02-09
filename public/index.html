@@ -1771,13 +1771,10 @@
     // Initialize on load
     window.addEventListener('load', () => {
       createParticles();
-      // Wait a bit for DOM to be fully ready
-      setTimeout(() => {
-        initBeforeAfterSlider();
-      }, 100);
+      initBeforeAfterSlider();
     });
     
-    // Before/After Image Slider - Using working pattern from photo-enhancer
+    // Before/After Image Slider - Simple working version
     function initBeforeAfterSlider() {
       const wrapper = document.querySelector('.before-after-wrapper');
       const slider = document.querySelector('.slider-control');
@@ -1785,7 +1782,7 @@
       const afterImage = document.getElementById('afterImage');
       
       if (!wrapper || !slider || !handle || !afterImage) {
-        console.error('❌ Slider elements missing!');
+        console.warn('Slider elements not found');
         return;
       }
       
@@ -1795,59 +1792,47 @@
       function updateSlider(position) {
         currentPosition = Math.max(0, Math.min(100, position));
         slider.style.left = currentPosition + '%';
-        afterImage.classList.add('no-transition');
         afterImage.style.clipPath = `inset(0 ${100 - currentPosition}% 0 0)`;
       }
       
-      // Mouse drag start
+      // Mouse events
       handle.addEventListener('mousedown', (e) => {
         isDragging = true;
         handle.style.cursor = 'grabbing';
         e.preventDefault();
-        e.stopPropagation();
       });
       
-      // Mouse move
       document.addEventListener('mousemove', (e) => {
         if (!isDragging) return;
         const rect = wrapper.getBoundingClientRect();
         const x = e.clientX - rect.left;
-        const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
+        const percent = (x / rect.width) * 100;
         updateSlider(percent);
       });
       
-      // Mouse up
       document.addEventListener('mouseup', () => {
         if (isDragging) {
           isDragging = false;
           handle.style.cursor = 'grab';
-          afterImage.classList.remove('no-transition');
         }
       });
       
-      // Touch start
+      // Touch events
       handle.addEventListener('touchstart', (e) => {
         isDragging = true;
         e.preventDefault();
-        e.stopPropagation();
       });
       
-      // Touch move
       document.addEventListener('touchmove', (e) => {
         if (!isDragging) return;
-        e.preventDefault();
         const rect = wrapper.getBoundingClientRect();
         const x = e.touches[0].clientX - rect.left;
-        const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
+        const percent = (x / rect.width) * 100;
         updateSlider(percent);
       });
       
-      // Touch end
       document.addEventListener('touchend', () => {
-        if (isDragging) {
-          isDragging = false;
-          afterImage.classList.remove('no-transition');
-        }
+        isDragging = false;
       });
       
       // Click on wrapper to move slider
@@ -1857,16 +1842,12 @@
         }
         const rect = wrapper.getBoundingClientRect();
         const x = e.clientX - rect.left;
-        const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
-        afterImage.classList.remove('no-transition');
+        const percent = (x / rect.width) * 100;
         updateSlider(percent);
       });
       
-      // Initialize at 50%
+      // Initialize position
       updateSlider(50);
-      afterImage.classList.remove('no-transition');
-      
-      console.log('✅ Slider initialized and ready!');
     }
   </script>
 
