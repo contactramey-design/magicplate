@@ -1767,19 +1767,28 @@
     // Initialize on load
     window.addEventListener('load', () => {
       createParticles();
-      initBeforeAfterSlider();
+      // Wait a bit for DOM to be fully ready
+      setTimeout(() => {
+        initBeforeAfterSlider();
+      }, 100);
     });
     
-    // Before/After Image Slider
+    // Before/After Image Slider - Simple and Direct
     function initBeforeAfterSlider() {
       const wrapper = document.querySelector('.before-after-wrapper');
       const slider = document.querySelector('.slider-control');
       const handle = document.getElementById('sliderHandle');
       const afterImage = document.getElementById('afterImage');
-      const beforeImage = document.getElementById('beforeImage');
       
-      if (!wrapper || !slider || !handle || !afterImage || !beforeImage) {
-        console.warn('Slider elements not found');
+      console.log('Initializing slider...', {
+        wrapper: !!wrapper,
+        slider: !!slider,
+        handle: !!handle,
+        afterImage: !!afterImage
+      });
+      
+      if (!wrapper || !slider || !handle || !afterImage) {
+        console.error('❌ Slider elements missing!');
         return;
       }
       
@@ -1788,93 +1797,60 @@
       
       function updateSlider(position) {
         currentPosition = Math.max(0, Math.min(100, position));
-        
-        // Move slider control (it has translateX(-50%) so this centers it at position)
         slider.style.left = currentPosition + '%';
-        
-        // Update clip-path: reveal after image from left to right
-        // At 0%: show all before (clip 100% from right)
-        // At 50%: show half/half (clip 50% from right)
-        // At 100%: show all after (clip 0% from right)
         afterImage.style.clipPath = `inset(0 ${100 - currentPosition}% 0 0)`;
       }
       
-      function getPositionFromEvent(e) {
+      function getPosition(e) {
         const rect = wrapper.getBoundingClientRect();
-        const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
-        if (!clientX) return null;
-        
-        const x = clientX - rect.left;
+        const x = (e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0)) - rect.left;
         return Math.max(0, Math.min(100, (x / rect.width) * 100));
       }
       
-      function handleMove(e) {
+      function onMove(e) {
         if (!isDragging) return;
         e.preventDefault();
-        e.stopPropagation();
-        
-        const position = getPositionFromEvent(e);
-        if (position !== null) {
-          updateSlider(position);
-        }
+        afterImage.classList.add('no-transition');
+        updateSlider(getPosition(e));
       }
       
-      function handleEnd(e) {
+      function onEnd() {
         if (!isDragging) return;
         isDragging = false;
         handle.style.cursor = 'grab';
-        
-        document.removeEventListener('mousemove', handleMove);
-        document.removeEventListener('touchmove', handleMove);
-        document.removeEventListener('mouseup', handleEnd);
-        document.removeEventListener('touchend', handleEnd);
-        document.removeEventListener('touchcancel', handleEnd);
+        afterImage.classList.remove('no-transition');
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('touchmove', onMove);
+        document.removeEventListener('mouseup', onEnd);
+        document.removeEventListener('touchend', onEnd);
       }
       
-      function handleStart(e) {
+      function onStart(e) {
         e.preventDefault();
-        e.stopPropagation();
-        
         isDragging = true;
         handle.style.cursor = 'grabbing';
-        
-        const position = getPositionFromEvent(e);
-        if (position !== null) {
-          updateSlider(position);
-        }
-        
-        document.addEventListener('mousemove', handleMove);
-        document.addEventListener('touchmove', handleMove, { passive: false });
-        document.addEventListener('mouseup', handleEnd);
-        document.addEventListener('touchend', handleEnd);
-        document.addEventListener('touchcancel', handleEnd);
+        updateSlider(getPosition(e));
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('touchmove', onMove, { passive: false });
+        document.addEventListener('mouseup', onEnd);
+        document.addEventListener('touchend', onEnd);
       }
       
-      // Click anywhere on wrapper to move slider
+      // Click wrapper to move
       wrapper.addEventListener('click', (e) => {
-        // Don't trigger if clicking on handle or slider control
-        if (handle.contains(e.target) || slider.contains(e.target)) {
-          return;
-        }
-        
-        const position = getPositionFromEvent(e);
-        if (position !== null) {
-          updateSlider(position);
-        }
+        if (handle.contains(e.target) || slider.contains(e.target)) return;
+        updateSlider(getPosition(e));
       });
       
-      // Mouse events on handle and slider
-      handle.addEventListener('mousedown', handleStart);
-      slider.addEventListener('mousedown', handleStart);
+      // Drag handle or slider
+      handle.addEventListener('mousedown', onStart);
+      slider.addEventListener('mousedown', onStart);
+      handle.addEventListener('touchstart', onStart, { passive: false });
+      slider.addEventListener('touchstart', onStart, { passive: false });
       
-      // Touch events on handle and slider
-      handle.addEventListener('touchstart', handleStart, { passive: false });
-      slider.addEventListener('touchstart', handleStart, { passive: false });
-      
-      // Initialize at 50%
+      // Initialize
       updateSlider(50);
-      
-      console.log('✅ Slider initialized');
+      console.log('✅ Slider ready!');
     }
   </script>
 
