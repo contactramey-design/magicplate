@@ -707,7 +707,7 @@
         const rect = sliderWrapper.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
-        updateSlider(percent, false);
+        updateSlider(percent);
       };
       
       // Mouse up handler
@@ -740,7 +740,7 @@
         const rect = sliderWrapper.getBoundingClientRect();
         const x = e.touches[0].clientX - rect.left;
         const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
-        updateSlider(percent, false);
+        updateSlider(percent);
       };
       
       // Touch end handler
