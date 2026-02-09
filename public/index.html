@@ -238,15 +238,7 @@
     }
     
     .hero-section::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.1) 100%);
-      pointer-events: none;
-      z-index: 1;
+      display: none; /* Removed overlay that was hiding slider */
     }
     
     @keyframes pulseGlow {
@@ -264,8 +256,9 @@
       max-width: 700px;
       margin: 0 auto;
       position: relative;
-      z-index: 10;
-      opacity: 1;
+      z-index: 100;
+      opacity: 1 !important;
+      visibility: visible !important;
     }
     
     .intro-image {
@@ -483,7 +476,9 @@
       animation: imagePulse 4s ease-in-out infinite;
       cursor: col-resize;
       position: relative;
-      z-index: 2;
+      z-index: 100;
+      opacity: 1 !important;
+      visibility: visible !important;
     }
     
     .before-after-wrapper:hover {
