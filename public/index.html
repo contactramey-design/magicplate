@@ -244,7 +244,9 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.7) 100%);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.1) 100%);
+      pointer-events: none;
+      z-index: 1;
     }
     
     @keyframes pulseGlow {
@@ -262,7 +264,8 @@
       max-width: 700px;
       margin: 0 auto;
       position: relative;
-      z-index: 2;
+      z-index: 10;
+      opacity: 1;
     }
     
     .intro-image {
@@ -441,6 +444,9 @@
       margin: 50px 0;
       perspective: 1000px;
       animation: fadeInUp 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1.5s both;
+      opacity: 1;
+      z-index: 10;
+      position: relative;
     }
     
     @keyframes fadeInUp {
@@ -459,6 +465,9 @@
       width: 100%;
       max-width: 550px;
       margin: 0 auto;
+      opacity: 1;
+      z-index: 10;
+      position: relative;
     }
     
     .before-after-wrapper {
@@ -1728,8 +1737,9 @@
       const heroContent = document.querySelector('.hero-content');
       
       if (heroContent) {
-        // Light parallax only, no fade
-        heroContent.style.transform = `translateY(${scrolled * 0.2}px)`;
+        // Light parallax only, no fade, ensure opacity stays at 1
+        heroContent.style.transform = `translateY(${scrolled * 0.1}px)`;
+        heroContent.style.opacity = '1';
       }
     });
     
