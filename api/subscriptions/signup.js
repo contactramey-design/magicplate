@@ -1,5 +1,5 @@
-// Subscription Signup API
-// Handles new subscription signups with restaurant creation
+// Purchase Signup API
+// Handles one-time purchases with restaurant creation
 
 const { insert, findAll } = require('../../lib/db');
 const { setupRestaurantAvatar } = require('../../scripts/setup-restaurant-avatar');
@@ -13,7 +13,7 @@ module.exports = async (req, res) => {
       phone, 
       website, 
       tier, 
-      billing_cycle = 'monthly',
+      billing_cycle = 'one-time',
       setup_avatar = false,
       create_welcome_video = false,
       restaurant_name,
@@ -43,20 +43,18 @@ module.exports = async (req, res) => {
       status: 'active'
     });
     
-    // Step 2: Create subscription
-    const renewalDate = new Date();
-    if (billing_cycle === 'monthly') {
-      renewalDate.setMonth(renewalDate.getMonth() + 1);
-    } else if (billing_cycle === 'annual') {
-      renewalDate.setFullYear(renewalDate.getFullYear() + 1);
-    }
+    // Step 2: Create purchase record (one-time payment model)
+    // Note: billing_cycle is now 'one-time' for all purchases
+    const purchaseDate = new Date();
     
     const subscription = await insert('subscriptions', {
       restaurant_id: restaurant.restaurant_id,
       tier,
       status: 'active',
-      billing_cycle,
-      renewal_date: renewalDate.toISOString()
+      billing_cycle: 'one-time', // All purchases are one-time
+      renewal_date: null, // No renewal for one-time purchases
+      purchase_date: purchaseDate.toISOString(),
+      payment_type: 'one-time'
     });
     
     // Step 3: Create first location if address provided
@@ -96,9 +94,24 @@ module.exports = async (req, res) => {
       }
     }
     
-    // TODO: Integrate with Stripe for payment processing
-    // const stripeCustomer = await stripe.customers.create({ email, name });
-    // const stripeSubscription = await stripe.subscriptions.create({...});
+    // TODO: Integrate with Stripe for one-time payment processing
+    // For one-time payments, use Stripe Checkout Sessions:
+    // const session = await stripe.checkout.sessions.create({
+    //   payment_method_types: ['card'],
+    //   line_items: [{
+    //     price_data: {
+    //       currency: 'usd',
+    //       product_data: { name: `${tier} Plan - One-Time Purchase` },
+    //       unit_amount: tier === 'starter' ? 9900 : tier === 'professional' ? 29900 : 79900, // $99, $299, $799
+    //     },
+    //     quantity: 1,
+    //   }],
+    //   mode: 'payment', // One-time payment, not subscription
+    //   success_url: `${process.env.BASE_URL}/dashboard.html?tier=${tier}&purchase=success`,
+    //   cancel_url: `${process.env.BASE_URL}/#pricing`,
+    //   customer_email: email,
+    // });
+    // return res.json({ sessionId: session.id, url: session.url });
     
     res.json({
       success: true,
@@ -122,7 +135,7 @@ module.exports = async (req, res) => {
       } : null,
       avatar: avatarResult?.avatar || null,
       welcome_video: avatarResult?.welcome_video || null,
-      message: 'Subscription created successfully! Welcome to MagicPlate.ai',
+      message: 'Purchase successful! Welcome to MagicPlate.ai - You now have lifetime access!',
       next_steps: [
         'Check your email for onboarding instructions',
         'Set up your brand guidelines',
@@ -132,6 +145,6 @@ module.exports = async (req, res) => {
     });
   } catch (error) {
     console.error('Error in subscription signup:', error);
-    res.status(500).json({ error: 'Failed to create subscription', details: error.message });
+    res.status(500).json({ error: 'Failed to process purchase', details: error.message });
   }
 };

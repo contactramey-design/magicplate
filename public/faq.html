@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FAQ - MagicPlate.ai</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #ffffff;
+      color: #1a1a1a;
+      line-height: 1.8;
+    }
+    .header {
+      background: rgba(255, 255, 255, 0.98);
+      padding: 20px 40px;
+      border-bottom: 1px solid rgba(76, 175, 80, 0.2);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 4px 30px rgba(0,0,0,0.1);
+    }
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      color: #4caf50;
+      text-decoration: none;
+    }
+    .nav-link {
+      color: rgba(26, 26, 26, 0.9);
+      text-decoration: none;
+      margin-left: 30px;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+    .nav-link:hover {
+      color: #4caf50;
+    }
+    .content {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 60px 20px;
+    }
+    h1 {
+      font-size: 3em;
+      color: #1a1a1a;
+      margin-bottom: 20px;
+      font-weight: 700;
+      text-align: center;
+    }
+    .intro {
+      text-align: center;
+      color: rgba(26, 26, 26, 0.7);
+      font-size: 1.2em;
+      margin-bottom: 50px;
+    }
+    .faq-item {
+      margin-bottom: 30px;
+      border-bottom: 1px solid rgba(76, 175, 80, 0.2);
+      padding-bottom: 30px;
+    }
+    .faq-question {
+      font-size: 1.5em;
+      color: #4caf50;
+      margin-bottom: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .faq-question:hover {
+      color: #66bb6a;
+    }
+    .faq-answer {
+      color: rgba(26, 26, 26, 0.8);
+      line-height: 1.8;
+      margin-top: 10px;
+    }
+    .faq-answer ul {
+      margin-left: 30px;
+      margin-top: 10px;
+    }
+    .faq-answer li {
+      margin-bottom: 8px;
+    }
+    .category {
+      margin-top: 60px;
+      margin-bottom: 30px;
+      font-size: 2em;
+      color: #1a1a1a;
+      font-weight: 700;
+      border-bottom: 3px solid #4caf50;
+      padding-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-content">
+      <a href="/" class="logo">MagicPlate.ai</a>
+      <nav>
+        <a href="/" class="nav-link">Home</a>
+        <a href="/#pricing" class="nav-link">Pricing</a>
+        <a href="/#contact" class="nav-link">Contact</a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="content">
+    <h1>Frequently Asked Questions</h1>
+    <p class="intro">Find answers to common questions about MagicPlate.ai</p>
+
+    <div class="category">Pricing & Payment</div>
+
+    <div class="faq-item">
+      <div class="faq-question">What happens after my one-time purchase?</div>
+      <div class="faq-answer">
+        <p>After your one-time purchase, you receive immediate lifetime access to all features included in your plan. You'll get:</p>
+        <ul>
+          <li>Instant access to your dashboard</li>
+          <li>Email with login credentials and onboarding instructions</li>
+          <li>Lifetime access to all purchased features (no recurring fees)</li>
+          <li>Access to updates and improvements (at our discretion)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">Are there any hidden fees?</div>
+      <div class="faq-answer">
+        <p>No hidden fees! The price you see is the price you pay - one time, for lifetime access. There are no recurring monthly or annual charges. The only potential additional costs would be:</p>
+        <ul>
+          <li>Optional premium support services (clearly marked if available)</li>
+          <li>Future add-on features (optional, clearly priced)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">What payment methods do you accept?</div>
+      <div class="faq-answer">
+        <p>We accept all major credit cards, debit cards, and PayPal through our secure payment processors (Stripe and PayPal). All payments are processed securely and we never store your full payment information.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">Can I get a refund?</div>
+      <div class="faq-answer">
+        <p>Yes! We offer a 7-day money-back guarantee if you haven't used the Service. Once you've used any features (enhanced photos, created menus, etc.), all sales are final. See our <a href="/refund-policy.html" style="color: #4caf50;">Refund Policy</a> for full details.</p>
+      </div>
+    </div>
+
+    <div class="category">Features & Usage</div>
+
+    <div class="faq-item">
+      <div class="faq-question">How does AI photo enhancement work?</div>
+      <div class="faq-answer">
+        <p>Our AI photo enhancement uses advanced machine learning to improve your existing food photos ethically. We:</p>
+        <ul>
+          <li>Enhance lighting, colors, and composition</li>
+          <li>Remove unwanted shadows or reflections</li>
+          <li>Improve sharpness and clarity</li>
+          <li>Maintain the authenticity of your actual food</li>
+        </ul>
+        <p><strong>Important:</strong> We do NOT generate new food items or misrepresent your offerings. We enhance what's already in your photo.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">Is the AI enhancement truly ethical?</div>
+      <div class="faq-answer">
+        <p>Absolutely! Our AI enhancement is designed to be ethical and transparent:</p>
+        <ul>
+          <li>We enhance existing photos, not generate new content</li>
+          <li>We don't add food items that weren't in the original photo</li>
+          <li>We improve lighting, colors, and presentation - not the food itself</li>
+          <li>We maintain authenticity and truthfulness in your menu representation</li>
+        </ul>
+        <p>This ensures customers see accurate representations of what you actually serve.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">What's included in "lifetime access"?</div>
+      <div class="faq-answer">
+        <p>Lifetime access means:</p>
+        <ul>
+          <li>You can use all purchased features indefinitely</li>
+          <li>No recurring fees or subscription renewals</li>
+          <li>Access to bug fixes and security updates</li>
+          <li>Access to new features (at our discretion, not guaranteed)</li>
+        </ul>
+        <p>Note: If we discontinue the service entirely, we'll provide reasonable notice and export options.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">How do I get support?</div>
+      <div class="faq-answer">
+        <p>Support options vary by plan:</p>
+        <ul>
+          <li><strong>Starter:</strong> Email support (response within 48 hours)</li>
+          <li><strong>Professional:</strong> Priority email and chat support (faster response times)</li>
+          <li><strong>Enterprise:</strong> Dedicated account manager with personalized support</li>
+        </ul>
+        <p>Contact us at <a href="mailto:sydney@magicplate.info" style="color: #4caf50;">sydney@magicplate.info</a> or (805) 668-9973.</p>
+      </div>
+    </div>
+
+    <div class="category">Technical Questions</div>
+
+    <div class="faq-item">
+      <div class="faq-question">Do I need technical skills to use MagicPlate?</div>
+      <div class="faq-answer">
+        <p>No technical skills required! MagicPlate is designed for restaurant owners, not developers. Our interface is intuitive and user-friendly. If you can use email and upload photos, you can use MagicPlate.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">What file formats do you support?</div>
+      <div class="faq-answer">
+        <p>For photo enhancement, we support:</p>
+        <ul>
+          <li>JPEG/JPG</li>
+          <li>PNG</li>
+          <li>WebP</li>
+        </ul>
+        <p>Maximum file size: 10MB per image. For best results, use high-resolution photos (at least 1200px on the longest side).</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">Can I use MagicPlate on mobile devices?</div>
+      <div class="faq-answer">
+        <p>Yes! MagicPlate is fully responsive and works on:</p>
+        <ul>
+          <li>Desktop computers (Windows, Mac, Linux)</li>
+          <li>Tablets (iPad, Android tablets)</li>
+          <li>Smartphones (iPhone, Android)</li>
+        </ul>
+        <p>You can upload photos, create menus, and manage your account from any device with a web browser.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">How do I integrate with my existing systems?</div>
+      <div class="faq-answer">
+        <p>Integration options vary by plan:</p>
+        <ul>
+          <li><strong>Starter/Professional:</strong> Manual export of enhanced photos and menu data</li>
+          <li><strong>Enterprise:</strong> Full API access for integration with POS systems, websites, and custom applications</li>
+        </ul>
+        <p>Contact us if you need help with integration - we're happy to assist!</p>
+      </div>
+    </div>
+
+    <div class="category">Account & Access</div>
+
+    <div class="faq-item">
+      <div class="faq-question">How do I create an account?</div>
+      <div class="faq-answer">
+        <p>When you purchase a plan, an account is automatically created for you. You'll receive:</p>
+        <ul>
+          <li>Email with login credentials</li>
+          <li>Link to access your dashboard</li>
+          <li>Onboarding instructions</li>
+        </ul>
+        <p>If you don't receive this email, check your spam folder or contact us.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">Can I upgrade my plan later?</div>
+      <div class="faq-answer">
+        <p>Yes! You can upgrade from Starter to Professional or Professional to Enterprise at any time. When upgrading:</p>
+        <ul>
+          <li>You pay the difference between plans (one-time)</li>
+          <li>You immediately gain access to all new features</li>
+          <li>Your existing data and work are preserved</li>
+        </ul>
+        <p>Contact us to discuss upgrade options.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">What happens if I forget my password?</div>
+      <div class="faq-answer">
+        <p>Use the "Forgot Password" link on the login page. We'll send a password reset link to your registered email address. If you have trouble, contact support at <a href="mailto:sydney@magicplate.info" style="color: #4caf50;">sydney@magicplate.info</a>.</p>
+      </div>
+    </div>
+
+    <div class="category">Business & Legal</div>
+
+    <div class="faq-item">
+      <div class="faq-question">Who owns the enhanced photos?</div>
+      <div class="faq-answer">
+        <p>You own your original photos and the enhanced versions. You can use them for:</p>
+        <ul>
+          <li>Your website and social media</li>
+          <li>Menus and marketing materials</li>
+          <li>Delivery platforms (DoorDash, Uber Eats, etc.)</li>
+          <li>Any commercial use related to your restaurant</li>
+        </ul>
+        <p>You may not resell the AI enhancement service itself or claim ownership of our AI technology.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">Is my data secure?</div>
+      <div class="faq-answer">
+        <p>Yes! We take data security seriously:</p>
+        <ul>
+          <li>All data is encrypted in transit and at rest</li>
+          <li>Secure payment processing (we never see your full card details)</li>
+          <li>Regular security assessments</li>
+          <li>Access controls and authentication</li>
+        </ul>
+        <p>See our <a href="/privacy-policy.html" style="color: #4caf50;">Privacy Policy</a> for full details.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">Do you offer discounts for multiple locations?</div>
+      <div class="faq-answer">
+        <p>Enterprise plans include unlimited locations. For multiple single-location purchases, contact us at <a href="mailto:sydney@magicplate.info" style="color: #4caf50;">sydney@magicplate.info</a> to discuss volume pricing options.</p>
+      </div>
+    </div>
+
+    <div style="margin-top: 60px; padding: 40px; background: rgba(76, 175, 80, 0.1); border-radius: 15px; text-align: center;">
+      <h2 style="color: #4caf50; margin-bottom: 20px;">Still Have Questions?</h2>
+      <p style="margin-bottom: 20px;">We're here to help! Contact us and we'll get back to you as soon as possible.</p>
+      <a href="/#contact" style="display: inline-block; background: linear-gradient(135deg, #4caf50, #66bb6a); color: white; padding: 15px 35px; border-radius: 30px; text-decoration: none; font-weight: 600; margin-top: 10px;">Contact Us</a>
+    </div>
+  </div>
+</body>
+</html>

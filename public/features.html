@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Features - MagicPlate.ai</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #ffffff;
+      color: #1a1a1a;
+      line-height: 1.8;
+    }
+    .header {
+      background: rgba(255, 255, 255, 0.98);
+      padding: 20px 40px;
+      border-bottom: 1px solid rgba(76, 175, 80, 0.2);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 4px 30px rgba(0,0,0,0.1);
+    }
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      color: #4caf50;
+      text-decoration: none;
+    }
+    .nav-link {
+      color: rgba(26, 26, 26, 0.9);
+      text-decoration: none;
+      margin-left: 30px;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+    .nav-link:hover {
+      color: #4caf50;
+    }
+    .hero {
+      background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(255, 255, 255, 0.98) 100%);
+      padding: 100px 20px 60px;
+      text-align: center;
+    }
+    h1 {
+      font-size: 3.5em;
+      color: #1a1a1a;
+      margin-bottom: 20px;
+      font-weight: 700;
+    }
+    .hero-subtitle {
+      font-size: 1.3em;
+      color: rgba(26, 26, 26, 0.7);
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 80px 20px;
+    }
+    .feature-section {
+      margin-bottom: 80px;
+    }
+    .feature-section h2 {
+      font-size: 2.5em;
+      color: #4caf50;
+      margin-bottom: 40px;
+      font-weight: 700;
+      text-align: center;
+    }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 30px;
+    }
+    .feature-card {
+      background: rgba(255, 255, 255, 0.9);
+      border: 2px solid rgba(76, 175, 80, 0.15);
+      border-radius: 20px;
+      padding: 40px;
+      transition: all 0.3s;
+    }
+    .feature-card:hover {
+      border-color: #4caf50;
+      box-shadow: 0 10px 40px rgba(76, 175, 80, 0.2);
+      transform: translateY(-5px);
+    }
+    .feature-icon {
+      font-size: 3em;
+      margin-bottom: 20px;
+    }
+    .feature-card h3 {
+      color: #4caf50;
+      font-size: 1.8em;
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+    .feature-card p {
+      color: rgba(26, 26, 26, 0.8);
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+    .feature-card ul {
+      list-style: none;
+      padding: 0;
+    }
+    .feature-card li {
+      padding: 8px 0;
+      color: rgba(26, 26, 26, 0.8);
+      border-bottom: 1px solid rgba(76, 175, 80, 0.1);
+    }
+    .feature-card li:last-child {
+      border-bottom: none;
+    }
+    .feature-card li:before {
+      content: "✅ ";
+      color: #4caf50;
+      font-weight: bold;
+    }
+    .cta-section {
+      background: linear-gradient(135deg, #4caf50, #66bb6a);
+      color: white;
+      padding: 80px 20px;
+      text-align: center;
+      border-radius: 20px;
+      margin-top: 60px;
+    }
+    .cta-button {
+      display: inline-block;
+      background: white;
+      color: #4caf50;
+      padding: 18px 45px;
+      border-radius: 35px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 18px;
+      margin-top: 30px;
+      transition: all 0.3s;
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
+    }
+    .cta-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-content">
+      <a href="/" class="logo">MagicPlate.ai</a>
+      <nav>
+        <a href="/" class="nav-link">Home</a>
+        <a href="/features.html" class="nav-link">Features</a>
+        <a href="/#pricing" class="nav-link">Pricing</a>
+        <a href="/faq.html" class="nav-link">FAQ</a>
+        <a href="/#contact" class="nav-link">Contact</a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="hero">
+    <h1>Powerful Features for Your Restaurant</h1>
+    <p class="hero-subtitle">Everything you need to transform your menu presentation, boost your online presence, and grow your business.</p>
+  </div>
+
+  <div class="content">
+    <div class="feature-section">
+      <h2>AI Photo Enhancement</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon">✨</div>
+          <h3>Ethical AI Enhancement</h3>
+          <p>Transform your existing food photos with AI-powered enhancement. We improve lighting, colors, and composition while maintaining authenticity.</p>
+          <ul>
+            <li>Enhance lighting and shadows</li>
+            <li>Improve color saturation</li>
+            <li>Remove unwanted reflections</li>
+            <li>Maintain food authenticity</li>
+            <li>Professional quality results</li>
+          </ul>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎨</div>
+          <h3>Style-Specific Enhancement</h3>
+          <p>Choose from restaurant-specific styles: Fine Dining, Casual, Fast Casual, Sushi, BBQ, and more. Each style is optimized for that cuisine type.</p>
+          <ul>
+            <li>10+ restaurant style presets</li>
+            <li>Custom style options</li>
+            <li>Before/after comparison</li>
+            <li>Batch processing available</li>
+            <li>High-resolution output</li>
+          </ul>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📸</div>
+          <h3>Easy Upload & Download</h3>
+          <p>Simple drag-and-drop interface. Upload photos, enhance them instantly, and download professional-quality results.</p>
+          <ul>
+            <li>Drag & drop upload</li>
+            <li>Multiple format support</li>
+            <li>Instant processing</li>
+            <li>Download enhanced images</li>
+            <li>Cloud storage included</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature-section">
+      <h2>Digital Menu Creation</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon">📱</div>
+          <h3>Interactive Digital Menus</h3>
+          <p>Create beautiful, shareable digital menus with QR codes. Perfect for tables, social media, and online sharing.</p>
+          <ul>
+            <li>Easy menu builder</li>
+            <li>QR code generation</li>
+            <li>Mobile-responsive design</li>
+            <li>Item previews with photos</li>
+            <li>Shareable links</li>
+          </ul>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎬</div>
+          <h3>Video Previews</h3>
+          <p>Add video previews to menu items. Show your food in action with short clips that make customers hungry.</p>
+          <ul>
+            <li>Video upload support</li>
+            <li>Automatic optimization</li>
+            <li>Mobile-friendly playback</li>
+            <li>Custom video thumbnails</li>
+            <li>Embedded player</li>
+          </ul>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔄</div>
+          <h3>Easy Updates</h3>
+          <p>Update your menu anytime, anywhere. Changes sync instantly across all platforms and QR codes.</p>
+          <ul>
+            <li>Real-time updates</li>
+            <li>Version history</li>
+            <li>Bulk item management</li>
+            <li>Price updates</li>
+            <li>Seasonal menu support</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature-section">
+      <h2>Marketing & Social Media</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon">📱</div>
+          <h3>AI Social Media Posts</h3>
+          <p>Generate engaging social media content automatically. Keep your Instagram, Facebook, and TikTok feeds active.</p>
+          <ul>
+            <li>AI-generated captions</li>
+            <li>Hashtag suggestions</li>
+            <li>Post scheduling</li>
+            <li>Multi-platform support</li>
+            <li>Content calendar</li>
+          </ul>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">✉️</div>
+          <h3>Email Marketing</h3>
+          <p>Create and send personalized email campaigns to engage customers and drive repeat business.</p>
+          <ul>
+            <li>Email template library</li>
+            <li>Customer segmentation</li>
+            <li>Automated campaigns</li>
+            <li>Open/click tracking</li>
+            <li>A/B testing</li>
+          </ul>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔔</div>
+          <h3>Menu Update Notifications</h3>
+          <p>Automatically notify customers when you add new items or update your menu. Keep your audience engaged.</p>
+          <ul>
+            <li>Automatic notifications</li>
+            <li>Email & SMS options</li>
+            <li>Customizable messages</li>
+            <li>Customer preferences</li>
+            <li>Engagement tracking</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature-section">
+      <h2>SEO & Online Presence</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🔍</div>
+          <h3>SEO Optimization</h3>
+          <p>Optimize your menu descriptions and content for search engines. Improve your Google Business Profile and local SEO.</p>
+          <ul>
+            <li>Keyword optimization</li>
+            <li>Meta descriptions</li>
+            <li>Schema markup</li>
+            <li>Local SEO tools</li>
+            <li>Performance analytics</li>
+          </ul>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📍</div>
+          <h3>Google Business Profile</h3>
+          <p>Integrate with Google Business Profile to improve your local search visibility and customer engagement.</p>
+          <ul>
+            <li>Profile optimization</li>
+            <li>Review response generation</li>
+            <li>Post scheduling</li>
+            <li>Photo uploads</li>
+            <li>Analytics integration</li>
+          </ul>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h3>Analytics & Reporting</h3>
+          <p>Track your performance with comprehensive analytics. See what's working and optimize your strategy.</p>
+          <ul>
+            <li>Menu view analytics</li>
+            <li>Social media metrics</li>
+            <li>Email campaign stats</li>
+            <li>Customer engagement</li>
+            <li>ROI reporting</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature-section">
+      <h2>Enterprise Features</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🌐</div>
+          <h3>Multi-Location Management</h3>
+          <p>Manage unlimited restaurant locations from one central dashboard. Perfect for franchises and chains.</p>
+          <ul>
+            <li>Unlimited locations</li>
+            <li>Centralized control</li>
+            <li>Location-specific customization</li>
+            <li>Bulk operations</li>
+            <li>Location analytics</li>
+          </ul>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎨</div>
+          <h3>Brand Consistency</h3>
+          <p>Ensure all locations maintain consistent branding, colors, fonts, and messaging across your franchise.</p>
+          <ul>
+            <li>Brand guidelines dashboard</li>
+            <li>Content validation</li>
+            <li>Template enforcement</li>
+            <li>Approval workflows</li>
+            <li>Brand compliance reports</li>
+          </ul>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎓</div>
+          <h3>Franchise Training</h3>
+          <p>Complete training system with HeyGen video modules for staff onboarding and brand standards.</p>
+          <ul>
+            <li>Video training modules</li>
+            <li>Completion tracking</li>
+            <li>Certification system</li>
+            <li>Multi-language support</li>
+            <li>Progress analytics</li>
+          </ul>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎬</div>
+          <h3>HeyGen Avatar Videos</h3>
+          <p>Create personalized virtual host videos for your restaurant. Welcome customers with custom avatars.</p>
+          <ul>
+            <li>Custom avatar creation</li>
+            <li>Welcome video generation</li>
+            <li>Multi-language support</li>
+            <li>Location-specific avatars</li>
+            <li>Video customization</li>
+          </ul>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔌</div>
+          <h3>API Access</h3>
+          <p>Full API access to integrate MagicPlate with your existing systems, POS, and custom applications.</p>
+          <ul>
+            <li>RESTful API</li>
+            <li>Comprehensive documentation</li>
+            <li>Webhook support</li>
+            <li>Rate limiting</li>
+            <li>Developer support</li>
+          </ul>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🏷️</div>
+          <h3>White-Label Options</h3>
+          <p>White-label the platform with your branding. Perfect for franchise systems wanting their own brand identity.</p>
+          <ul>
+            <li>Custom branding</li>
+            <li>Logo replacement</li>
+            <li>Color customization</li>
+            <li>Domain mapping</li>
+            <li>Brand removal</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="cta-section">
+      <h2 style="color: white; font-size: 2.5em; margin-bottom: 20px;">Ready to Transform Your Restaurant?</h2>
+      <p style="font-size: 1.2em; margin-bottom: 20px;">Choose a plan and get lifetime access to all these powerful features.</p>
+      <a href="/#pricing" class="cta-button">View Pricing</a>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 - Page Not Found - MagicPlate.ai</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(255, 255, 255, 0.98) 100%);
+      color: #1a1a1a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+    }
+    .error-code {
+      font-size: 8em;
+      font-weight: 900;
+      color: #4caf50;
+      line-height: 1;
+      margin-bottom: 20px;
+      text-shadow: 0 4px 20px rgba(76, 175, 80, 0.3);
+    }
+    h1 {
+      font-size: 2.5em;
+      color: #1a1a1a;
+      margin-bottom: 20px;
+      font-weight: 700;
+    }
+    .message {
+      font-size: 1.2em;
+      color: rgba(26, 26, 26, 0.7);
+      margin-bottom: 40px;
+      line-height: 1.8;
+    }
+    .emoji {
+      font-size: 4em;
+      margin-bottom: 20px;
+    }
+    .links {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 40px;
+    }
+    .link-button {
+      display: inline-block;
+      padding: 15px 30px;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .primary {
+      background: linear-gradient(135deg, #4caf50, #66bb6a);
+      color: white;
+      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    }
+    .primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(76, 175, 80, 0.5);
+    }
+    .secondary {
+      background: white;
+      color: #4caf50;
+      border: 2px solid #4caf50;
+    }
+    .secondary:hover {
+      background: rgba(76, 175, 80, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="emoji">🍽️</div>
+    <div class="error-code">404</div>
+    <h1>Plate Not Found</h1>
+    <p class="message">Oops! The page you're looking for seems to have been removed from the menu. Don't worry - we've got plenty of other delicious options!</p>
+    <div class="links">
+      <a href="/" class="link-button primary">Go Home</a>
+      <a href="/#pricing" class="link-button secondary">View Pricing</a>
+      <a href="/#contact" class="link-button secondary">Contact Us</a>
+    </div>
+  </div>
+</body>
+</html>

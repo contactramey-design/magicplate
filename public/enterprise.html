@@ -202,8 +202,8 @@
     <div class="hero-content">
       <div class="tier-badge">ENTERPRISE PLAN</div>
       <h1>Complete Franchise Solution</h1>
-      <div class="price">$799<span class="price-period">/month</span></div>
-      <p class="description">Everything you need for multi-location management, brand consistency, and franchise operations</p>
+      <div class="price">$799<span class="price-period"> (one-time)</span></div>
+      <p class="description">One-time purchase includes lifetime access to complete franchise solutions. No recurring fees.</p>
     </div>
   </div>
 
@@ -401,8 +401,7 @@
         <div style="margin-bottom: 20px;">
           <label style="display: block; color: white; margin-bottom: 8px; font-weight: 600;">Billing Cycle *</label>
           <select id="billingCycle" required style="width: 100%; padding: 14px; border-radius: 10px; border: none; font-size: 16px;">
-            <option value="monthly">Monthly ($799/month)</option>
-            <option value="annual">Annual ($7,980/year - Save $1,608!)</option>
+            <option value="one-time">One-Time Payment ($799)</option>
           </select>
         </div>
         
@@ -419,7 +418,7 @@
         </div>
         
         <button type="submit" id="submitBtn" style="width: 100%; padding: 18px; background: linear-gradient(135deg, #4caf50, #66bb6a); color: white; border: none; border-radius: 12px; font-weight: 700; font-size: 18px; cursor: pointer; margin-top: 10px; transition: all 0.3s;">
-          Subscribe to Enterprise Plan
+          Purchase Enterprise Plan
         </button>
         
         <button type="button" id="skipBtn" onclick="window.location.href='/dashboard.html?tier=enterprise&test=true'" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.5); border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; margin-top: 10px; transition: all 0.3s;">
@@ -475,15 +474,15 @@
           statusDiv.style.color = 'white';
           statusDiv.style.border = '2px solid rgba(76, 175, 80, 0.5)';
           statusDiv.innerHTML = `
-            <h3 style="margin-bottom: 10px;">✅ Enterprise Subscription Created!</h3>
-            <p>Welcome to MagicPlate.ai Enterprise! Your dedicated account manager will contact you shortly.</p>
+            <h3 style="margin-bottom: 10px;">✅ Purchase Successful!</h3>
+            <p>Welcome to MagicPlate.ai Enterprise! You now have lifetime access to all Enterprise features. Your dedicated account manager will contact you shortly.</p>
             ${data.avatar ? '<p style="margin-top: 10px;">🎬 Your HeyGen avatars are being created!</p>' : ''}
             <p style="margin-top: 15px; font-size: 0.9em;">Restaurant ID: ${data.restaurant.restaurant_id}</p>
             <p style="margin-top: 10px; font-size: 0.9em;">Check your email for onboarding instructions and next steps.</p>
           `;
           document.getElementById('subscriptionForm').reset();
         } else {
-          throw new Error(data.error || 'Subscription failed');
+          throw new Error(data.error || 'Purchase failed');
         }
       } catch (error) {
         statusDiv.style.display = 'block';
@@ -493,7 +492,7 @@
         statusDiv.textContent = `❌ Error: ${error.message}`;
       } finally {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Subscribe to Enterprise Plan';
+        submitBtn.textContent = 'Purchase Enterprise Plan';
       }
     });
   </script>

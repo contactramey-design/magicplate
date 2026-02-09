@@ -216,8 +216,8 @@
     <div class="hero-content">
       <div class="tier-badge">PROFESSIONAL PLAN</div>
       <h1>Everything You Need to Grow</h1>
-      <div class="price">$299<span class="price-period">/month</span></div>
-      <p class="description">Unlimited features, HeyGen videos, and advanced marketing tools for serious restaurant owners</p>
+      <div class="price">$299<span class="price-period"> (one-time)</span></div>
+      <p class="description">One-time purchase includes lifetime access to unlimited features, HeyGen videos, and advanced marketing tools. No recurring fees.</p>
     </div>
   </div>
 
@@ -305,7 +305,7 @@
         <tbody>
           <tr>
             <td><strong>Photo Enhancements</strong></td>
-            <td>10/month</td>
+            <td>10 (lifetime)</td>
             <td>Unlimited</td>
             <td>Unlimited</td>
           </tr>
@@ -317,7 +317,7 @@
           </tr>
           <tr>
             <td><strong>Social Media Posts</strong></td>
-            <td>5/month</td>
+            <td>5 included</td>
             <td>Unlimited</td>
             <td>Unlimited</td>
           </tr>
@@ -384,8 +384,7 @@
         <div style="margin-bottom: 20px;">
           <label style="display: block; color: white; margin-bottom: 8px; font-weight: 600;">Billing Cycle *</label>
           <select id="billingCycle" required style="width: 100%; padding: 14px; border-radius: 10px; border: none; font-size: 16px;">
-            <option value="monthly">Monthly ($299/month)</option>
-            <option value="annual">Annual ($2,988/year - Save $600!)</option>
+            <option value="one-time">One-Time Payment ($299)</option>
           </select>
         </div>
         
@@ -397,7 +396,7 @@
         </div>
         
         <button type="submit" id="submitBtn" style="width: 100%; padding: 18px; background: white; color: #4caf50; border: none; border-radius: 12px; font-weight: 700; font-size: 18px; cursor: pointer; margin-top: 10px; transition: all 0.3s;">
-          Subscribe to Professional Plan
+          Purchase Professional Plan
         </button>
         
         <button type="button" id="skipBtn" onclick="window.location.href='/dashboard.html?tier=professional&test=true'" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.5); border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; margin-top: 10px; transition: all 0.3s;">
@@ -447,14 +446,14 @@
           statusDiv.style.color = 'white';
           statusDiv.style.border = '2px solid rgba(76, 175, 80, 0.5)';
           statusDiv.innerHTML = `
-            <h3 style="margin-bottom: 10px;">✅ Subscription Created Successfully!</h3>
-            <p>Welcome to MagicPlate.ai Professional! Check your email for onboarding instructions.</p>
+            <h3 style="margin-bottom: 10px;">✅ Purchase Successful!</h3>
+            <p>Welcome to MagicPlate.ai Professional! You now have lifetime access to all Professional features. Check your email for access instructions.</p>
             ${data.avatar ? '<p style="margin-top: 10px;">🎬 Your HeyGen avatar is being created!</p>' : ''}
             <p style="margin-top: 15px; font-size: 0.9em;">Restaurant ID: ${data.restaurant.restaurant_id}</p>
           `;
           document.getElementById('subscriptionForm').reset();
         } else {
-          throw new Error(data.error || 'Subscription failed');
+          throw new Error(data.error || 'Purchase failed');
         }
       } catch (error) {
         statusDiv.style.display = 'block';
@@ -464,7 +463,7 @@
         statusDiv.textContent = `❌ Error: ${error.message}`;
       } finally {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Subscribe to Professional Plan';
+        submitBtn.textContent = 'Purchase Professional Plan';
       }
     });
   </script>
