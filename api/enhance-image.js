@@ -286,9 +286,17 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
     
     // Step 2: Upload image to presigned S3 URL
     // Note: Presigned URLs use PUT method with the raw image buffer
+    const contentTypeMap = {
+      'jpg': 'image/jpeg',
+      'jpeg': 'image/jpeg',
+      'png': 'image/png',
+      'webp': 'image/webp'
+    };
+    const contentType = contentTypeMap[extension] || 'image/jpeg';
+    
     const uploadResponse = await axios.put(presignedUrl, imageBuffer, {
       headers: {
-        'Content-Type': 'image/jpeg',
+        'Content-Type': contentType,
         'Content-Length': imageBuffer.length.toString()
       },
       maxContentLength: Infinity,
