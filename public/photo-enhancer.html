@@ -384,6 +384,40 @@
       
       <div id="previewContainer" style="display: none; margin-top: 20px;">
         <img id="previewImage" class="preview-image" alt="Preview" />
+        
+        <!-- Fiction Level Control -->
+        <div class="fictional-control" style="margin: 20px 0; padding: 20px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+          <label for="fictionalLevel" style="display: block; margin-bottom: 12px; font-weight: 600; color: #333; font-size: 0.95em;">
+            Creative Intensity: 
+            <span id="fictionalLabel" style="color: #4CAF50; font-weight: 700;">Authentic (30%)</span>
+          </label>
+          
+          <!-- Preset Buttons -->
+          <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+            <button type="button" class="preset-btn" data-level="20" style="flex: 1; min-width: 80px; padding: 8px 12px; background: #4CAF50; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85em; font-weight: 600; transition: all 0.2s;">Authentic</button>
+            <button type="button" class="preset-btn" data-level="50" style="flex: 1; min-width: 80px; padding: 8px 12px; background: #FF9800; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85em; font-weight: 600; transition: all 0.2s;">Balanced</button>
+            <button type="button" class="preset-btn" data-level="85" style="flex: 1; min-width: 80px; padding: 8px 12px; background: #F44336; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85em; font-weight: 600; transition: all 0.2s;">Magical</button>
+          </div>
+          
+          <!-- Slider -->
+          <input 
+            type="range" 
+            id="fictionalLevel" 
+            min="0" 
+            max="100" 
+            value="30" 
+            style="width: 100%; height: 10px; border-radius: 5px; outline: none; background: linear-gradient(to right, #4CAF50 0%, #FF9800 50%, #F44336 100%); -webkit-appearance: none; appearance: none;"
+          />
+          <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.8em; color: #666;">
+            <span>0% Real</span>
+            <span>50% Balanced</span>
+            <span>100% Fictional</span>
+          </div>
+          <p id="fictionalDescription" style="margin-top: 10px; font-size: 0.85em; color: #555; text-align: center; font-style: italic;">
+            Enhance food quality while keeping original background
+          </p>
+        </div>
+        
         <div style="text-align: center;">
           <button class="btn btn-primary" id="enhanceBtn">✨ Enhance Photo</button>
           <button class="btn btn-secondary" id="removeBtn" style="margin-left: 10px;">Remove</button>

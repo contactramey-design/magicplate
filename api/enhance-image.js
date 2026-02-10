@@ -82,24 +82,44 @@ function styleBlock(style) {
 // Import the new prompt system
 const { getAIGatewayPrompt } = require('../lib/photo-enhancement-prompt');
 
-function buildRegenPrompt(style) {
+function buildRegenPrompt(style, fictionalLevel = 30) {
   try {
     // Use the comprehensive ethical food photography prompt
     const basePrompt = getAIGatewayPrompt(style);
     
-    // PERFECT THE PHOTO - Allow idealization and minor fictional improvements for perfection
-    // Focus on making it look PERFECT, even if slightly idealized
-    const qualityPrompt = `PERFECT THIS FOOD PHOTO: Transform into an idealized, perfect restaurant marketing photo. 
+    // Determine enhancement style based on fictional level (0-100)
+    let enhancementMode = '';
+    let backgroundInstructions = '';
+    let authenticityInstructions = '';
+    
+    if (fictionalLevel <= 30) {
+      // AUTHENTIC: Enhance food only, keep original background
+      enhancementMode = 'AUTHENTIC ENHANCEMENT';
+      backgroundInstructions = 'Keep the original background exactly as shown - only enhance the food quality. Maintain original restaurant setting, table, plates, and environment exactly as they appear. Do not change the background at all.';
+      authenticityInstructions = 'Maintain complete authenticity - only improve food quality, colors, lighting, and textures. Keep everything else exactly as in the original photo. No background changes, no new settings, no fictional elements.';
+    } else if (fictionalLevel <= 70) {
+      // BALANCED: Perfect food with subtle background improvements
+      enhancementMode = 'BALANCED PERFECTION';
+      backgroundInstructions = 'Improve the background subtly - enhance depth of field, soften distractions, clean up the table/surface, but keep the general restaurant setting recognizable. Make subtle improvements without changing the fundamental environment.';
+      authenticityInstructions = 'Perfect the food dramatically while making subtle background improvements. Maintain recognizable restaurant environment but make it cleaner and more professional.';
+    } else {
+      // FICTIONAL: New restaurant setting
+      enhancementMode = 'FICTIONAL PERFECTION';
+      backgroundInstructions = 'Create a new, ideal restaurant setting - professional food photography studio background, elegant modern restaurant table, perfect restaurant environment, or sophisticated dining setting. Replace background completely with perfect setting that matches the food style. Make it look like a professional restaurant marketing photo in an ideal location.';
+      authenticityInstructions = 'Create the perfect version - new ideal restaurant setting, perfect food, perfect everything. Make it look like a professional restaurant marketing photo in an ideal location. Transform the entire scene while keeping the main food item recognizable.';
+    }
+    
+    const qualityPrompt = `${enhancementMode}: Transform this food photo into ${fictionalLevel <= 30 ? 'an enhanced authentic' : fictionalLevel <= 70 ? 'a perfectly balanced' : 'a completely idealized'} restaurant marketing photo. 
 Create the PERFECT version of this dish - make it look absolutely flawless and magazine-worthy. 
 PERFECT sharpness and clarity - every detail should be razor-sharp and crystal clear. 
 PERFECT colors - make them vibrant, rich, and ideal (perfectly cooked meat colors, fresh vibrant vegetables, glossy perfect sauces). 
 PERFECT lighting - add ideal professional food photography lighting with perfect highlights, perfect shadows, perfect exposure - make it look like it was shot in a professional studio. 
 PERFECT textures - make food look absolutely perfect (perfectly crispy edges, perfectly juicy meat, perfectly flaky pastry, perfectly glossy glazes). 
 PERFECT plating - idealize the presentation if needed (perfect arrangement, perfect garnish placement, perfect composition). 
-PERFECT background - create ideal depth of field with perfect bokeh, remove any distracting elements, make the background perfect. 
+${backgroundInstructions}
 Upscale to maximum resolution. 
-Maintain the core dish concept and main ingredients - but make EVERYTHING look PERFECT and IDEALIZED, like the best possible version of this dish. 
-Ultra-high resolution, perfect magazine-quality food photography, idealized commercial food photo, flawless presentation. 
+${authenticityInstructions}
+Ultra-high resolution, perfect magazine-quality food photography, ${fictionalLevel <= 30 ? 'authentic' : fictionalLevel <= 70 ? 'balanced' : 'idealized'} commercial food photo, flawless presentation. 
 ${basePrompt}`;
     
     // Ensure prompt is not too long (Leonardo has limits around 1000-2000 chars)
