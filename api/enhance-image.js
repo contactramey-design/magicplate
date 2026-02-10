@@ -641,20 +641,29 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
   }
 
   // Step 3: Generate enhanced image using image-to-image with PhotoReal for food
+  // Focus on QUALITY ENHANCEMENT (sharpness, detail, noise reduction) not style transformation
   const prompt = buildRegenPrompt(style);
   const negativePrompt = baseNegativePrompt();
   
+  // Calculate aspect ratio from original image to maintain proportions
+  // For now, use high resolution square format (Leonardo supports up to 2048x2048)
+  // Higher resolution = better quality, more detail, sharper results
   const generationData = {
     prompt: prompt,
     negative_prompt: negativePrompt,
     init_image_id: initImageId,
     modelId: 'aa77f04e-3eec-4034-9c07-d0f619684628', // Leonardo Kino XL (supports PhotoReal)
     num_images: 1,
-    width: 1024,
-    height: 1024,
+    // INCREASED RESOLUTION for quality enhancement (4x more pixels = better quality)
+    width: 2048,  // Increased from 1024 for professional quality
+    height: 2048, // Increased from 1024 for professional quality
     guidance_scale: 7,
-    num_inference_steps: 30,
-    init_strength: 0.65, // Lower = more transformation, higher = closer to original
+    // MORE STEPS = better quality (more processing time but better results)
+    num_inference_steps: 40, // Increased from 30 for better quality
+    // HIGHER init_strength = quality enhancement (stays closer to original, improves quality)
+    // LOWER init_strength = style transformation (changes appearance more)
+    // 0.85 = 85% original, 15% enhancement (quality improvement, not transformation)
+    init_strength: 0.85, // Changed from 0.65 - focus on quality enhancement, not style change
     scheduler: 'LEONARDO',
     seed: null,
     // PhotoReal settings for food photography
