@@ -87,17 +87,19 @@ function buildRegenPrompt(style) {
     // Use the comprehensive ethical food photography prompt
     const basePrompt = getAIGatewayPrompt(style);
     
-    // DRAMATIC QUALITY ENHANCEMENT - Make it look like professional restaurant marketing photography
-    // Emphasize DRASTIC improvements to match homepage slider effect
-    const qualityPrompt = `DRAMATIC QUALITY ENHANCEMENT: Transform this food photo into professional restaurant marketing quality. 
-DRASTICALLY improve sharpness and clarity - make every detail crisp, clear, and razor-sharp. 
-DRASTICALLY enhance colors - make them vibrant, rich, and appetizing (deeper reds for meat, brighter greens for vegetables, richer browns for breads, glossy sauces). 
-DRASTICALLY improve lighting - add professional food photography lighting with perfect highlights on glossy surfaces, natural shadows for depth, balanced exposure. 
-DRASTICALLY reduce noise and grain - make the image crystal clear and professional quality. 
-DRASTICALLY enhance textures - make food look more tactile and appealing (crispy edges, juicy meat, flaky pastry, glossy glazes). 
-Upscale resolution to maximum quality. 
-Maintain the exact same dish composition, ingredients, and portions - but make it look PROFESSIONALLY PHOTOGRAPHED like a magazine cover. 
-Ultra-high resolution, magazine-quality food photography, editorial commercial food photo. 
+    // PERFECT THE PHOTO - Allow idealization and minor fictional improvements for perfection
+    // Focus on making it look PERFECT, even if slightly idealized
+    const qualityPrompt = `PERFECT THIS FOOD PHOTO: Transform into an idealized, perfect restaurant marketing photo. 
+Create the PERFECT version of this dish - make it look absolutely flawless and magazine-worthy. 
+PERFECT sharpness and clarity - every detail should be razor-sharp and crystal clear. 
+PERFECT colors - make them vibrant, rich, and ideal (perfectly cooked meat colors, fresh vibrant vegetables, glossy perfect sauces). 
+PERFECT lighting - add ideal professional food photography lighting with perfect highlights, perfect shadows, perfect exposure - make it look like it was shot in a professional studio. 
+PERFECT textures - make food look absolutely perfect (perfectly crispy edges, perfectly juicy meat, perfectly flaky pastry, perfectly glossy glazes). 
+PERFECT plating - idealize the presentation if needed (perfect arrangement, perfect garnish placement, perfect composition). 
+PERFECT background - create ideal depth of field with perfect bokeh, remove any distracting elements, make the background perfect. 
+Upscale to maximum resolution. 
+Maintain the core dish concept and main ingredients - but make EVERYTHING look PERFECT and IDEALIZED, like the best possible version of this dish. 
+Ultra-high resolution, perfect magazine-quality food photography, idealized commercial food photo, flawless presentation. 
 ${basePrompt}`;
     
     // Ensure prompt is not too long (Leonardo has limits around 1000-2000 chars)
@@ -108,8 +110,8 @@ ${basePrompt}`;
     return qualityPrompt;
   } catch (error) {
     console.error('Error generating prompt, using fallback:', error);
-    // Fallback to dramatic quality-focused prompt if new system fails
-    return `DRAMATIC QUALITY ENHANCEMENT. DRASTICALLY improve sharpness, colors, lighting, and detail. Professional food photography quality, magazine-quality, editorial commercial food photo. ${styleBlock(style)}`;
+    // Fallback to perfection-focused prompt if new system fails
+    return `PERFECT THIS FOOD PHOTO. Create the ideal, perfect version - flawless sharpness, perfect colors, perfect lighting, perfect textures, perfect plating. Magazine-quality, idealized commercial food photography. ${styleBlock(style)}`;
   }
 }
 
