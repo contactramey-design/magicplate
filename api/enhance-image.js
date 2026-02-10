@@ -784,9 +784,10 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
   let negativePrompt = baseNegativePrompt(identifiedItems);
   
   // Leonardo has stricter prompt length limits — truncate if needed
-  if (prompt.length > 1000) {
-    console.log(`⚠️ Leonardo prompt too long (${prompt.length} chars), truncating to 1000`);
-    prompt = prompt.substring(0, 1000);
+  // Style/tier content is at the TOP of the prompt so truncation preserves it
+  if (prompt.length > 1500) {
+    console.log(`⚠️ Leonardo prompt too long (${prompt.length} chars), truncating to 1500`);
+    prompt = prompt.substring(0, 1500);
   }
   if (negativePrompt.length > 500) {
     negativePrompt = negativePrompt.substring(0, 500);
