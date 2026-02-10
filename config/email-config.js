@@ -216,10 +216,11 @@ Visit: https://magicplate.info
     `;
     
     // Enhance with AI Gateway if configured
+    // If AI Gateway is not available, gracefully fall back to original template
     let finalHtml = html;
     let finalText = text;
     
-    if (aiGateway.isConfigured()) {
+    if (aiGateway && aiGateway.isConfigured && aiGateway.isConfigured()) {
       try {
         const personalizedHtml = await aiGateway.personalizeEmail(restaurant, html);
         if (personalizedHtml && personalizedHtml.trim()) {
@@ -228,9 +229,13 @@ Visit: https://magicplate.info
           finalText = personalizedHtml.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
         }
       } catch (aiError) {
-        console.error('AI personalization error, using template:', aiError);
-        // Continue with original template
+        // AI Gateway not available or failed - use original template
+        console.warn('AI Gateway personalization not available, using original template:', aiError.message || 'AI Gateway not configured');
+        // Continue with original template (already set above)
       }
+    } else {
+      // AI Gateway not configured - use original template
+      console.log('AI Gateway not configured, using original email template');
     }
     
     return {
