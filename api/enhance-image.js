@@ -276,20 +276,30 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
       throw new Error(`Failed to get presigned URL: ${initResponse.status} - ${JSON.stringify(initResponse.data)}`);
     }
     
-    console.log('Init image response:', initResponse.data);
-    const uploadInitImage = initResponse.data.uploadInitImage;
+    console.log('Init image response:', JSON.stringify(initResponse.data, null, 2));
+    
+    // Leonardo API response structure can vary - check different possible formats
+    const uploadInitImage = initResponse.data.uploadInitImage || 
+                           initResponse.data.upload_init_image ||
+                           initResponse.data;
     
     if (!uploadInitImage) {
       console.error('Init response structure:', JSON.stringify(initResponse.data, null, 2));
-      throw new Error('Failed to get presigned URL from Leonardo');
+      throw new Error('Failed to get presigned URL from Leonardo. Response: ' + JSON.stringify(initResponse.data));
     }
     
-    const presignedUrl = uploadInitImage.url;
-    initImageId = uploadInitImage.id;
+    const presignedUrl = uploadInitImage.url || uploadInitImage.uploadUrl || uploadInitImage.presignedUrl;
+    initImageId = uploadInitImage.id || uploadInitImage.initImageId;
     
     if (!presignedUrl || !initImageId) {
-      throw new Error('Missing presigned URL or init image ID');
+      console.error('Missing presigned URL or init image ID');
+      console.error('uploadInitImage:', uploadInitImage);
+      throw new Error('Missing presigned URL or init image ID from Leonardo response');
     }
+    
+    console.log('Presigned URL received (length:', presignedUrl.length, ')');
+    console.log('Presigned URL (first 200 chars):', presignedUrl.substring(0, 200));
+    console.log('Init image ID:', initImageId);
     
     console.log('Got presigned URL, uploading image to S3...');
     
