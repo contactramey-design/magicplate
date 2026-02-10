@@ -1090,23 +1090,34 @@ Check: http://localhost:3000/api/check-config
       });
     }
     
-    // Save images to public directory
-    const outputDir = path.join(process.cwd(), 'public', 'images', 'enhanced');
-    await fsPromises.mkdir(outputDir, { recursive: true });
+    // Note: Vercel serverless functions have a read-only filesystem
+    // We can't save files to /var/task/public/ - skip file saving
+    // The client receives the URLs and can handle saving if needed
+    console.log('📸 Enhanced image URL:', enhancedImageUrl);
+    console.log('📸 Original image size:', imageBuffer.length, 'bytes');
     
-    const timestamp = Date.now();
-    const beforePath = path.join(outputDir, `before-${timestamp}.jpg`);
-    const afterPath = path.join(outputDir, `after-${timestamp}.jpg`);
-    
-    // Save original as "before"
-    await fsPromises.writeFile(beforePath, imageBuffer);
-    
-    // Download and save enhanced image as "after"
-    const enhancedResponse = await axios.get(enhancedImageUrl, { 
-      responseType: 'arraybuffer',
-      timeout: 30000
-    });
-    await fsPromises.writeFile(afterPath, Buffer.from(enhancedResponse.data));
+    // Optional: Save to /tmp if needed (only works during function execution)
+    // Files in /tmp are deleted after function execution, so this is mainly for debugging
+    if (process.env.SAVE_TO_TMP === 'true') {
+      try {
+        const tmpDir = '/tmp/enhanced-images';
+        await fsPromises.mkdir(tmpDir, { recursive: true });
+        const timestamp = Date.now();
+        const beforePath = path.join(tmpDir, `before-${timestamp}.jpg`);
+        const afterPath = path.join(tmpDir, `after-${timestamp}.jpg`);
+        
+        await fsPromises.writeFile(beforePath, imageBuffer);
+        const enhancedResponse = await axios.get(enhancedImageUrl, { 
+          responseType: 'arraybuffer',
+          timeout: 30000
+        });
+        await fsPromises.writeFile(afterPath, Buffer.from(enhancedResponse.data));
+        console.log('✅ Saved images to /tmp (will be deleted after function execution)');
+      } catch (tmpError) {
+        console.warn('⚠️ Could not save to /tmp:', tmpError.message);
+        // Continue - file saving is optional
+      }
+    }
     
     // Track usage if restaurant_id provided
     // Skip if database is not configured (e.g., on Vercel without Postgres)
