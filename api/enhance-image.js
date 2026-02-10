@@ -337,7 +337,9 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
     console.log('Presigned URL received (length:', presignedUrl.length, ')');
     console.log('Presigned URL (first 200 chars):', presignedUrl.substring(0, 200));
     console.log('Presigned URL (last 100 chars):', presignedUrl.substring(presignedUrl.length - 100));
+    console.log('Full presigned URL:', presignedUrl);
     console.log('Init image ID:', initImageId);
+    console.log('Full uploadInitImage response:', JSON.stringify(uploadInitImage, null, 2));
     
     console.log('Got presigned URL, uploading image to S3...');
     
@@ -396,27 +398,82 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
         console.warn('⚠️ Could not parse URL, attempting upload anyway:', urlError.message);
       }
       
-      // S3 presigned URLs - use PUT with raw buffer, no Content-Type header
-      // The signature is calculated without Content-Type, so adding it breaks the signature
-      const uploadResponse = await axios.put(presignedUrl, imageBuffer, {
-        headers: {
-          'Content-Length': imageBuffer.length.toString()
-          // DO NOT add Content-Type - it breaks the presigned URL signature
-        },
-        maxContentLength: Infinity,
-        maxBodyLength: Infinity,
-        timeout: 120000,
-        // Prevent axios from automatically adding Content-Type or modifying the request
-        transformRequest: [(data) => {
-          // Return Buffer/ArrayBuffer as-is
-          if (Buffer.isBuffer(data)) {
+      // S3 presigned URLs - try different approaches
+      // Some presigned URLs require specific headers that are part of the signature
+      let uploadResponse;
+      let lastError;
+      
+      // Try 1: Minimal headers (just Content-Length)
+      try {
+        console.log('Attempt 1: Uploading with minimal headers (Content-Length only)...');
+        uploadResponse = await axios.put(presignedUrl, imageBuffer, {
+          headers: {
+            'Content-Length': imageBuffer.length.toString()
+          },
+          maxContentLength: Infinity,
+          maxBodyLength: Infinity,
+          timeout: 120000,
+          transformRequest: [(data) => {
+            if (Buffer.isBuffer(data)) return data;
             return data;
+          }],
+          validateStatus: (status) => status < 500
+        });
+        
+        if (uploadResponse.status === 200 || uploadResponse.status === 204) {
+          console.log('✅ Upload successful with minimal headers');
+        } else {
+          throw new Error(`Upload returned status ${uploadResponse.status}`);
+        }
+      } catch (error1) {
+        lastError = error1;
+        console.log('❌ Attempt 1 failed:', error1.response?.status, error1.response?.data || error1.message);
+        
+        // Try 2: With Content-Type header (some presigned URLs require it)
+        try {
+          console.log('Attempt 2: Uploading with Content-Type header...');
+          uploadResponse = await axios.put(presignedUrl, imageBuffer, {
+            headers: {
+              'Content-Type': contentType,
+              'Content-Length': imageBuffer.length.toString()
+            },
+            maxContentLength: Infinity,
+            maxBodyLength: Infinity,
+            timeout: 120000,
+            validateStatus: (status) => status < 500
+          });
+          
+          if (uploadResponse.status === 200 || uploadResponse.status === 204) {
+            console.log('✅ Upload successful with Content-Type header');
+          } else {
+            throw new Error(`Upload returned status ${uploadResponse.status}`);
           }
-          return data;
-        }],
-        // Don't let axios set default headers
-        validateStatus: (status) => status < 500
-      });
+        } catch (error2) {
+          lastError = error2;
+          console.log('❌ Attempt 2 failed:', error2.response?.status, error2.response?.data || error2.message);
+          
+          // Try 3: No headers at all (let axios handle it)
+          try {
+            console.log('Attempt 3: Uploading with no custom headers...');
+            uploadResponse = await axios.put(presignedUrl, imageBuffer, {
+              maxContentLength: Infinity,
+              maxBodyLength: Infinity,
+              timeout: 120000,
+              validateStatus: (status) => status < 500
+            });
+            
+            if (uploadResponse.status === 200 || uploadResponse.status === 204) {
+              console.log('✅ Upload successful with no custom headers');
+            } else {
+              throw new Error(`Upload returned status ${uploadResponse.status}`);
+            }
+          } catch (error3) {
+            lastError = error3;
+            console.log('❌ Attempt 3 failed:', error3.response?.status, error3.response?.data || error3.message);
+            throw new Error(`All upload attempts failed. Last error: ${error3.response?.status} - ${JSON.stringify(error3.response?.data || error3.message)}`);
+          }
+        }
+      }
       
       // Check response status
       if (uploadResponse.status !== 200 && uploadResponse.status !== 204) {
