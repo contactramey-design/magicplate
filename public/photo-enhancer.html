@@ -16,11 +16,24 @@
       color: #1a1a1a;
       padding: 20px;
       min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-text-size-adjust: 100%;
     }
     
     .container {
       max-width: 1200px;
       margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #4caf50;
+      text-decoration: none;
+      font-weight: 500;
+      margin-bottom: 16px;
+      font-size: 0.95em;
     }
     
     .header {
@@ -264,6 +277,12 @@
       font-weight: 600;
     }
     
+    .processing-subtext {
+      color: #666;
+      margin-top: 10px;
+      font-size: 0.95em;
+    }
+    
     .actions {
       display: flex;
       gap: 15px;
@@ -465,35 +484,423 @@
       font-size: 1.4em;
       margin-bottom: 8px;
     }
+    .gate-success-icon {
+      font-size: 3em;
+      margin-bottom: 12px;
+    }
+    .gate-success-text {
+      color: #666;
+      line-height: 1.5;
+    }
+    .gate-success-btn {
+      margin-top: 16px;
+    }
     
+    .preview-container {
+      display: none;
+      margin-top: 20px;
+    }
+
     .preview-image {
       max-width: 100%;
       border-radius: 10px;
       margin-bottom: 20px;
     }
-    
+
+    /* ── Fictional Control (proper classes instead of inline) ── */
+    .fictional-control {
+      margin: 20px 0;
+      padding: 20px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .fictional-control label {
+      display: block;
+      margin-bottom: 12px;
+      font-weight: 600;
+      color: #333;
+      font-size: 0.95em;
+    }
+    .fictional-label {
+      color: #4CAF50;
+      font-weight: 700;
+    }
+    .preset-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .preset-btn {
+      flex: 1;
+      min-width: 80px;
+      padding: 8px 12px;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85em;
+      font-weight: 600;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .preset-btn[data-level="20"] { background: #4CAF50; }
+    .preset-btn[data-level="50"] { background: #FF9800; }
+    .preset-btn[data-level="85"] { background: #F44336; }
+    .fictional-slider {
+      width: 100%;
+      height: 10px;
+      border-radius: 5px;
+      outline: none;
+      background: linear-gradient(to right, #4CAF50 0%, #FF9800 50%, #F44336 100%);
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 0.8em;
+      color: #666;
+    }
+    .fictional-desc {
+      margin-top: 10px;
+      font-size: 0.85em;
+      color: #555;
+      text-align: center;
+      font-style: italic;
+    }
+    .enhance-actions {
+      text-align: center;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+    .identified-banner {
+      display: none;
+      background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+      border: 1px solid #c8e6c9;
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 15px;
+    }
+    .identified-banner-title {
+      font-weight: 600;
+      color: #2e7d32;
+      margin-bottom: 4px;
+    }
+    .identified-banner-text {
+      color: #333;
+      font-size: 0.95em;
+      line-height: 1.4;
+    }
+
+    /* ── Mobile Responsive ────────────────────────── */
     @media (max-width: 768px) {
+      body {
+        padding: 12px 10px;
+        -webkit-overflow-scrolling: touch;
+        overflow-x: hidden;
+      }
+
+      .container {
+        max-width: 100%;
+      }
+
+      /* Back link */
+      .back-link {
+        font-size: 0.85em;
+        margin-bottom: 10px;
+      }
+
+      /* Header */
+      .header {
+        padding: 18px 16px;
+        border-radius: 12px;
+        margin-bottom: 16px;
+      }
       .header h1 {
-        font-size: 2em;
+        font-size: 1.5em;
+        line-height: 1.2;
       }
-      
+      .header p {
+        font-size: 0.92em;
+        line-height: 1.4;
+      }
+
+      /* Trial banner */
+      .trial-banner {
+        padding: 10px 14px;
+        margin-bottom: 14px;
+        border-radius: 10px;
+        flex-wrap: wrap;
+      }
+      .trial-banner-text {
+        font-size: 0.82em;
+        line-height: 1.3;
+      }
+
+      /* Upload section */
+      .upload-section {
+        padding: 16px;
+        border-radius: 12px;
+        margin-bottom: 16px;
+      }
       .upload-zone {
-        padding: 40px 20px;
+        padding: 32px 16px;
+        border-radius: 12px;
+        border-width: 2px;
       }
-      
+      .upload-icon {
+        font-size: 2.8em;
+        margin-bottom: 12px;
+      }
+      .upload-text {
+        font-size: 1em;
+        margin-bottom: 6px;
+      }
+      .upload-hint {
+        font-size: 0.82em;
+      }
+
+      /* Preview container & image */
+      .preview-container {
+        margin-top: 14px;
+      }
+      .preview-image {
+        border-radius: 8px;
+        margin-bottom: 14px;
+      }
+
+      /* Fictional control */
+      .fictional-control {
+        margin: 14px 0;
+        padding: 14px;
+        border-radius: 10px;
+      }
+      .fictional-control label {
+        font-size: 0.88em;
+        margin-bottom: 10px;
+      }
+      .preset-row {
+        gap: 6px;
+        margin-bottom: 10px;
+      }
+      .preset-btn {
+        padding: 10px 8px;
+        font-size: 0.82em;
+        border-radius: 8px;
+        min-width: 70px;
+      }
+      .slider-labels {
+        font-size: 0.72em;
+        margin-top: 6px;
+      }
+      .fictional-desc {
+        font-size: 0.78em;
+        margin-top: 8px;
+      }
+
+      /* Enhance / Remove buttons */
+      .enhance-actions {
+        flex-direction: column;
+        gap: 8px;
+      }
+      .enhance-actions .btn {
+        width: 100%;
+        padding: 14px 20px;
+        font-size: 1em;
+        border-radius: 10px;
+      }
+
+      /* Preview section */
+      .preview-section {
+        padding: 14px;
+        border-radius: 12px;
+        margin-bottom: 16px;
+      }
+
+      /* Processing */
+      .processing {
+        padding: 24px 12px;
+      }
+      .spinner {
+        width: 44px;
+        height: 44px;
+        border-width: 3px;
+        margin-bottom: 14px;
+      }
+      .processing-text {
+        font-size: 1em;
+      }
+
+      /* Identified items banner */
+      .identified-banner {
+        padding: 10px 14px;
+        border-radius: 8px;
+        margin-bottom: 12px;
+      }
+      .identified-banner-title {
+        font-size: 0.88em;
+      }
+      .identified-banner-text {
+        font-size: 0.85em;
+      }
+
+      /* Before/after slider */
+      .before-after-container {
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      }
+      .before-after-wrapper {
+        padding-bottom: 100%; /* Square on mobile for better fit */
+      }
+      .slider-handle {
+        width: 44px;
+        height: 44px;
+        border-width: 3px;
+      }
+      .slider-icon {
+        font-size: 1.2em;
+      }
+      .before-after-labels {
+        bottom: 12px;
+        padding: 0 12px;
+      }
+      .label-before,
+      .label-after {
+        padding: 5px 10px;
+        font-size: 0.72em;
+        border-radius: 14px;
+        letter-spacing: 0.3px;
+      }
+
+      /* Action buttons (download / enhance another) */
       .actions {
         flex-direction: column;
+        gap: 10px;
+        margin-top: 18px;
       }
-      
       .btn {
         width: 100%;
+        padding: 14px 20px;
+        font-size: 1em;
+        border-radius: 10px;
+        text-align: center;
+      }
+
+      /* Status message */
+      .status {
+        padding: 12px;
+        border-radius: 8px;
+        margin-top: 14px;
+        font-size: 0.9em;
+        line-height: 1.4;
+      }
+
+      /* Info box */
+      .info-box {
+        padding: 16px;
+        border-radius: 10px;
+        margin-top: 16px;
+      }
+      .info-box h3 {
+        font-size: 1em;
+        margin-bottom: 8px;
+      }
+      .info-box p {
+        font-size: 0.88em;
+        line-height: 1.5;
+      }
+
+      /* Gate modal */
+      .gate-card {
+        padding: 24px 20px;
+        border-radius: 16px;
+        width: 94%;
+        max-width: 400px;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+      .gate-card h2 {
+        font-size: 1.3em;
+        margin-bottom: 8px;
+      }
+      .gate-card > p {
+        font-size: 0.92em;
+        margin-bottom: 18px;
+      }
+      .gate-close {
+        top: 10px;
+        right: 14px;
+        font-size: 24px;
+      }
+      .gate-form label {
+        font-size: 13px;
+        margin-bottom: 3px;
+      }
+      .gate-form input,
+      .gate-form select {
+        padding: 11px;
+        font-size: 14px;
+        margin-bottom: 12px;
+        border-radius: 8px;
+      }
+      .gate-submit {
+        padding: 13px;
+        font-size: 15px;
+        border-radius: 10px;
+      }
+    }
+
+    /* Extra small screens (iPhone SE, small Androids) */
+    @media (max-width: 380px) {
+      body {
+        padding: 8px 6px;
+      }
+      .header {
+        padding: 14px 12px;
+      }
+      .header h1 {
+        font-size: 1.3em;
+      }
+      .header p {
+        font-size: 0.85em;
+      }
+      .upload-section {
+        padding: 12px;
+      }
+      .upload-zone {
+        padding: 24px 12px;
+      }
+      .upload-icon {
+        font-size: 2.2em;
+        margin-bottom: 8px;
+      }
+      .fictional-control {
+        padding: 10px;
+      }
+      .preset-btn {
+        min-width: 60px;
+        padding: 9px 6px;
+        font-size: 0.78em;
+      }
+      .preview-section {
+        padding: 10px;
+      }
+      .gate-card {
+        padding: 20px 16px;
+      }
+      .gate-card h2 {
+        font-size: 1.15em;
       }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <a href="/features.html" style="display:inline-flex;align-items:center;gap:6px;color:#4caf50;text-decoration:none;font-weight:500;margin-bottom:16px;">← Back to Features</a>
+    <a href="/features.html" class="back-link">← Back to Features</a>
 
     <!-- Trial Banner -->
     <div class="trial-banner" id="trialBanner">
@@ -513,21 +920,21 @@
         <input type="file" id="fileInput" accept="image/jpeg,image/png" />
       </div>
       
-      <div id="previewContainer" style="display: none; margin-top: 20px;">
+      <div id="previewContainer" class="preview-container">
         <img id="previewImage" class="preview-image" alt="Preview" />
         
         <!-- Fiction Level Control -->
-        <div class="fictional-control" style="margin: 20px 0; padding: 20px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-          <label for="fictionalLevel" style="display: block; margin-bottom: 12px; font-weight: 600; color: #333; font-size: 0.95em;">
+        <div class="fictional-control">
+          <label for="fictionalLevel">
             Creative Intensity: 
-            <span id="fictionalLabel" style="color: #4CAF50; font-weight: 700;">Authentic (30%)</span>
+            <span id="fictionalLabel" class="fictional-label">Authentic (30%)</span>
           </label>
           
           <!-- Preset Buttons -->
-          <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
-            <button type="button" class="preset-btn" data-level="20" style="flex: 1; min-width: 80px; padding: 8px 12px; background: #4CAF50; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85em; font-weight: 600; transition: all 0.2s;">Authentic</button>
-            <button type="button" class="preset-btn" data-level="50" style="flex: 1; min-width: 80px; padding: 8px 12px; background: #FF9800; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85em; font-weight: 600; transition: all 0.2s;">Balanced</button>
-            <button type="button" class="preset-btn" data-level="85" style="flex: 1; min-width: 80px; padding: 8px 12px; background: #F44336; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85em; font-weight: 600; transition: all 0.2s;">Magical</button>
+          <div class="preset-row">
+            <button type="button" class="preset-btn" data-level="20">Authentic</button>
+            <button type="button" class="preset-btn" data-level="50">Balanced</button>
+            <button type="button" class="preset-btn" data-level="85">Magical</button>
           </div>
           
           <!-- Slider -->
@@ -537,21 +944,21 @@
             min="0" 
             max="100" 
             value="30" 
-            style="width: 100%; height: 10px; border-radius: 5px; outline: none; background: linear-gradient(to right, #4CAF50 0%, #FF9800 50%, #F44336 100%); -webkit-appearance: none; appearance: none;"
+            class="fictional-slider"
           />
-          <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.8em; color: #666;">
+          <div class="slider-labels">
             <span>0% Real</span>
             <span>50% Balanced</span>
             <span>100% Fictional</span>
           </div>
-          <p id="fictionalDescription" style="margin-top: 10px; font-size: 0.85em; color: #555; text-align: center; font-style: italic;">
+          <p id="fictionalDescription" class="fictional-desc">
             Enhance food quality while keeping original background
           </p>
         </div>
         
-        <div style="text-align: center;">
+        <div class="enhance-actions">
           <button class="btn btn-primary" id="enhanceBtn">✨ Enhance Photo</button>
-          <button class="btn btn-secondary" id="removeBtn" style="margin-left: 10px;">Remove</button>
+          <button class="btn btn-secondary" id="removeBtn">Remove</button>
         </div>
       </div>
       
@@ -562,13 +969,13 @@
       <div class="processing" id="processingDiv" style="display: none;">
         <div class="spinner"></div>
         <div class="processing-text" id="processingText">Enhancing your photo...</div>
-        <p id="processingSubtext" style="color: #666; margin-top: 10px;">This may take 15-30 seconds</p>
+        <p id="processingSubtext" class="processing-subtext">This may take 15-30 seconds</p>
       </div>
 
       <!-- Shows after enhancement is complete — what the AI identified -->
-      <div id="identifiedItemsBanner" style="display:none; background:linear-gradient(135deg,#e8f5e9,#f1f8e9); border:1px solid #c8e6c9; border-radius:10px; padding:14px 18px; margin-bottom:15px;">
-        <div style="font-weight:600; color:#2e7d32; margin-bottom:4px;">🔍 Detected Food Items</div>
-        <div id="identifiedItemsText" style="color:#333; font-size:0.95em; line-height:1.4;"></div>
+      <div id="identifiedItemsBanner" class="identified-banner">
+        <div class="identified-banner-title">🔍 Detected Food Items</div>
+        <div id="identifiedItemsText" class="identified-banner-text"></div>
       </div>
       
       <div class="before-after-container" id="sliderContainer" style="display: none;">
@@ -1299,10 +1706,10 @@
         </form>
       </div>
       <div class="gate-success" id="gateSuccessView">
-        <div style="font-size:3em;margin-bottom:12px;">🎉</div>
+        <div class="gate-success-icon">🎉</div>
         <h3>You're All Set!</h3>
-        <p style="color:#666;">Thanks for signing up! We'll contact you within 24 hours to get your plan set up with unlimited enhancements.</p>
-        <a href="/features.html#pricing" class="btn btn-primary" style="margin-top:16px;">View Plans</a>
+        <p class="gate-success-text">Thanks for signing up! We'll contact you within 24 hours to get your plan set up with unlimited enhancements.</p>
+        <a href="/features.html#pricing" class="btn btn-primary gate-success-btn">View Plans</a>
       </div>
     </div>
   </div>

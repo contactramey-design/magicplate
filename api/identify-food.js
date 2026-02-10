@@ -20,16 +20,28 @@ if (fs.existsSync(envPath))      require('dotenv').config({ path: envPath });
 if (fs.existsSync(envLocalPath)) require('dotenv').config({ path: envLocalPath, override: true });
 
 // ── Food identification prompt (shared across providers) ──
-const FOOD_ID_PROMPT = `You are a professional chef and food photographer. Analyze this food photo carefully.
+const FOOD_ID_PROMPT = `You are a professional chef, food photographer, and cuisine expert. Analyze this food photo with extreme precision.
 
-List EVERY food item, drink, sauce, garnish, side dish, and condiment visible. Be VERY specific:
-- Say "grilled chicken breast with herb crust" not just "chicken"
-- Say "creamy Caesar salad with romaine, croutons, and shaved parmesan" not just "salad"  
-- Say "iced lemonade with mint sprig" not just "drink"
-- Note cooking method if visible (grilled, fried, roasted, steamed, seared)
-- Include plate/bowl style and any garnishes
+Your response MUST follow this exact format:
 
-Write a single detailed paragraph listing everything visible, separated by commas. Only describe what you actually see.`;
+CUISINE: [Identify the cuisine type — e.g. Chinese, Mexican, Italian, Japanese, American, Indian, Thai, French, Korean, Mediterranean, BBQ, Soul Food, etc. If unclear say "Mixed/Unclear"]
+
+DISH: [Name the specific dish if recognizable — e.g. "Sesame Chicken", "Eggs Benedict", "Pad Thai", "Margherita Pizza". If not a known dish, describe it like "Grilled chicken breast with mashed potatoes and green beans"]
+
+ITEMS: [List EVERY food item, drink, sauce, garnish, side dish, and condiment visible. Be VERY specific:
+- Say "sesame-glazed fried chicken pieces with sesame seeds" not just "chicken"
+- Say "steamed white rice" not just "rice"
+- Say "sliced French baguette" not just "bread"
+- Say "roasted garlic bulb" not just "garlic"
+- Note cooking method if visible (grilled, fried, roasted, steamed, seared, braised, baked)
+- Note the color and appearance of sauces (e.g. "dark brown soy-based glaze", "bright orange buffalo sauce", "creamy white alfredo")
+- Include garnishes (sesame seeds, scallions, cilantro, parsley, microgreens)]
+
+PLATING: [Describe the plate/bowl/surface and spatial layout — e.g. "white round plate with chicken in center, rice on left side, broccoli on right" or "wooden cutting board with meat sliced in center, small bowls of sides around it"]
+
+COLORS: [List the dominant colors of the food — e.g. "golden brown fried exterior, dark amber glaze, white sesame seeds, green scallion garnish"]
+
+Only describe what you ACTUALLY see. Do NOT guess or add items that are not visible.`;
 
 // ── Provider 1: Google Gemini (FREE) ──────────────────
 async function identifyWithGemini(base64Data, mimeType) {
@@ -48,8 +60,8 @@ async function identifyWithGemini(base64Data, mimeType) {
         ]
       }],
       generationConfig: {
-        temperature: 0.2,
-        maxOutputTokens: 500
+        temperature: 0.15,
+        maxOutputTokens: 800
       }
     },
     { timeout: 30000 }
@@ -79,8 +91,8 @@ async function identifyWithReplicate(dataUri) {
       input: {
         image: dataUri,
         prompt: FOOD_ID_PROMPT,
-        max_tokens: 500,
-        temperature: 0.2
+        max_tokens: 800,
+        temperature: 0.15
       }
     },
     {

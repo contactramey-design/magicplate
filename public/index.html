@@ -1383,63 +1383,171 @@
       border: 1px solid #f59e0b;
     }
     
-    /* Mobile Responsive */
+    /* ── Hamburger Menu Button ──────────────────── */
+    .menu-toggle {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px;
+      z-index: 1001;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .menu-toggle span {
+      display: block;
+      width: 24px;
+      height: 2.5px;
+      background: #1a1a1a;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+    .menu-toggle.active span:nth-child(1) {
+      transform: rotate(45deg) translate(5px, 5px);
+    }
+    .menu-toggle.active span:nth-child(2) {
+      opacity: 0;
+    }
+    .menu-toggle.active span:nth-child(3) {
+      transform: rotate(-45deg) translate(5px, -5px);
+    }
+
+    /* ── Mobile Responsive ────────────────────────── */
     @media (max-width: 768px) {
+      /* Header */
+      .top-header {
+        padding: 14px 16px;
+      }
+      .brand-name {
+        font-size: 20px;
+      }
+      .fork-knife-icon {
+        width: 22px;
+        height: 22px;
+      }
+
+      /* Hamburger visible on mobile */
+      .menu-toggle {
+        display: flex;
+      }
+
+      /* Nav becomes a dropdown panel */
+      .header-nav {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 280px;
+        height: 100vh;
+        background: rgba(255, 255, 255, 0.99);
+        backdrop-filter: blur(20px);
+        flex-direction: column;
+        align-items: stretch;
+        padding: 80px 28px 40px;
+        gap: 0;
+        box-shadow: -4px 0 30px rgba(0,0,0,0.1);
+        transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 999;
+        overflow-y: auto;
+      }
+      .header-nav.open {
+        right: 0;
+      }
+
+      .nav-link {
+        font-size: 16px;
+        padding: 14px 0;
+        border-bottom: 1px solid rgba(0,0,0,0.06);
+        display: block;
+        width: 100%;
+      }
+      .nav-link::after {
+        display: none;
+      }
+
+      .nav-button {
+        margin-top: 16px;
+        padding: 14px 24px;
+        font-size: 15px;
+        text-align: center;
+        display: block;
+        border-radius: 12px;
+      }
+
+      /* Overlay when menu is open */
+      .nav-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.3);
+        z-index: 998;
+      }
+      .nav-overlay.active {
+        display: block;
+      }
+
+      /* Hero */
+      .hero-section {
+        padding: 100px 16px 60px;
+        min-height: auto;
+      }
       .hero-text {
         font-size: 2.2em;
       }
-      
       .hero-subtext {
         font-size: 1.8em;
       }
-      
       .intro-image {
         width: 250px;
       }
-      
+
+      /* Grids */
       .package-cards,
       .gallery-grid,
       .services-grid {
         grid-template-columns: 1fr;
       }
-      
+
       .food-image-large {
         height: 250px;
       }
-      
+
+      /* Video */
       .video-title {
         font-size: 2em;
       }
-      
       .video-wrapper {
         border-radius: 20px;
       }
-      
       .magic-video {
         border-radius: 17px;
       }
-      
-      .header-nav {
-        gap: 15px;
-        flex-wrap: wrap;
-      }
-      
-      .nav-link {
-        font-size: 13px;
-      }
-      
-      .nav-button {
-        padding: 8px 18px;
-        font-size: 13px;
-      }
-      
+
+      /* Contact */
       .contact-content {
         grid-template-columns: 1fr;
         gap: 40px;
       }
-      
       .contact-form {
         padding: 30px 20px;
+      }
+    }
+
+    /* Extra small screens */
+    @media (max-width: 380px) {
+      .top-header {
+        padding: 12px 12px;
+      }
+      .brand-name {
+        font-size: 17px;
+      }
+      .fork-knife-icon {
+        width: 20px;
+        height: 20px;
+      }
+      .hero-text {
+        font-size: 1.8em;
       }
     }
   </style>
@@ -1456,7 +1564,12 @@
       </svg>
       <span class="brand-name">MagicPlate.ai</span>
     </div>
-    <nav class="header-nav">
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <nav class="header-nav" id="headerNav">
       <a href="#home" class="nav-link">Home</a>
       <a href="/features.html" class="nav-link">Features</a>
       <a href="/features.html#pricing" class="nav-link">Pricing</a>
@@ -1465,6 +1578,7 @@
       <a href="/features.html" class="nav-button">Explore Features</a>
     </nav>
   </div>
+  <div class="nav-overlay" id="navOverlay"></div>
 
   <!-- Hero Section -->
   <section class="hero-section" id="home">
@@ -1729,6 +1843,51 @@
   </div>
 
   <script>
+    // ── Mobile Menu Toggle ──
+    (function() {
+      const menuToggle = document.getElementById('menuToggle');
+      const headerNav = document.getElementById('headerNav');
+      const navOverlay = document.getElementById('navOverlay');
+
+      function openMenu() {
+        menuToggle.classList.add('active');
+        headerNav.classList.add('open');
+        navOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeMenu() {
+        menuToggle.classList.remove('active');
+        headerNav.classList.remove('open');
+        navOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+
+      if (menuToggle) {
+        menuToggle.addEventListener('click', function() {
+          if (headerNav.classList.contains('open')) {
+            closeMenu();
+          } else {
+            openMenu();
+          }
+        });
+      }
+
+      if (navOverlay) {
+        navOverlay.addEventListener('click', closeMenu);
+      }
+
+      // Close menu when a nav link is clicked
+      document.querySelectorAll('.header-nav .nav-link, .header-nav .nav-button').forEach(function(link) {
+        link.addEventListener('click', closeMenu);
+      });
+
+      // Close on Escape key
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeMenu();
+      });
+    })();
+
     // Create particle system
     function createParticles() {
       const particlesContainer = document.getElementById('particles');

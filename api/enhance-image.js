@@ -100,7 +100,12 @@ async function analyzeImageContents(imageBuffer) {
   }
 
   const base64 = imageBuffer.toString('base64');
-  const prompt = 'List every food item, drink, sauce, garnish, and side visible in this photo. Be specific (e.g. "grilled chicken breast" not "chicken"). Comma-separated list.';
+  const prompt = `Identify this food photo precisely. Reply in this format:
+CUISINE: [cuisine type e.g. Chinese, Italian, Mexican, American, Japanese, etc.]
+DISH: [specific dish name if recognizable, e.g. "Sesame Chicken", "Eggs Benedict"]
+ITEMS: [every food item, drink, sauce, garnish, side visible — be very specific, e.g. "sesame-glazed fried chicken pieces" not just "chicken"]
+COLORS: [dominant food colors e.g. "golden brown, dark glaze, white sesame seeds"]
+Only describe what you actually see.`;
 
   // Try Gemini first (free, fast)
   if (geminiKey) {
@@ -113,7 +118,7 @@ async function analyzeImageContents(imageBuffer) {
             { text: prompt },
             { inline_data: { mime_type: 'image/jpeg', data: base64 } }
           ]}],
-          generationConfig: { temperature: 0.2, maxOutputTokens: 300 }
+          generationConfig: { temperature: 0.15, maxOutputTokens: 600 }
         },
         { timeout: 20000 }
       );
@@ -171,15 +176,15 @@ async function analyzeImageContents(imageBuffer) {
  */
 function buildRegenPrompt(style, fictionalLevel = 30, identifiedItems = '') {
   const prompt = buildPrompt(style, fictionalLevel, identifiedItems);
-  if (prompt.length > 1500) {
-    console.warn('Prompt too long, truncating to 1500 chars');
-    return prompt.substring(0, 1500);
+  if (prompt.length > 3500) {
+    console.warn('Prompt too long, truncating to 3500 chars');
+    return prompt.substring(0, 3500);
   }
   return prompt;
 }
 
-function baseNegativePrompt() {
-  return getNegativePrompt();
+function baseNegativePrompt(identifiedItems = '') {
+  return getNegativePrompt(identifiedItems);
 }
 
 /**
@@ -220,20 +225,21 @@ async function enhanceImageWithReplicate(imageBuffer, imageName, style = 'upscal
   // Step 2: Use Flux model for img2img quality enhancement
   // Use quality-focused prompt (same as Leonardo/Together)
   const prompt = buildRegenPrompt(style, fictionalLevel, identifiedItems);
-  const negativePrompt = baseNegativePrompt();
+  const negativePrompt = baseNegativePrompt(identifiedItems);
   
-  // Calculate strength based on fictional level
-  // Lower strength = MORE dramatic transformation
-  // Prompt-level food identity rules handle keeping the right food items
-  const calculatedStrength = 0.75 - (fictionalLevel / 100 * 0.50);
-  // Authentic (0%):   0.75 — subtle cleanup, very close to original
-  // Authentic (30%):  0.60 — moderate enhancement
-  // Balanced (50%):   0.50 — noticeable improvement
-  // Balanced (70%):   0.40 — significant transformation
-  // Magical (100%):   0.25 — dramatic overhaul (colors, lighting, background)
-  const calculatedGuidance = 7 + (fictionalLevel / 100 * 2.5);
+  // Calculate prompt_strength for Flux (Replicate)
+  // IMPORTANT: In Flux, prompt_strength works as "how much to CHANGE from original"
+  //   0.0 = keep original unchanged, 1.0 = fully regenerate from prompt
+  //   So we need LOW values to preserve food identity
+  const calculatedStrength = 0.20 + (fictionalLevel / 100 * 0.45);
+  // Authentic (0%):   0.20 — only 20% regenerated, very close to original
+  // Authentic (30%):  0.34 — subtle enhancement, food identity strongly preserved
+  // Balanced (50%):   0.43 — noticeable improvement
+  // Balanced (70%):   0.52 — significant transformation
+  // Magical (100%):   0.65 — dramatic overhaul (colors, lighting, background)
+  const calculatedGuidance = 5.5 + (fictionalLevel / 100 * 2.0);
   
-  console.log(`🎨 Replicate strength: ${calculatedStrength.toFixed(2)}, guidance: ${calculatedGuidance.toFixed(1)} (fictional: ${fictionalLevel}%)`);
+  console.log(`🎨 Replicate prompt_strength: ${calculatedStrength.toFixed(2)} (lower=preserve original), guidance: ${calculatedGuidance.toFixed(1)} (fictional: ${fictionalLevel}%)`);
   
   let prediction;
   let lastError = null;
@@ -251,7 +257,7 @@ async function enhanceImageWithReplicate(imageBuffer, imageName, style = 'upscal
           negative_prompt: negativePrompt,
           prompt_strength: calculatedStrength,
           num_inference_steps: 40,
-          guidance_scale: calculatedGuidance, // Scale from 7.5 to 9.0
+          guidance_scale: calculatedGuidance, // Scale from 5.5 to 7.5
           output_format: 'jpg', // Output format
           output_quality: 95, // High quality output
         }
@@ -279,9 +285,9 @@ async function enhanceImageWithReplicate(imageBuffer, imageName, style = 'upscal
             image: uploadedFileUrl,
             prompt: prompt,
             negative_prompt: negativePrompt,
-            prompt_strength: calculatedStrength, // Scale from 0.75 (authentic) to 0.3 (fictional)
+            prompt_strength: calculatedStrength, // 0.20 (authentic, preserve original) to 0.65 (magical, more change)
             num_inference_steps: 40,
-            guidance_scale: calculatedGuidance, // Scale from 7.5 to 9.0
+            guidance_scale: calculatedGuidance, // Scale from 5.5 to 7.5
             output_format: 'jpg',
             output_quality: 95,
           }
@@ -775,17 +781,22 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
   // Step 3: Generate enhanced image using image-to-image with PhotoReal for food
   // Focus on QUALITY ENHANCEMENT (sharpness, detail, noise reduction) not style transformation
   const prompt = buildRegenPrompt(style, fictionalLevel, identifiedItems);
-  const negativePrompt = baseNegativePrompt();
+  const negativePrompt = baseNegativePrompt(identifiedItems);
   
-  // Calculate strength based on fictional level
-  // Lower strength = MORE dramatic transformation
-  // Prompt-level food identity rules handle keeping the right food items
-  const calculatedStrength = 0.75 - (fictionalLevel / 100 * 0.50);
-  // Authentic (0%):  0.75 — subtle, Balanced (50%): 0.50, Magical (100%): 0.25
+  // Calculate init_strength for Leonardo
+  // IMPORTANT: In Leonardo, init_strength works as "how much to KEEP from original"
+  //   1.0 = keep original unchanged, 0.0 = fully regenerate from prompt
+  //   So we need HIGH values to preserve food identity
+  const calculatedStrength = 0.88 - (fictionalLevel / 100 * 0.40);
+  // Authentic (0%):  0.88 — 88% faithful to original
+  // Authentic (30%): 0.76 — 76% faithful, subtle enhancement
+  // Balanced (50%):  0.68 — 68% faithful, noticeable improvement
+  // Balanced (70%):  0.60 — 60% faithful, significant transformation
+  // Magical (100%):  0.48 — 48% faithful, dramatic overhaul
   
-  const calculatedGuidance = 7 + (fictionalLevel / 100 * 2.5); // 7 to 9.5
+  const calculatedGuidance = 5.5 + (fictionalLevel / 100 * 2.0); // 5.5 to 7.5
   
-  console.log(`🎨 Leonardo strength: ${calculatedStrength.toFixed(2)}, guidance: ${calculatedGuidance.toFixed(1)} (fictional: ${fictionalLevel}%)`)
+  console.log(`🎨 Leonardo init_strength: ${calculatedStrength.toFixed(2)} (higher=preserve original), guidance: ${calculatedGuidance.toFixed(1)} (fictional: ${fictionalLevel}%)`)
   
   // Calculate aspect ratio from original image to maintain proportions
   // Leonardo.ai maximum resolution: 1536x1536 (not 2048)
@@ -802,13 +813,13 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
     width: 1536,  // Leonardo maximum (was 2048, but Leonardo limit is 1536)
     height: 1536, // Leonardo maximum (was 2048, but Leonardo limit is 1536)
     // Scale guidance_scale based on fictional level
-    guidance_scale: calculatedGuidance, // 7 (authentic) to 9 (fictional)
+    guidance_scale: calculatedGuidance, // 5.5 (authentic) to 7.5 (fictional)
     // MORE STEPS = better quality (more processing time but better results)
     num_inference_steps: 40, // Increased from 30 for better quality
     // init_strength: how much the original image influences the output
     // Higher = stays closer to original, Lower = more dramatic transformation
-    // Food identity is preserved via explicit prompt rules, not strength alone
-    init_strength: calculatedStrength, // 0.75 (authentic) → 0.25 (Michelin/magical)
+    // Food identity is preserved via both strength AND explicit prompt rules
+    init_strength: calculatedStrength, // 0.88 (authentic) → 0.48 (Michelin/magical)
     scheduler: 'LEONARDO',
     seed: null,
     // PhotoReal settings for food photography
@@ -917,14 +928,16 @@ async function enhanceImageWithTogether(imageBuffer, imageName, style = 'upscale
   // Convert image to base64
   const base64Image = imageBuffer.toString('base64');
   const prompt = buildRegenPrompt(style, fictionalLevel, identifiedItems);
-  const negativePrompt = baseNegativePrompt();
+  const negativePrompt = baseNegativePrompt(identifiedItems);
   
-  // Calculate strength based on fictional level
-  // Lower strength = MORE dramatic transformation
-  const calculatedStrength = 0.75 - (fictionalLevel / 100 * 0.50);
-  const calculatedGuidance = 7 + (fictionalLevel / 100 * 2.5);
+  // Calculate strength for Together (uses Flux Pro)
+  // IMPORTANT: In Together/Flux, strength works as "how much to CHANGE from original"
+  //   0.0 = keep original unchanged, 1.0 = fully regenerate from prompt
+  //   So we need LOW values to preserve food identity (same direction as Replicate Flux)
+  const calculatedStrength = 0.20 + (fictionalLevel / 100 * 0.45);
+  const calculatedGuidance = 5.5 + (fictionalLevel / 100 * 2.0);
   
-  console.log(`🎨 Together strength: ${calculatedStrength.toFixed(2)}, guidance: ${calculatedGuidance.toFixed(1)} (fictional: ${fictionalLevel}%)`);
+  console.log(`🎨 Together strength: ${calculatedStrength.toFixed(2)} (lower=preserve original), guidance: ${calculatedGuidance.toFixed(1)} (fictional: ${fictionalLevel}%)`);
   
   try {
     const response = await axios.post(
@@ -936,7 +949,7 @@ async function enhanceImageWithTogether(imageBuffer, imageName, style = 'upscale
         image: `data:image/jpeg;base64,${base64Image}`,
         steps: 50,
         guidance_scale: calculatedGuidance,
-        strength: calculatedStrength  // 0.75 (authentic) to 0.45 (magical) — never below 0.45
+        strength: calculatedStrength  // 0.20 (authentic) to 0.65 (magical)
       },
       {
         headers: {
