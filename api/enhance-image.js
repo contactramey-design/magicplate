@@ -304,67 +304,31 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
     const contentType = contentTypeMap[extension] || 'image/jpeg';
     
     try {
-      // Leonardo S3 presigned URLs - try different header combinations
-      // Some presigned URLs are very specific about headers
+      // Leonardo S3 presigned URLs - must use exactly as provided
+      // The URL signature includes specific parameters, don't modify it
       console.log('Uploading to S3...');
       console.log('Image size:', imageBuffer.length, 'bytes');
       console.log('Content-Type:', contentType);
-      console.log('Presigned URL (first 100 chars):', presignedUrl.substring(0, 100));
+      console.log('Presigned URL (first 200 chars):', presignedUrl.substring(0, 200));
       
-      // Try 1: With Content-Type and Content-Length (most common)
-      let uploadResponse;
-      try {
-        uploadResponse = await axios.put(presignedUrl, imageBuffer, {
-          headers: {
-            'Content-Type': contentType,
-            'Content-Length': imageBuffer.length.toString()
-          },
-          maxContentLength: Infinity,
-          maxBodyLength: Infinity,
-          timeout: 120000
-        });
-        console.log('S3 upload successful with Content-Type header, status:', uploadResponse.status);
-      } catch (error1) {
-        if (error1.response?.status === 403) {
-          console.log('Upload with Content-Type failed (403), trying without Content-Type...');
-          // Try 2: Without Content-Type (some presigned URLs don't allow it)
-          try {
-            uploadResponse = await axios.put(presignedUrl, imageBuffer, {
-              headers: {
-                'Content-Length': imageBuffer.length.toString()
-              },
-              maxContentLength: Infinity,
-              maxBodyLength: Infinity,
-              timeout: 120000
-            });
-            console.log('S3 upload successful without Content-Type, status:', uploadResponse.status);
-          } catch (error2) {
-            if (error2.response?.status === 403) {
-              console.log('Upload without Content-Type also failed (403), trying minimal headers...');
-              // Try 3: Minimal headers only
-              try {
-                uploadResponse = await axios.put(presignedUrl, imageBuffer, {
-                  maxContentLength: Infinity,
-                  maxBodyLength: Infinity,
-                  timeout: 120000
-                });
-                console.log('S3 upload successful with minimal headers, status:', uploadResponse.status);
-              } catch (error3) {
-                // All attempts failed
-                console.error('All S3 upload attempts failed');
-                console.error('Error 1 (with Content-Type):', error1.response?.status, error1.response?.data);
-                console.error('Error 2 (without Content-Type):', error2.response?.status, error2.response?.data);
-                console.error('Error 3 (minimal):', error3.response?.status, error3.response?.data);
-                throw error3;
-              }
-            } else {
-              throw error2;
-            }
-          }
-        } else {
-          throw error1;
-        }
-      }
+      // S3 presigned URLs typically don't need Content-Type header
+      // The signature is calculated without it, so adding it breaks the signature
+      // Use the raw buffer with minimal headers
+      const uploadResponse = await axios.put(presignedUrl, imageBuffer, {
+        headers: {
+          'Content-Length': imageBuffer.length.toString()
+        },
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity,
+        timeout: 120000,
+        // Prevent axios from automatically adding Content-Type
+        transformRequest: [(data) => {
+          // Return data as-is, don't let axios modify it
+          return data;
+        }]
+      });
+      
+      console.log('S3 upload successful, status:', uploadResponse.status);
       
       // Check if upload was successful (200 or 204)
       if (uploadResponse.status !== 200 && uploadResponse.status !== 204) {
