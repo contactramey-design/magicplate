@@ -22,7 +22,7 @@ const useSendGrid = !!process.env.SENDGRID_API_KEY && !useResend;
 const aiGateway = require('../lib/ai-gateway');
 
 const emailTemplates = {
-  initialOutreach: (restaurant) => {
+  initialOutreach: async (restaurant) => {
     // Personalize based on their issues and Instagram data
     const issues = restaurant.issues || [];
     let personalizedHook = '';
