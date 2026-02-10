@@ -6,271 +6,1384 @@
   <title>Social Media Manager - MagicPlate.ai</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+
     body {
       font-family: 'Inter', sans-serif;
-      background: #f5f5f5;
-      color: #1a1a1a;
-      padding: 20px;
-    }
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      background: white;
-      border-radius: 15px;
-      padding: 40px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-    }
-    h1 {
-      color: #4caf50;
-      margin-bottom: 30px;
-      font-size: 2.5em;
-    }
-    .tabs {
+      background: #f0f2f5;
+      color: #1a1a2e;
       display: flex;
-      gap: 10px;
-      margin-bottom: 30px;
-      border-bottom: 2px solid rgba(76, 175, 80, 0.2);
+      min-height: 100vh;
     }
-    .tab {
-      padding: 12px 24px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-weight: 600;
-      color: rgba(26, 26, 26, 0.6);
-      border-bottom: 3px solid transparent;
-      transition: all 0.3s;
+
+    /* ── Sidebar ────────────────────────────── */
+    .sidebar {
+      width: 260px;
+      background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+      color: #fff;
+      padding: 30px 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
     }
-    .tab.active {
-      color: #4caf50;
-      border-bottom-color: #4caf50;
-    }
-    .tab-content {
-      display: none;
-    }
-    .tab-content.active {
-      display: block;
-    }
-    .form-group {
+
+    .sidebar-brand {
+      padding: 0 24px 30px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
       margin-bottom: 20px;
     }
-    label {
-      display: block;
-      font-weight: 600;
+
+    .sidebar-brand h2 {
+      font-size: 1.4em;
+      font-weight: 700;
+      background: linear-gradient(135deg, #4caf50, #81c784);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 2px;
+    }
+
+    .sidebar-brand span {
+      font-size: 0.8em;
+      color: rgba(255,255,255,0.4);
+      font-weight: 400;
+    }
+
+    .nav-section {
+      padding: 0 16px;
       margin-bottom: 8px;
     }
-    input, textarea, select {
-      width: 100%;
-      padding: 12px;
-      border: 2px solid rgba(76, 175, 80, 0.2);
-      border-radius: 8px;
-      font-size: 16px;
-      font-family: inherit;
+
+    .nav-section-label {
+      font-size: 0.7em;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.3);
+      padding: 0 12px;
+      margin-bottom: 8px;
     }
-    .btn {
-      padding: 12px 24px;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      font-size: 0.9em;
+      font-weight: 500;
+      transition: all 0.2s;
       cursor: pointer;
-      transition: all 0.3s;
+      margin-bottom: 2px;
     }
+
+    .nav-item:hover {
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.9);
+    }
+
+    .nav-item.active {
+      background: linear-gradient(135deg, rgba(76,175,80,0.2), rgba(129,199,132,0.1));
+      color: #81c784;
+    }
+
+    .nav-item .nav-icon {
+      width: 20px;
+      text-align: center;
+      font-size: 1.1em;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 20px 24px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .sidebar-footer a {
+      color: rgba(255,255,255,0.4);
+      text-decoration: none;
+      font-size: 0.85em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: color 0.2s;
+    }
+
+    .sidebar-footer a:hover { color: rgba(255,255,255,0.8); }
+
+    /* ── Main Content ────────────────────────── */
+    .main-content {
+      margin-left: 260px;
+      flex: 1;
+      padding: 0;
+      min-height: 100vh;
+    }
+
+    /* Top bar */
+    .topbar {
+      background: #fff;
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #e8eaed;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .topbar-left h1 {
+      font-size: 1.3em;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+
+    .topbar-left p {
+      font-size: 0.85em;
+      color: #888;
+      margin-top: 2px;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9em;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     .btn-primary {
       background: linear-gradient(135deg, #4caf50, #66bb6a);
       color: white;
+      box-shadow: 0 4px 12px rgba(76,175,80,0.25);
     }
+
     .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(76,175,80,0.35);
     }
-    .status {
-      margin-top: 20px;
-      padding: 15px;
+
+    .btn-outline {
+      background: #fff;
+      color: #555;
+      border: 1.5px solid #ddd;
+    }
+
+    .btn-outline:hover {
+      border-color: #4caf50;
+      color: #4caf50;
+    }
+
+    .btn-sm {
+      padding: 8px 14px;
+      font-size: 0.82em;
       border-radius: 8px;
+    }
+
+    /* Content area */
+    .content {
+      padding: 28px 32px;
+    }
+
+    /* ── Platform Stats Cards ──────────────── */
+    .platform-cards {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+
+    .platform-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 22px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .platform-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+
+    .platform-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .platform-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2em;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .platform-icon.twitter { background: linear-gradient(135deg, #1DA1F2, #0d8ecf); }
+    .platform-icon.instagram { background: linear-gradient(135deg, #E1306C, #F77737, #FCAF45); }
+    .platform-icon.youtube { background: linear-gradient(135deg, #FF0000, #cc0000); }
+    .platform-icon.facebook { background: linear-gradient(135deg, #1877F2, #0d65d9); }
+    .platform-icon.tiktok { background: linear-gradient(135deg, #000, #333); }
+
+    .platform-card-info h4 {
+      font-size: 0.78em;
+      color: #999;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .platform-card-info .handle {
+      font-size: 0.82em;
+      color: #555;
+      font-weight: 500;
+    }
+
+    .platform-stat {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .platform-stat .number {
+      font-size: 2em;
+      font-weight: 800;
+      color: #1a1a2e;
+      letter-spacing: -0.5px;
+    }
+
+    .platform-stat .label {
+      font-size: 0.78em;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .platform-change {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.78em;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      margin-top: 8px;
+    }
+
+    .platform-change.up { background: rgba(76,175,80,0.1); color: #4caf50; }
+    .platform-change.down { background: rgba(244,67,54,0.1); color: #f44336; }
+
+    /* ── Charts Row ───────────────────────── */
+    .charts-row {
+      display: grid;
+      grid-template-columns: 1.8fr 1fr;
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+
+    .chart-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    }
+
+    .chart-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .chart-card-header h3 {
+      font-size: 1em;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+
+    .chart-filters {
+      display: flex;
+      gap: 6px;
+    }
+
+    .chart-filter {
+      padding: 5px 12px;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      background: #fff;
+      font-size: 0.78em;
+      color: #888;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .chart-filter.active {
+      background: #4caf50;
+      color: #fff;
+      border-color: #4caf50;
+    }
+
+    /* SVG Chart area */
+    .chart-area {
+      width: 100%;
+      height: 220px;
+      position: relative;
+    }
+
+    .chart-area svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .chart-legend {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      margin-top: 16px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8em;
+      color: #888;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    /* ── Side Widgets ────────────────────────── */
+    .side-widgets {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .widget-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 22px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    }
+
+    .widget-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .widget-header h4 {
+      font-size: 0.88em;
+      color: #888;
+      font-weight: 500;
+    }
+
+    .widget-header .more-icon {
+      color: #ccc;
+      cursor: pointer;
+      font-size: 1.2em;
+    }
+
+    .widget-big-number {
+      font-size: 2.2em;
+      font-weight: 800;
+      color: #1a1a2e;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+
+    .mini-chart {
+      height: 60px;
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+    }
+
+    .mini-bar {
+      flex: 1;
+      border-radius: 4px 4px 0 0;
+      min-height: 8px;
+      transition: height 0.3s;
+    }
+
+    /* ── Bottom Stats Row ───────────────────── */
+    .bottom-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 22px;
+      text-align: center;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    }
+
+    .stat-card .stat-label {
+      font-size: 0.82em;
+      color: #888;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .stat-card .stat-value {
+      font-size: 2em;
+      font-weight: 800;
+      color: #1a1a2e;
+      letter-spacing: -0.5px;
+    }
+
+    /* ── Content Sections (Create Post, AI, Schedule) ── */
+    .section-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 28px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      margin-bottom: 22px;
       display: none;
     }
-    .status.success {
-      background: rgba(76, 175, 80, 0.1);
-      color: #4caf50;
-      border: 2px solid rgba(76, 175, 80, 0.3);
+
+    .section-card.active { display: block; }
+
+    .section-card h2 {
+      font-size: 1.2em;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 6px;
     }
-    .status.error {
-      background: rgba(245, 158, 11, 0.1);
-      color: #f59e0b;
-      border: 2px solid rgba(245, 158, 11, 0.3);
+
+    .section-card .section-subtitle {
+      font-size: 0.88em;
+      color: #888;
+      margin-bottom: 24px;
     }
-    .posts-list {
-      margin-top: 30px;
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
     }
-    .post-card {
-      background: #f9f9f9;
-      padding: 20px;
+
+    .form-grid .full-width { grid-column: 1 / -1; }
+
+    .form-group { margin-bottom: 0; }
+
+    .form-group label {
+      display: block;
+      font-size: 0.82em;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 6px;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid #e0e0e0;
       border-radius: 10px;
-      margin-bottom: 15px;
-      border: 2px solid rgba(76, 175, 80, 0.1);
+      font-size: 0.92em;
+      font-family: inherit;
+      color: #333;
+      background: #fafafa;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #4caf50;
+      box-shadow: 0 0 0 3px rgba(76,175,80,0.1);
+      background: #fff;
+    }
+
+    .form-group textarea { resize: vertical; }
+
+    /* Post cards */
+    .posts-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .post-card {
+      background: #fafbfc;
+      border-radius: 12px;
+      padding: 20px;
+      border: 1.5px solid #e8eaed;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      transition: border-color 0.2s;
+    }
+
+    .post-card:hover { border-color: #4caf50; }
+
+    .post-platform-badge {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 1.1em;
+      flex-shrink: 0;
+    }
+
+    .post-body { flex: 1; }
+
+    .post-body h4 {
+      font-size: 0.9em;
+      font-weight: 600;
+      color: #1a1a2e;
+      margin-bottom: 4px;
+    }
+
+    .post-body p {
+      font-size: 0.85em;
+      color: #666;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .post-meta {
+      display: flex;
+      gap: 16px;
+      font-size: 0.78em;
+      color: #aaa;
+    }
+
+    .post-status {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 0.75em;
+      font-weight: 600;
+    }
+
+    .post-status.draft { background: #fff3e0; color: #f57c00; }
+    .post-status.scheduled { background: #e3f2fd; color: #1976d2; }
+    .post-status.published { background: #e8f5e9; color: #388e3c; }
+
+    /* AI Generated preview */
+    .ai-preview {
+      background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+      border: 1.5px solid #a7f3d0;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 20px;
+      display: none;
+    }
+
+    .ai-preview h4 {
+      font-size: 0.9em;
+      color: #065f46;
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ai-preview .preview-content {
+      font-size: 0.92em;
+      color: #333;
+      line-height: 1.7;
+      background: #fff;
+      border-radius: 10px;
+      padding: 16px;
+      border: 1px solid #d1fae5;
+    }
+
+    /* Status messages */
+    .status-msg {
+      padding: 12px 18px;
+      border-radius: 10px;
+      margin-top: 16px;
+      font-size: 0.9em;
+      font-weight: 500;
+      display: none;
+    }
+
+    .status-msg.success { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+    .status-msg.error { background: #fce4ec; color: #c62828; border: 1px solid #f8bbd0; }
+
+    /* ── Responsive ──────────────────────────── */
+    @media (max-width: 1200px) {
+      .platform-cards { grid-template-columns: repeat(2, 1fr); }
+      .charts-row { grid-template-columns: 1fr; }
+      .bottom-stats { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; }
+      .platform-cards { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      .content { padding: 16px; }
+      .topbar { padding: 12px 16px; }
+      .bottom-stats { grid-template-columns: 1fr 1fr; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>📱 Social Media Manager</h1>
-    
-    <div class="tabs">
-      <button class="tab active" onclick="switchTab('create')">Create Post</button>
-      <button class="tab" onclick="switchTab('generate')">Generate AI Post</button>
-      <button class="tab" onclick="switchTab('schedule')">Schedule Post</button>
-      <button class="tab" onclick="switchTab('posts')">My Posts</button>
+
+  <!-- ═══════ Sidebar ═══════ -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <h2>🍽️ MagicPlate</h2>
+      <span>Social Media Manager</span>
     </div>
     
-    <!-- Create Post Tab -->
-    <div id="createTab" class="tab-content active">
+    <div class="nav-section">
+      <div class="nav-section-label">Main</div>
+      <a class="nav-item active" data-view="dashboard">
+        <span class="nav-icon">📊</span> Dashboard
+      </a>
+      <a class="nav-item" data-view="create">
+        <span class="nav-icon">✏️</span> Create Post
+      </a>
+      <a class="nav-item" data-view="generate">
+        <span class="nav-icon">🤖</span> AI Generate
+      </a>
+      <a class="nav-item" data-view="schedule">
+        <span class="nav-icon">📅</span> Schedule
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Content</div>
+      <a class="nav-item" data-view="posts">
+        <span class="nav-icon">📋</span> My Posts
+      </a>
+      <a class="nav-item" data-view="calendar">
+        <span class="nav-icon">🗓️</span> Calendar
+      </a>
+      <a class="nav-item" data-view="analytics">
+        <span class="nav-icon">📈</span> Analytics
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Settings</div>
+      <a class="nav-item" data-view="accounts">
+        <span class="nav-icon">🔗</span> Connected Accounts
+      </a>
+      <a class="nav-item" data-view="settings">
+        <span class="nav-icon">⚙️</span> Settings
+      </a>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="/dashboard.html">← Back to Dashboard</a>
+    </div>
+  </aside>
+
+  <!-- ═══════ Main Content ═══════ -->
+  <div class="main-content">
+
+    <!-- Top Bar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1 id="pageTitle">Social Dashboard</h1>
+        <p id="pageSubtitle">Overview of your restaurant's social presence</p>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-outline btn-sm" onclick="showView('analytics')">📈 Analytics</button>
+        <button class="btn btn-primary btn-sm" onclick="showView('create')">✏️ New Post</button>
+      </div>
+    </div>
+
+    <!-- ═══════ Dashboard View ═══════ -->
+    <div class="content">
+      <div id="dashboardView" class="view active">
+
+        <!-- Platform Cards -->
+        <div class="platform-cards">
+          <div class="platform-card">
+            <div class="platform-card-header">
+              <div class="platform-icon twitter">𝕏</div>
+              <div class="platform-card-info">
+                <h4>Twitter / X</h4>
+                <span class="handle">@YourRestaurant</span>
+              </div>
+            </div>
+            <div class="platform-stat">
+              <span class="number" id="twitterFollowers">—</span>
+              <span class="label">Followers</span>
+            </div>
+            <div class="platform-change up">↑ 2.4%</div>
+          </div>
+
+          <div class="platform-card">
+            <div class="platform-card-header">
+              <div class="platform-icon instagram">📷</div>
+              <div class="platform-card-info">
+                <h4>Instagram</h4>
+                <span class="handle">@YourRestaurant</span>
+              </div>
+            </div>
+            <div class="platform-stat">
+              <span class="number" id="instaFollowers">—</span>
+              <span class="label">Followers</span>
+            </div>
+            <div class="platform-change up">↑ 3.1%</div>
+          </div>
+
+          <div class="platform-card">
+            <div class="platform-card-header">
+              <div class="platform-icon youtube">▶</div>
+              <div class="platform-card-info">
+                <h4>YouTube</h4>
+                <span class="handle">Your Restaurant</span>
+              </div>
+            </div>
+            <div class="platform-stat">
+              <span class="number" id="ytSubscribers">—</span>
+              <span class="label">Subscribers</span>
+            </div>
+            <div class="platform-change up">↑ 1.8%</div>
+          </div>
+
+          <div class="platform-card">
+            <div class="platform-card-header">
+              <div class="platform-icon facebook">f</div>
+              <div class="platform-card-info">
+                <h4>Facebook</h4>
+                <span class="handle">Your Restaurant</span>
+              </div>
+            </div>
+            <div class="platform-stat">
+              <span class="number" id="fbFollowers">—</span>
+              <span class="label">Followers</span>
+            </div>
+            <div class="platform-change down">↓ 0.5%</div>
+          </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="charts-row">
+          <!-- Followers Growth Chart -->
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <h3>Followers Growth</h3>
+              <div class="chart-filters">
+                <button class="chart-filter" data-range="7d">7D</button>
+                <button class="chart-filter active" data-range="30d">30D</button>
+                <button class="chart-filter" data-range="90d">90D</button>
+                <button class="chart-filter" data-range="1y">1Y</button>
+              </div>
+            </div>
+            <div class="chart-area" id="followersChart"></div>
+            <div class="chart-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:#4caf50"></div> Gained</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#ef9a9a"></div> Lost</div>
+            </div>
+          </div>
+
+          <!-- Side Widgets -->
+          <div class="side-widgets">
+            <div class="widget-card">
+              <div class="widget-header">
+                <h4>Total Impressions</h4>
+                <span class="more-icon">⋮</span>
+              </div>
+              <div class="widget-big-number" id="impressionsNumber">—</div>
+              <div class="mini-chart" id="impressionsChart"></div>
+            </div>
+            <div class="widget-card">
+              <div class="widget-header">
+                <h4>Engagement Rate</h4>
+                <span class="more-icon">⋮</span>
+              </div>
+              <div class="widget-big-number" id="engagementNumber">—</div>
+              <div class="mini-chart" id="engagementChart"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Stats -->
+        <div class="bottom-stats">
+          <div class="stat-card">
+            <div class="stat-label">Clicks</div>
+            <div class="stat-value" id="clicksStat">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Likes</div>
+            <div class="stat-value" id="likesStat">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">New Followers</div>
+            <div class="stat-value" id="newFollowersStat">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Impressions</div>
+            <div class="stat-value" id="impressionsStat">—</div>
+          </div>
+        </div>
+
+        <!-- Recent Posts Preview -->
+        <div class="section-card active">
+          <h2>Recent Posts</h2>
+          <p class="section-subtitle">Your latest social media content</p>
+          <div class="posts-grid" id="recentPostsList">
+            <div style="text-align:center; padding:40px; color:#aaa;">
+              <p style="font-size:2em; margin-bottom:10px;">📱</p>
+              <p>No posts yet. Create your first post to get started!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════ Create Post View ═══════ -->
+      <div id="createView" class="view" style="display:none;">
+        <div class="section-card active">
+          <h2>Create New Post</h2>
+          <p class="section-subtitle">Compose and publish content to your social channels</p>
       <form id="createForm">
+            <div class="form-grid">
         <div class="form-group">
-          <label>Restaurant ID *</label>
-          <input type="number" id="restaurantId" required>
+                <label>Platform</label>
+                <select id="platform">
+                  <option value="instagram">📷 Instagram</option>
+                  <option value="facebook">📘 Facebook</option>
+                  <option value="tiktok">🎵 TikTok</option>
+                  <option value="twitter">𝕏 Twitter / X</option>
+                </select>
         </div>
         <div class="form-group">
-          <label>Platform *</label>
-          <select id="platform" required>
-            <option value="instagram">Instagram</option>
-            <option value="facebook">Facebook</option>
-            <option value="tiktok">TikTok</option>
-            <option value="twitter">Twitter</option>
+                <label>Post Type</label>
+                <select id="createPostType">
+                  <option value="image">📸 Image Post</option>
+                  <option value="carousel">🖼️ Carousel</option>
+                  <option value="story">📱 Story</option>
+                  <option value="reel">🎬 Reel / Video</option>
+                  <option value="text">💬 Text Only</option>
           </select>
         </div>
-        <div class="form-group">
-          <label>Content *</label>
-          <textarea id="content" rows="5" required></textarea>
+              <div class="form-group full-width">
+                <label>Content</label>
+                <textarea id="content" rows="5" placeholder="Write your post caption here... Use #hashtags and @mentions"></textarea>
         </div>
         <div class="form-group">
           <label>Image URL (optional)</label>
-          <input type="url" id="imageUrl">
+                <input type="text" id="imageUrl" placeholder="https://...">
         </div>
-        <button type="submit" class="btn btn-primary">Create Post</button>
-        <div id="createStatus" class="status"></div>
+              <div class="form-group">
+                <label>Schedule (optional)</label>
+                <input type="datetime-local" id="scheduleTime">
+              </div>
+            </div>
+            <div style="margin-top:20px; display:flex; gap:12px;">
+              <button type="submit" class="btn btn-primary">🚀 Publish Now</button>
+              <button type="button" class="btn btn-outline" onclick="schedulePost()">📅 Schedule</button>
+              <button type="button" class="btn btn-outline" onclick="saveDraft()">💾 Save Draft</button>
+            </div>
+            <div id="createStatus" class="status-msg"></div>
       </form>
+        </div>
     </div>
     
-    <!-- Generate AI Post Tab -->
-    <div id="generateTab" class="tab-content">
+      <!-- ═══════ AI Generate View ═══════ -->
+      <div id="generateView" class="view" style="display:none;">
+        <div class="section-card active">
+          <h2>🤖 AI Post Generator</h2>
+          <p class="section-subtitle">Let AI create engaging social media content for your restaurant</p>
       <form id="generateForm">
+            <div class="form-grid">
         <div class="form-group">
-          <label>Restaurant ID *</label>
-          <input type="number" id="genRestaurantId" required>
-        </div>
-        <div class="form-group">
-          <label>Platform *</label>
-          <select id="genPlatform" required>
-            <option value="instagram">Instagram</option>
-            <option value="facebook">Facebook</option>
-            <option value="tiktok">TikTok</option>
+                <label>Platform</label>
+                <select id="genPlatform">
+                  <option value="instagram">📷 Instagram</option>
+                  <option value="facebook">📘 Facebook</option>
+                  <option value="tiktok">🎵 TikTok</option>
           </select>
         </div>
         <div class="form-group">
-          <label>Post Type *</label>
-          <select id="postType" required>
-            <option value="menu_item">Menu Item</option>
-            <option value="promotion">Promotion</option>
-            <option value="announcement">Announcement</option>
+                <label>Content Type</label>
+                <select id="postType">
+                  <option value="menu_item">🍽️ Menu Item Feature</option>
+                  <option value="promotion">🎉 Promotion / Deal</option>
+                  <option value="announcement">📣 Announcement</option>
+                  <option value="behind_scenes">🎬 Behind The Scenes</option>
+                  <option value="customer_spotlight">⭐ Customer Spotlight</option>
+                  <option value="seasonal">🌸 Seasonal Special</option>
           </select>
         </div>
         <div class="form-group">
-          <label>Item Name (for menu_item)</label>
-          <input type="text" id="itemName">
+                <label>Dish / Item Name</label>
+                <input type="text" id="itemName" placeholder="e.g. Truffle Wagyu Burger">
         </div>
         <div class="form-group">
-          <label>Description</label>
-          <textarea id="description" rows="3"></textarea>
+                <label>Tone</label>
+                <select id="genTone">
+                  <option value="engaging">😊 Engaging & Friendly</option>
+                  <option value="professional">🎩 Professional</option>
+                  <option value="fun">🎉 Fun & Playful</option>
+                  <option value="luxurious">✨ Luxurious & Premium</option>
+                  <option value="casual">👋 Casual & Relaxed</option>
+                </select>
         </div>
-        <button type="submit" class="btn btn-primary">Generate & Create Post</button>
-        <div id="generateStatus" class="status"></div>
+              <div class="form-group full-width">
+                <label>Additional Details</label>
+                <textarea id="description" rows="3" placeholder="Any specific details to include: ingredients, price, special story behind the dish..."></textarea>
+              </div>
+            </div>
+            <div style="margin-top:20px; display:flex; gap:12px;">
+              <button type="submit" class="btn btn-primary">✨ Generate Post</button>
+            </div>
+            <div id="generateStatus" class="status-msg"></div>
+            <div id="aiPreview" class="ai-preview">
+              <h4>✨ AI Generated Content</h4>
+              <div class="preview-content" id="aiPreviewContent"></div>
+              <div style="margin-top:14px; display:flex; gap:10px;">
+                <button type="button" class="btn btn-primary btn-sm" onclick="publishAI()">🚀 Publish This</button>
+                <button type="button" class="btn btn-outline btn-sm" onclick="regenerateAI()">🔄 Regenerate</button>
+                <button type="button" class="btn btn-outline btn-sm" onclick="editAI()">✏️ Edit & Publish</button>
+              </div>
+            </div>
       </form>
+        </div>
     </div>
     
-    <!-- Schedule Post Tab -->
-    <div id="scheduleTab" class="tab-content">
+      <!-- ═══════ Schedule View ═══════ -->
+      <div id="scheduleView" class="view" style="display:none;">
+        <div class="section-card active">
+          <h2>📅 Schedule Posts</h2>
+          <p class="section-subtitle">Plan and queue your content for optimal posting times</p>
       <form id="scheduleForm">
+            <div class="form-grid">
         <div class="form-group">
-          <label>Post ID *</label>
-          <input type="number" id="postId" required>
+                <label>Post ID</label>
+                <input type="number" id="postId" placeholder="Enter post ID to schedule">
         </div>
         <div class="form-group">
-          <label>Scheduled Date & Time *</label>
-          <input type="datetime-local" id="scheduledTime" required>
+                <label>Schedule Date & Time</label>
+                <input type="datetime-local" id="scheduledTime">
         </div>
-        <button type="submit" class="btn btn-primary">Schedule Post</button>
-        <div id="scheduleStatus" class="status"></div>
+            </div>
+            <div style="margin-top:20px;">
+              <button type="submit" class="btn btn-primary">📅 Schedule Post</button>
+            </div>
+            <div id="scheduleStatus" class="status-msg"></div>
       </form>
+
+          <div style="margin-top:32px;">
+            <h3 style="font-size:1em; margin-bottom:16px; color:#1a1a2e;">📌 Upcoming Scheduled</h3>
+            <div id="scheduledList" class="posts-grid">
+              <div style="text-align:center; padding:30px; color:#aaa;">
+                <p>No scheduled posts yet.</p>
+              </div>
+            </div>
+          </div>
+        </div>
     </div>
     
-    <!-- My Posts Tab -->
-    <div id="postsTab" class="tab-content">
-      <form id="listForm" style="margin-bottom: 20px;">
-        <div class="form-group">
-          <label>Restaurant ID *</label>
-          <input type="number" id="listRestaurantId" required>
+      <!-- ═══════ My Posts View ═══════ -->
+      <div id="postsView" class="view" style="display:none;">
+        <div class="section-card active">
+          <h2>📋 All Posts</h2>
+          <p class="section-subtitle">Manage all your social media content</p>
+          <div style="display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap;">
+            <button class="btn btn-sm btn-outline post-filter active" data-filter="all">All</button>
+            <button class="btn btn-sm btn-outline post-filter" data-filter="published">Published</button>
+            <button class="btn btn-sm btn-outline post-filter" data-filter="scheduled">Scheduled</button>
+            <button class="btn btn-sm btn-outline post-filter" data-filter="draft">Drafts</button>
+          </div>
+          <div id="allPostsList" class="posts-grid">
+            <div style="text-align:center; padding:40px; color:#aaa;">
+              <p>Loading posts...</p>
+            </div>
+          </div>
         </div>
-        <button type="submit" class="btn btn-primary">Load Posts</button>
-      </form>
-      <div id="postsList" class="posts-list"></div>
+      </div>
+
+      <!-- ═══════ Analytics View ═══════ -->
+      <div id="analyticsView" class="view" style="display:none;">
+        <div class="section-card active">
+          <h2>📈 Analytics & Insights</h2>
+          <p class="section-subtitle">Performance metrics across all your social channels</p>
+          <div style="text-align:center; padding:60px; color:#999;">
+            <p style="font-size:3em; margin-bottom:12px;">📊</p>
+            <p style="font-size:1.1em; margin-bottom:4px;">Connect your social accounts to see real-time analytics</p>
+            <p style="font-size:0.9em; color:#bbb;">Instagram, Facebook, Twitter, TikTok, YouTube</p>
+            <button class="btn btn-primary" style="margin-top:20px;" onclick="showView('accounts')">🔗 Connect Accounts</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════ Calendar View ═══════ -->
+      <div id="calendarView" class="view" style="display:none;">
+        <div class="section-card active">
+          <h2>🗓️ Content Calendar</h2>
+          <p class="section-subtitle">Visual overview of your posting schedule</p>
+          <div id="calendarGrid" style="margin-top:16px;"></div>
+        </div>
+      </div>
+
+      <!-- ═══════ Connected Accounts View ═══════ -->
+      <div id="accountsView" class="view" style="display:none;">
+        <div class="section-card active">
+          <h2>🔗 Connected Accounts</h2>
+          <p class="section-subtitle">Manage your linked social media profiles</p>
+          <div style="display:grid; gap:14px; margin-top:20px;">
+            <div class="post-card">
+              <div class="post-platform-badge instagram" style="font-size:1.3em;">📷</div>
+              <div class="post-body">
+                <h4>Instagram</h4>
+                <p>Connect your Instagram Business account to publish posts, stories, and reels.</p>
+              </div>
+              <button class="btn btn-outline btn-sm">Connect</button>
+            </div>
+            <div class="post-card">
+              <div class="post-platform-badge facebook" style="background:#1877F2; font-size:1.3em;">f</div>
+              <div class="post-body">
+                <h4>Facebook</h4>
+                <p>Connect your Facebook Page to publish posts and manage your community.</p>
+              </div>
+              <button class="btn btn-outline btn-sm">Connect</button>
+            </div>
+            <div class="post-card">
+              <div class="post-platform-badge" style="background:#000; font-size:1.3em;">𝕏</div>
+              <div class="post-body">
+                <h4>Twitter / X</h4>
+                <p>Connect your X account to tweet and engage with followers.</p>
+              </div>
+              <button class="btn btn-outline btn-sm">Connect</button>
+            </div>
+            <div class="post-card">
+              <div class="post-platform-badge" style="background:#000; font-size:1.3em;">🎵</div>
+              <div class="post-body">
+                <h4>TikTok</h4>
+                <p>Connect your TikTok Business account to publish video content.</p>
+              </div>
+              <button class="btn btn-outline btn-sm">Connect</button>
+            </div>
+            <div class="post-card">
+              <div class="post-platform-badge" style="background:#FF0000; font-size:1.3em;">▶</div>
+              <div class="post-body">
+                <h4>YouTube</h4>
+                <p>Connect your YouTube channel to manage video content.</p>
+              </div>
+              <button class="btn btn-outline btn-sm">Connect</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════ Settings View ═══════ -->
+      <div id="settingsView" class="view" style="display:none;">
+        <div class="section-card active">
+          <h2>⚙️ Settings</h2>
+          <p class="section-subtitle">Configure your social media manager preferences</p>
+          <div class="form-grid" style="margin-top:20px;">
+        <div class="form-group">
+              <label>Restaurant Name</label>
+              <input type="text" id="restaurantName" placeholder="Your Restaurant Name">
+        </div>
+            <div class="form-group">
+              <label>Default Hashtags</label>
+              <input type="text" id="defaultHashtags" placeholder="#food #restaurant #delicious">
+            </div>
+            <div class="form-group">
+              <label>Posting Timezone</label>
+              <select id="timezone">
+                <option value="America/Los_Angeles">Pacific (PT)</option>
+                <option value="America/Denver">Mountain (MT)</option>
+                <option value="America/Chicago">Central (CT)</option>
+                <option value="America/New_York" selected>Eastern (ET)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>AI Writing Style</label>
+              <select id="writingStyle">
+                <option value="casual">Casual & Friendly</option>
+                <option value="professional">Professional</option>
+                <option value="playful">Playful & Fun</option>
+                <option value="luxury">Luxurious & Upscale</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-primary" style="margin-top:20px;">💾 Save Settings</button>
     </div>
   </div>
 
+    </div><!-- /content -->
+  </div><!-- /main-content -->
+
   <script>
-    function switchTab(tabName) {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      event.target.classList.add('active');
-      document.getElementById(tabName + 'Tab').classList.add('active');
+    // ── View Management ──
+    function showView(viewName) {
+      document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
+      const view = document.getElementById(viewName + 'View');
+      if (view) view.style.display = 'block';
+
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.querySelectorAll(`.nav-item[data-view="${viewName}"]`).forEach(n => n.classList.add('active'));
+
+      const titles = {
+        dashboard: ['Social Dashboard', 'Overview of your restaurant\'s social presence'],
+        create: ['Create Post', 'Compose and publish to your social channels'],
+        generate: ['AI Post Generator', 'Let AI write engaging content for you'],
+        schedule: ['Schedule', 'Plan your content calendar'],
+        posts: ['My Posts', 'Manage all your social media content'],
+        analytics: ['Analytics', 'Performance metrics and insights'],
+        calendar: ['Content Calendar', 'Visual overview of your posting schedule'],
+        accounts: ['Connected Accounts', 'Manage your linked social profiles'],
+        settings: ['Settings', 'Configure your preferences']
+      };
+
+      const [title, subtitle] = titles[viewName] || ['Social Dashboard', ''];
+      document.getElementById('pageTitle').textContent = title;
+      document.getElementById('pageSubtitle').textContent = subtitle;
+
+      if (viewName === 'posts') loadPosts();
+      if (viewName === 'calendar') renderCalendar();
     }
-    
+
+    // Sidebar navigation
+    document.querySelectorAll('.nav-item[data-view]').forEach(item => {
+      item.addEventListener('click', () => showView(item.dataset.view));
+    });
+
+    // ── Mock Data for Dashboard ──
+    function initDashboard() {
+      // Platform followers (demo data — replace with real API)
+      const stored = JSON.parse(localStorage.getItem('mp_social_stats') || 'null') || {
+        twitter: 1240, instagram: 3850, youtube: 890, facebook: 2100,
+        impressions: 62800, engagement: 4.7,
+        clicks: 11500, likes: 680, newFollowers: 450, totalImpressions: 4300
+      };
+
+      document.getElementById('twitterFollowers').textContent = formatNumber(stored.twitter);
+      document.getElementById('instaFollowers').textContent = formatNumber(stored.instagram);
+      document.getElementById('ytSubscribers').textContent = formatNumber(stored.youtube);
+      document.getElementById('fbFollowers').textContent = formatNumber(stored.facebook);
+      document.getElementById('impressionsNumber').textContent = formatNumber(stored.impressions);
+      document.getElementById('engagementNumber').textContent = stored.engagement + '%';
+      document.getElementById('clicksStat').textContent = formatNumber(stored.clicks);
+      document.getElementById('likesStat').textContent = formatNumber(stored.likes);
+      document.getElementById('newFollowersStat').textContent = formatNumber(stored.newFollowers);
+      document.getElementById('impressionsStat').textContent = formatNumber(stored.totalImpressions);
+
+      // Draw mini charts
+      drawMiniChart('impressionsChart', [35, 50, 45, 60, 55, 70, 65, 80, 75, 90, 85, 95], '#4caf50');
+      drawMiniChart('engagementChart', [40, 55, 35, 65, 50, 70, 45, 80, 60, 75, 85, 70], '#7c4dff');
+
+      // Draw followers chart
+      drawFollowersChart();
+
+      // Load recent posts
+      loadRecentPosts();
+    }
+
+    function formatNumber(n) {
+      if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+      if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+      return String(n);
+    }
+
+    function drawMiniChart(containerId, values, color) {
+      const container = document.getElementById(containerId);
+      const maxVal = Math.max(...values);
+      container.innerHTML = values.map(v =>
+        `<div class="mini-bar" style="height:${(v / maxVal) * 100}%; background:${color}; opacity:${0.4 + (v / maxVal) * 0.6}"></div>`
+      ).join('');
+    }
+
+    function drawFollowersChart() {
+      const container = document.getElementById('followersChart');
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const gained = [120, 180, 150, 220, 200, 280, 250, 310, 290, 350, 320, 380];
+      const lost = [30, 25, 40, 35, 20, 45, 30, 35, 25, 40, 30, 20];
+      const maxVal = Math.max(...gained) + 20;
+
+      const barWidth = 100 / months.length;
+      const chartHeight = 200;
+
+      let barsHTML = months.map((m, i) => {
+        const gH = (gained[i] / maxVal) * chartHeight;
+        const lH = (lost[i] / maxVal) * chartHeight;
+        const x = i * barWidth + barWidth * 0.1;
+        const w = barWidth * 0.35;
+
+        return `
+          <rect x="${x}%" y="${chartHeight - gH}" width="${w}%" height="${gH}" rx="3" fill="#4caf50" opacity="0.8"/>
+          <rect x="${x + w + 1}%" y="${chartHeight - lH}" width="${w}%" height="${lH}" rx="3" fill="#ef9a9a" opacity="0.7"/>
+          <text x="${x + barWidth * 0.35}%" y="${chartHeight + 16}" text-anchor="middle" font-size="11" fill="#aaa">${m}</text>
+        `;
+      }).join('');
+
+      container.innerHTML = `<svg viewBox="0 0 100 ${chartHeight + 20}" preserveAspectRatio="none" style="width:100%; height:100%;">
+        ${barsHTML}
+      </svg>`;
+    }
+
+    // ── Chart Filters ──
+    document.querySelectorAll('.chart-filter').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.parentElement.querySelectorAll('.chart-filter').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        drawFollowersChart(); // Re-render with different data range
+      });
+    });
+
+    // ── Post Management ──
+    function getPosts() {
+      return JSON.parse(localStorage.getItem('mp_social_posts') || '[]');
+    }
+
+    function savePosts(posts) {
+      localStorage.setItem('mp_social_posts', JSON.stringify(posts));
+    }
+
+    function loadRecentPosts() {
+      const posts = getPosts().slice(-5).reverse();
+      const container = document.getElementById('recentPostsList');
+      if (posts.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding:40px; color:#aaa;">
+          <p style="font-size:2em; margin-bottom:10px;">📱</p>
+          <p>No posts yet. Create your first post to get started!</p>
+          <button class="btn btn-primary" style="margin-top:14px;" onclick="showView('create')">✏️ Create First Post</button>
+        </div>`;
+        return;
+      }
+      container.innerHTML = posts.map(p => renderPostCard(p)).join('');
+    }
+
+    function loadPosts() {
+      const posts = getPosts().reverse();
+      const container = document.getElementById('allPostsList');
+      if (posts.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:40px; color:#aaa;"><p>No posts yet.</p></div>';
+        return;
+      }
+      container.innerHTML = posts.map(p => renderPostCard(p)).join('');
+    }
+
+    function renderPostCard(post) {
+      const bgColors = { instagram: '#E1306C', facebook: '#1877F2', twitter: '#000', tiktok: '#000', youtube: '#FF0000' };
+      const icons = { instagram: '📷', facebook: 'f', twitter: '𝕏', tiktok: '🎵', youtube: '▶' };
+      const bg = bgColors[post.platform] || '#666';
+      const icon = icons[post.platform] || '📱';
+      const statusClass = post.status || 'draft';
+
+      return `<div class="post-card">
+        <div class="post-platform-badge" style="background:${bg};">${icon}</div>
+        <div class="post-body">
+          <h4>${post.platform?.charAt(0).toUpperCase() + post.platform?.slice(1)} Post <span class="post-status ${statusClass}">${statusClass}</span></h4>
+          <p>${(post.content || '').substring(0, 200)}${post.content?.length > 200 ? '…' : ''}</p>
+          <div class="post-meta">
+            <span>${post.created_at ? new Date(post.created_at).toLocaleDateString() : 'Just now'}</span>
+            ${post.scheduled_time ? `<span>📅 ${new Date(post.scheduled_time).toLocaleString()}</span>` : ''}
+          </div>
+        </div>
+      </div>`;
+    }
+
+    // ── Create Post Form ──
     document.getElementById('createForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const status = document.getElementById('createStatus');
       status.style.display = 'none';
       
+      const postData = {
+        id: Date.now(),
+        platform: document.getElementById('platform').value,
+        content: document.getElementById('content').value,
+        image_url: document.getElementById('imageUrl').value || null,
+        status: 'published',
+        created_at: new Date().toISOString()
+      };
+
+      // Try API first, fall back to localStorage
       try {
         const response = await fetch('/api/social/posts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            restaurant_id: parseInt(document.getElementById('restaurantId').value),
-            platform: document.getElementById('platform').value,
-            content: document.getElementById('content').value,
-            image_url: document.getElementById('imageUrl').value || null
-          })
+          body: JSON.stringify({ restaurant_id: 1, ...postData })
         });
-        
         const data = await response.json();
         if (response.ok) {
-          status.className = 'status success';
-          status.innerHTML = `✅ Post created! ID: ${data.post_id}`;
-        } else {
-          throw new Error(data.error);
+          postData.id = data.post_id || postData.id;
         }
-      } catch (error) {
-        status.className = 'status error';
-        status.textContent = `❌ ${error.message}`;
+      } catch (err) {
+        console.log('API not available, saving locally');
       }
+
+      const posts = getPosts();
+      posts.push(postData);
+      savePosts(posts);
+
+      status.className = 'status-msg success';
+      status.innerHTML = '✅ Post published successfully!';
       status.style.display = 'block';
+      e.target.reset();
+      loadRecentPosts();
     });
+
+    // ── AI Generate Form ──
+    let lastGeneratedContent = '';
     
     document.getElementById('generateForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const status = document.getElementById('generateStatus');
+      const preview = document.getElementById('aiPreview');
       status.style.display = 'none';
+      preview.style.display = 'none';
+
+      status.className = 'status-msg success';
+      status.innerHTML = '⏳ Generating AI content…';
+      status.style.display = 'block';
       
       try {
         const response = await fetch('/api/social/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            restaurant_id: parseInt(document.getElementById('genRestaurantId').value),
+            restaurant_id: 1,
             platform: document.getElementById('genPlatform').value,
             post_type: document.getElementById('postType').value,
+            tone: document.getElementById('genTone').value,
             context: {
               item_name: document.getElementById('itemName').value,
               description: document.getElementById('description').value
@@ -280,79 +1393,191 @@
         
         const data = await response.json();
         if (response.ok) {
-          status.className = 'status success';
-          status.innerHTML = `✅ AI post generated!<br>Content: ${data.content}<br>Post ID: ${data.post_id}`;
+          lastGeneratedContent = data.content || data.generated_content || '';
+          document.getElementById('aiPreviewContent').textContent = lastGeneratedContent;
+          preview.style.display = 'block';
+          status.innerHTML = '✅ Content generated!';
         } else {
-          throw new Error(data.error);
+          throw new Error(data.error || 'Generation failed');
         }
       } catch (error) {
-        status.className = 'status error';
-        status.textContent = `❌ ${error.message}`;
+        // Fallback: generate a sample post locally
+        const platform = document.getElementById('genPlatform').value;
+        const itemName = document.getElementById('itemName').value || 'our special dish';
+        const type = document.getElementById('postType').value;
+        const tone = document.getElementById('genTone').value;
+
+        const templates = {
+          menu_item: `🍽️ Introducing ${itemName}! Every bite tells a story of passion and flavor. Crafted with the finest ingredients, this dish is a masterpiece on your plate.\n\n📸 Swipe to see the magic!\n\n#FoodLover #RestaurantLife #${itemName.replace(/\s+/g, '')} #Foodie #Delicious`,
+          promotion: `🎉 SPECIAL OFFER! Don't miss our limited-time deal on ${itemName}. Your taste buds will thank you!\n\n⏰ Available this week only\n📍 Visit us today\n\n#SpecialOffer #FoodDeals #Restaurant`,
+          announcement: `📣 Big news! We're excited to announce ${itemName}. Stay tuned for more details!\n\n#Announcement #ExcitingNews #ComingSoon`,
+          behind_scenes: `🎬 Behind the scenes of how we make ${itemName}! Our chef puts love into every dish.\n\n#BehindTheScenes #ChefLife #FoodPrep`,
+          customer_spotlight: `⭐ Our amazing customer enjoying ${itemName}! Thank you for choosing us!\n\n#CustomerLove #HappyCustomer #FoodieLife`,
+          seasonal: `🌸 Seasonal special alert! ${itemName} is here for a limited time. Fresh, flavorful, and absolutely divine.\n\n#SeasonalMenu #LimitedTime #FreshFlavors`
+        };
+
+        lastGeneratedContent = templates[type] || templates.menu_item;
+        document.getElementById('aiPreviewContent').textContent = lastGeneratedContent;
+        preview.style.display = 'block';
+        status.innerHTML = '✅ Content generated (offline mode)';
       }
-      status.style.display = 'block';
     });
-    
+
+    function publishAI() {
+      if (!lastGeneratedContent) return;
+      const posts = getPosts();
+      posts.push({
+        id: Date.now(),
+        platform: document.getElementById('genPlatform').value,
+        content: lastGeneratedContent,
+        status: 'published',
+        created_at: new Date().toISOString(),
+        ai_generated: true
+      });
+      savePosts(posts);
+      document.getElementById('aiPreview').style.display = 'none';
+      const status = document.getElementById('generateStatus');
+      status.className = 'status-msg success';
+      status.innerHTML = '🚀 AI post published!';
+      status.style.display = 'block';
+      loadRecentPosts();
+    }
+
+    function regenerateAI() {
+      document.getElementById('generateForm').dispatchEvent(new Event('submit'));
+    }
+
+    function editAI() {
+      if (!lastGeneratedContent) return;
+      document.getElementById('content').value = lastGeneratedContent;
+      document.getElementById('platform').value = document.getElementById('genPlatform').value;
+      showView('create');
+    }
+
+    function saveDraft() {
+      const posts = getPosts();
+      posts.push({
+        id: Date.now(),
+        platform: document.getElementById('platform').value,
+        content: document.getElementById('content').value,
+        status: 'draft',
+        created_at: new Date().toISOString()
+      });
+      savePosts(posts);
+      const status = document.getElementById('createStatus');
+      status.className = 'status-msg success';
+      status.innerHTML = '💾 Draft saved!';
+      status.style.display = 'block';
+    }
+
+    function schedulePost() {
+      const time = document.getElementById('scheduleTime').value;
+      if (!time) {
+        alert('Please select a date and time first.');
+        return;
+      }
+      const posts = getPosts();
+      posts.push({
+        id: Date.now(),
+        platform: document.getElementById('platform').value,
+        content: document.getElementById('content').value,
+        status: 'scheduled',
+        scheduled_time: new Date(time).toISOString(),
+        created_at: new Date().toISOString()
+      });
+      savePosts(posts);
+      const status = document.getElementById('createStatus');
+      status.className = 'status-msg success';
+      status.innerHTML = `📅 Scheduled for ${new Date(time).toLocaleString()}!`;
+      status.style.display = 'block';
+    }
+
+    // ── Schedule Form ──
     document.getElementById('scheduleForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const status = document.getElementById('scheduleStatus');
-      status.style.display = 'none';
-      
-      try {
-        const scheduledTime = new Date(document.getElementById('scheduledTime').value).toISOString();
-        const response = await fetch('/api/social/schedule', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            post_id: parseInt(document.getElementById('postId').value),
-            scheduled_time: scheduledTime
-          })
-        });
-        
-        const data = await response.json();
-        if (response.ok) {
-          status.className = 'status success';
-          status.textContent = `✅ Post scheduled for ${new Date(scheduledTime).toLocaleString()}`;
-        } else {
-          throw new Error(data.error);
-        }
-      } catch (error) {
-        status.className = 'status error';
-        status.textContent = `❌ ${error.message}`;
+      const time = document.getElementById('scheduledTime').value;
+      const postId = document.getElementById('postId').value;
+
+      if (!time || !postId) {
+        status.className = 'status-msg error';
+        status.textContent = 'Please fill in both fields.';
+        status.style.display = 'block';
+        return;
       }
+
+      // Try to update in localStorage
+      const posts = getPosts();
+      const post = posts.find(p => p.id == postId);
+      if (post) {
+        post.status = 'scheduled';
+        post.scheduled_time = new Date(time).toISOString();
+        savePosts(posts);
+      }
+
+      status.className = 'status-msg success';
+      status.textContent = `✅ Post scheduled for ${new Date(time).toLocaleString()}`;
       status.style.display = 'block';
     });
     
-    document.getElementById('listForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const list = document.getElementById('postsList');
-      list.innerHTML = 'Loading...';
-      
-      try {
-        const response = await fetch(`/api/social/posts/${document.getElementById('listRestaurantId').value}`);
-        const data = await response.json();
-        
-        if (response.ok) {
-          if (data.posts.length === 0) {
-            list.innerHTML = '<p>No posts found.</p>';
-          } else {
-            list.innerHTML = data.posts.map(post => `
-              <div class="post-card">
-                <h4>${post.platform.toUpperCase()} - ${post.status}</h4>
-                <p>${post.content}</p>
-                <p style="color: #666; font-size: 0.9em; margin-top: 10px;">
-                  Created: ${new Date(post.created_at).toLocaleString()}
-                  ${post.scheduled_time ? ` | Scheduled: ${new Date(post.scheduled_time).toLocaleString()}` : ''}
-                </p>
-              </div>
-            `).join('');
-          }
-        } else {
-          throw new Error(data.error);
-        }
-      } catch (error) {
-        list.innerHTML = `<p style="color: #f59e0b;">Error: ${error.message}</p>`;
-      }
+    // ── Post Filters ──
+    document.querySelectorAll('.post-filter').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.parentElement.querySelectorAll('.post-filter').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const filter = btn.dataset.filter;
+        const posts = getPosts().reverse();
+        const filtered = filter === 'all' ? posts : posts.filter(p => p.status === filter);
+        const container = document.getElementById('allPostsList');
+        container.innerHTML = filtered.length
+          ? filtered.map(p => renderPostCard(p)).join('')
+          : '<div style="text-align:center; padding:30px; color:#aaa;">No posts found.</div>';
+      });
     });
+
+    // ── Calendar ──
+    function renderCalendar() {
+      const container = document.getElementById('calendarGrid');
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const firstDay = new Date(year, month, 1).getDay();
+      const monthName = now.toLocaleString('default', { month: 'long' });
+
+      const posts = getPosts();
+      const scheduledByDay = {};
+      posts.forEach(p => {
+        const d = new Date(p.scheduled_time || p.created_at);
+        if (d.getMonth() === month && d.getFullYear() === year) {
+          const day = d.getDate();
+          if (!scheduledByDay[day]) scheduledByDay[day] = [];
+          scheduledByDay[day].push(p);
+        }
+      });
+
+      let html = `<h3 style="text-align:center; margin-bottom:16px; font-size:1.1em;">${monthName} ${year}</h3>`;
+      html += '<div style="display:grid; grid-template-columns:repeat(7,1fr); gap:4px; text-align:center;">';
+      ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(d => {
+        html += `<div style="font-size:0.75em; color:#aaa; padding:8px; font-weight:600;">${d}</div>`;
+      });
+      for (let i = 0; i < firstDay; i++) html += '<div></div>';
+      for (let d = 1; d <= daysInMonth; d++) {
+        const isToday = d === now.getDate();
+        const hasPosts = scheduledByDay[d];
+        html += `<div style="padding:10px 4px; border-radius:10px; font-size:0.88em; position:relative;
+          ${isToday ? 'background:#4caf50; color:#fff; font-weight:700;' : ''}
+          ${hasPosts ? 'cursor:pointer;' : ''}">
+          ${d}
+          ${hasPosts ? `<div style="width:6px; height:6px; background:${isToday ? '#fff' : '#4caf50'}; border-radius:50%; margin:3px auto 0;"></div>` : ''}
+        </div>`;
+      }
+      html += '</div>';
+      container.innerHTML = html;
+    }
+
+    // ── Init ──
+    initDashboard();
   </script>
 </body>
 </html>

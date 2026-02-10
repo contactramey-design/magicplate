@@ -1,113 +1,120 @@
 /**
- * /api/identify-food — Lightweight endpoint that identifies food items
- * in a photo using a vision model (BLIP). Returns the description so the
- * user can confirm before spending credits on enhancement.
+ * /api/identify-food — Identifies food items in a photo using vision AI.
  *
- * Two-pass approach:
- *  1. image_captioning  → "a plate of grilled chicken with rice and greens"
- *  2. visual_question_answering → "chicken, rice, green beans, lemon wedge"
- * Combines both for a richer description.
+ * Provider priority:
+ *  1. Google Gemini Flash (FREE, no credit card needed, excellent at food ID)
+ *  2. Replicate LLaVA (paid, requires credits)
+ *  3. Graceful skip → enhancement proceeds with prompt rules only
+ *
+ * To get a FREE Gemini key: https://aistudio.google.com/apikey
+ * Set it as GEMINI_API_KEY in .env.local
  */
 const path = require('path');
 const fs   = require('fs');
 const axios = require('axios');
 
 // ── Load env ────────────────────────────────────────────
-const envLocalPath = path.join(__dirname, '..', '.env.local');
 const envPath      = path.join(__dirname, '..', '.env');
+const envLocalPath = path.join(__dirname, '..', '.env.local');
 if (fs.existsSync(envPath))      require('dotenv').config({ path: envPath });
 if (fs.existsSync(envLocalPath)) require('dotenv').config({ path: envLocalPath, override: true });
 
-// BLIP model on Replicate (salesforce/blip)
-const BLIP_VERSION = '2e1dddc8621f72155f24cf2e0adbde548458d3cab9f00c0139eea840d0ac4746';
+// ── Food identification prompt (shared across providers) ──
+const FOOD_ID_PROMPT = `You are a professional chef and food photographer. Analyze this food photo carefully.
 
-// ── Helpers ─────────────────────────────────────────────
+List EVERY food item, drink, sauce, garnish, side dish, and condiment visible. Be VERY specific:
+- Say "grilled chicken breast with herb crust" not just "chicken"
+- Say "creamy Caesar salad with romaine, croutons, and shaved parmesan" not just "salad"  
+- Say "iced lemonade with mint sprig" not just "drink"
+- Note cooking method if visible (grilled, fried, roasted, steamed, seared)
+- Include plate/bowl style and any garnishes
 
-/**
- * Run a single prediction on Replicate and poll until done.
- * @param {string} token  Replicate API token
- * @param {object} input  Model inputs
- * @param {number} timeoutSec  Max seconds to wait
- * @returns {Promise<string>} Model output text
- */
-async function runBlip(token, input, timeoutSec = 45) {
-  const { data } = await axios.post(
-    'https://api.replicate.com/v1/predictions',
-    { version: BLIP_VERSION, input },
-    { headers: { Authorization: `Token ${token}`, 'Content-Type': 'application/json' } }
+Write a single detailed paragraph listing everything visible, separated by commas. Only describe what you actually see.`;
+
+// ── Provider 1: Google Gemini (FREE) ──────────────────
+async function identifyWithGemini(base64Data, mimeType) {
+  const key = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_KEY;
+  if (!key) return null;
+
+  console.log('🔍 Using Google Gemini Flash for food identification…');
+
+  const response = await axios.post(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
+    {
+      contents: [{
+        parts: [
+          { text: FOOD_ID_PROMPT },
+          { inline_data: { mime_type: mimeType, data: base64Data } }
+        ]
+      }],
+      generationConfig: {
+        temperature: 0.2,
+        maxOutputTokens: 500
+      }
+    },
+    { timeout: 30000 }
   );
 
-  let result = data;
-  const deadline = Date.now() + timeoutSec * 1000;
+  const text = response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (text && text.trim().length > 10) {
+    console.log('🔍 Gemini identified:', text.trim().substring(0, 150) + '…');
+    return text.trim();
+  }
 
+  console.log('⚠️ Gemini returned empty/short response');
+  return null;
+}
+
+// ── Provider 2: Replicate LLaVA (paid) ────────────────
+async function identifyWithReplicate(dataUri) {
+  const token = process.env.REPLICATE_API_TOKEN;
+  if (!token) return null;
+
+  console.log('🔍 Using Replicate LLaVA for food identification…');
+
+  const { data } = await axios.post(
+    'https://api.replicate.com/v1/predictions',
+    {
+      version: '2facb4a474a0462c15041b78b1ad70952ea46b5ec6ad29583c0b29dbd4249591',
+      input: {
+        image: dataUri,
+        prompt: FOOD_ID_PROMPT,
+        max_tokens: 500,
+        temperature: 0.2
+      }
+    },
+    {
+      headers: { Authorization: `Token ${token}`, 'Content-Type': 'application/json' },
+      timeout: 15000
+    }
+  );
+
+  // Poll for result
+  let result = data;
+  const deadline = Date.now() + 60000;
   while (['starting', 'processing'].includes(result.status) && Date.now() < deadline) {
-    await new Promise(r => setTimeout(r, 1200));
+    await new Promise(r => setTimeout(r, 1500));
     const poll = await axios.get(
       `https://api.replicate.com/v1/predictions/${result.id}`,
-      { headers: { Authorization: `Token ${token}` } }
+      { headers: { Authorization: `Token ${token}` }, timeout: 10000 }
     );
     result = poll.data;
   }
 
-  if (result.status !== 'succeeded') {
-    throw new Error(`Model status: ${result.status} (waited ${timeoutSec}s)`);
-  }
-
-  return Array.isArray(result.output) ? result.output.join(' ') : String(result.output || '');
-}
-
-/**
- * Two-pass identification:
- *  Pass 1 — captioning (gives a sentence: "a plate of grilled chicken…")
- *  Pass 2 — VQA (gives a list: "chicken, rice, green beans…")
- *  Combine both for a richer description.
- */
-async function identifyFood(token, dataUri) {
-  let caption = '';
-  let vqaAnswer = '';
-
-  // ── Pass 1: image captioning ──
-  try {
-    console.log('🔍  Pass 1 — image captioning…');
-    caption = await runBlip(token, {
-      image: dataUri,
-      task: 'image_captioning'
-    });
-    caption = caption.replace(/^Caption:\s*/i, '').trim();
-    console.log('   Caption:', caption);
-  } catch (err) {
-    console.warn('⚠️  Captioning pass failed:', err.message);
-  }
-
-  // ── Pass 2: visual question answering ──
-  try {
-    console.log('🔍  Pass 2 — VQA for specific items…');
-    vqaAnswer = await runBlip(token, {
-      image: dataUri,
-      task: 'visual_question_answering',
-      question: 'What specific food items, drinks, and dishes are in this photo?'
-    });
-    vqaAnswer = vqaAnswer.replace(/^Answer:\s*/i, '').trim();
-    console.log('   VQA:', vqaAnswer);
-  } catch (err) {
-    console.warn('⚠️  VQA pass failed:', err.message);
-  }
-
-  // ── Combine ──
-  if (caption && vqaAnswer) {
-    // De-duplicate: if VQA just repeats the caption, skip it
-    if (caption.toLowerCase().includes(vqaAnswer.toLowerCase()) ||
-        vqaAnswer.toLowerCase().includes(caption.toLowerCase())) {
-      return caption.length >= vqaAnswer.length ? caption : vqaAnswer;
+  if (result.status === 'succeeded' && result.output) {
+    const text = (Array.isArray(result.output) ? result.output.join('') : String(result.output)).trim();
+    if (text.length > 10) {
+      console.log('🔍 LLaVA identified:', text.substring(0, 150) + '…');
+      return text;
     }
-    return `${caption}  —  Specific items: ${vqaAnswer}`;
   }
-  return caption || vqaAnswer || '';
+
+  console.log('⚠️ Replicate returned no useful output, status:', result.status);
+  return null;
 }
 
 // ── Main handler ────────────────────────────────────────
 module.exports = async (req, res) => {
-  // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -115,22 +122,23 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST')   return res.status(405).json({ error: 'Method not allowed' });
 
-  const token = process.env.REPLICATE_API_TOKEN;
-  if (!token) {
-    // No vision key → skip gracefully; frontend will show manual-input fallback
+  // Check if any vision provider is configured
+  const hasGemini = !!(process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_KEY);
+  const hasReplicate = !!process.env.REPLICATE_API_TOKEN;
+
+  if (!hasGemini && !hasReplicate) {
+    console.log('⚠️ No vision API configured (need GEMINI_API_KEY or REPLICATE_API_TOKEN)');
     return res.status(200).json({
       success: true,
       identified: false,
       description: '',
-      message: 'Vision API not configured — you can describe the food manually.'
+      message: 'No vision API configured. Get a FREE key at https://aistudio.google.com/apikey and add GEMINI_API_KEY to .env.local'
     });
   }
 
-  // ── Parse image ────────────────────────────────────────
+  // Parse image
   const imageData = req.body.image;
-  if (!imageData) {
-    return res.status(400).json({ error: 'No image provided' });
-  }
+  if (!imageData) return res.status(400).json({ error: 'No image provided' });
 
   const base64Data = imageData.replace(/^data:image\/\w+;base64,/, '');
   const imageBuffer = Buffer.from(base64Data, 'base64');
@@ -139,38 +147,46 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: 'Image too large. Maximum size: 10MB' });
   }
 
-  // Detect mime type from original data URI (default to jpeg)
   const mimeMatch = imageData.match(/^data:(image\/\w+);base64,/);
   const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
   const dataUri = `data:${mimeType};base64,${base64Data}`;
 
-  console.log(`🔍 /api/identify-food — image size: ${(imageBuffer.length / 1024).toFixed(0)} KB`);
+  console.log(`🔍 /api/identify-food — ${(imageBuffer.length / 1024).toFixed(0)} KB, providers: ${hasGemini ? 'Gemini' : ''}${hasGemini && hasReplicate ? '+' : ''}${hasReplicate ? 'Replicate' : ''}`);
 
-  try {
-    const description = await identifyFood(token, dataUri);
+  // Try providers in priority order
+  let description = null;
 
-    if (description) {
-      return res.status(200).json({
-        success: true,
-        identified: true,
-        description
-      });
+  // 1. Try Gemini first (free, fast, excellent)
+  if (hasGemini && !description) {
+    try {
+      description = await identifyWithGemini(base64Data, mimeType);
+    } catch (err) {
+      console.warn('⚠️ Gemini failed:', err.response?.status, err.response?.data?.error?.message || err.message);
     }
+  }
 
+  // 2. Fall back to Replicate
+  if (hasReplicate && !description) {
+    try {
+      description = await identifyWithReplicate(dataUri);
+    } catch (err) {
+      console.warn('⚠️ Replicate failed:', err.response?.status || '', err.response?.data?.detail || err.message);
+    }
+  }
+
+  // Return result
+  if (description) {
     return res.status(200).json({
       success: true,
-      identified: false,
-      description: '',
-      message: 'Could not identify food items. You can describe them manually below.'
-    });
-  } catch (error) {
-    console.error('Food identification error:', error.message);
-    // Non-fatal — let user describe manually
-    return res.status(200).json({
-      success: true,
-      identified: false,
-      description: '',
-      message: 'Identification failed. Please describe the food items manually.'
+      identified: true,
+      description
     });
   }
+
+  return res.status(200).json({
+    success: true,
+    identified: false,
+    description: '',
+    message: 'Could not identify food items. Enhancement will proceed with visual preservation rules.'
+  });
 };

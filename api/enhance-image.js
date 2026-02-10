@@ -83,64 +83,86 @@ function styleBlock(style) {
 const { buildRegenPrompt: buildPrompt, baseNegativePrompt: getNegativePrompt, getAIGatewayPrompt } = require('../lib/photo-enhancement-prompt');
 
 /**
- * STEP 1: Automatic food item identification using a vision model.
- * Calls Replicate's BLIP-2 to describe the image, then extracts a structured
- * list of food items, drinks, plates, etc. This runs BEFORE enhancement so
- * the enhancement prompt can reference the exact items.
+ * STEP 1: Server-side food identification using Gemini (free) or Replicate (paid).
+ * This is the fallback when the client doesn't send identified_items
+ * (i.e., when /api/identify-food wasn't called first).
  *
  * @param {Buffer} imageBuffer - Raw image bytes
- * @returns {Promise<string>} - A description of identified items, or '' on failure
+ * @returns {Promise<string>} - Detailed description of identified items, or '' on failure
  */
 async function analyzeImageContents(imageBuffer) {
-  // We need Replicate for vision (BLIP captioning model)
-  const token = process.env.REPLICATE_API_TOKEN;
-  if (!token) {
-    console.log('⚠️ REPLICATE_API_TOKEN not set — skipping automatic food identification');
+  const geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_KEY;
+  const replicateToken = process.env.REPLICATE_API_TOKEN;
+
+  if (!geminiKey && !replicateToken) {
+    console.log('⚠️ No vision API configured — skipping food identification');
     return '';
   }
 
-  try {
-    console.log('🔍 Server-side food identification (captioning)…');
+  const base64 = imageBuffer.toString('base64');
+  const prompt = 'List every food item, drink, sauce, garnish, and side visible in this photo. Be specific (e.g. "grilled chicken breast" not "chicken"). Comma-separated list.';
 
-    const base64 = imageBuffer.toString('base64');
-    const dataUri = `data:image/jpeg;base64,${base64}`;
-
-    // Use image_captioning task — gives a full sentence description
-    const { data } = await axios.post(
-      'https://api.replicate.com/v1/predictions',
-      {
-        version: '2e1dddc8621f72155f24cf2e0adbde548458d3cab9f00c0139eea840d0ac4746',
-        input: { image: dataUri, task: 'image_captioning' }
-      },
-      { headers: { Authorization: `Token ${token}`, 'Content-Type': 'application/json' } }
-    );
-
-    let result = data;
-    let attempts = 0;
-    while (['starting', 'processing'].includes(result.status) && attempts < 30) {
-      await new Promise(r => setTimeout(r, 1200));
-      const poll = await axios.get(
-        `https://api.replicate.com/v1/predictions/${result.id}`,
-        { headers: { Authorization: `Token ${token}` } }
+  // Try Gemini first (free, fast)
+  if (geminiKey) {
+    try {
+      console.log('🔍 Server-side food ID via Gemini…');
+      const resp = await axios.post(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
+        {
+          contents: [{ parts: [
+            { text: prompt },
+            { inline_data: { mime_type: 'image/jpeg', data: base64 } }
+          ]}],
+          generationConfig: { temperature: 0.2, maxOutputTokens: 300 }
+        },
+        { timeout: 20000 }
       );
-      result = poll.data;
-      attempts++;
+      const text = resp.data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+      if (text && text.length > 10) {
+        console.log('🔍 Gemini identified:', text.substring(0, 120));
+        return text;
+      }
+    } catch (err) {
+      console.warn('⚠️ Gemini fallback failed:', err.response?.data?.error?.message || err.message);
     }
-
-    if (result.status !== 'succeeded') {
-      console.warn('⚠️ Vision analysis did not succeed:', result.status);
-      return '';
-    }
-
-    const description = (Array.isArray(result.output) ? result.output.join(' ') : String(result.output || ''))
-      .replace(/^Caption:\s*/i, '')
-      .trim();
-    console.log('🔍 Identified food items:', description);
-    return description;
-  } catch (err) {
-    console.warn('⚠️ Food identification failed (non-fatal):', err.message);
-    return '';
   }
+
+  // Fall back to Replicate
+  if (replicateToken) {
+    try {
+      console.log('🔍 Server-side food ID via Replicate…');
+      const dataUri = `data:image/jpeg;base64,${base64}`;
+      const { data } = await axios.post(
+        'https://api.replicate.com/v1/predictions',
+        {
+          version: '2facb4a474a0462c15041b78b1ad70952ea46b5ec6ad29583c0b29dbd4249591',
+          input: { image: dataUri, prompt, max_tokens: 300, temperature: 0.2 }
+        },
+        { headers: { Authorization: `Token ${replicateToken}`, 'Content-Type': 'application/json' }, timeout: 15000 }
+      );
+      let result = data;
+      const deadline = Date.now() + 45000;
+      while (['starting', 'processing'].includes(result.status) && Date.now() < deadline) {
+        await new Promise(r => setTimeout(r, 1500));
+        const poll = await axios.get(
+          `https://api.replicate.com/v1/predictions/${result.id}`,
+          { headers: { Authorization: `Token ${replicateToken}` }, timeout: 10000 }
+        );
+        result = poll.data;
+      }
+      if (result.status === 'succeeded' && result.output) {
+        const text = (Array.isArray(result.output) ? result.output.join('') : String(result.output)).trim();
+        if (text.length > 10) {
+          console.log('🔍 Replicate identified:', text.substring(0, 120));
+          return text;
+        }
+      }
+    } catch (err) {
+      console.warn('⚠️ Replicate fallback failed:', err.response?.data?.detail || err.message);
+    }
+  }
+
+  return '';
 }
 
 /**
