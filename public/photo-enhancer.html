@@ -341,6 +341,130 @@
       color: #666;
       line-height: 1.6;
     }
+
+    /* ── Trial Banner ──────────────────────────── */
+    .trial-banner {
+      background: linear-gradient(135deg, #fff3e0, #fff8e1);
+      border: 1px solid #ffe0b2;
+      border-radius: 12px;
+      padding: 14px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .trial-banner-text {
+      font-size: 0.92em;
+      color: #e65100;
+      font-weight: 600;
+    }
+    .trial-banner-text span {
+      font-weight: 800;
+      color: #bf360c;
+    }
+
+    /* ── Signup Gate Modal ─────────────────────── */
+    .gate-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(8px);
+      z-index: 99999;
+      align-items: center;
+      justify-content: center;
+    }
+    .gate-overlay.active { display: flex; }
+    .gate-card {
+      background: white;
+      border-radius: 20px;
+      padding: 48px;
+      max-width: 480px;
+      width: 92%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      position: relative;
+      animation: gateSlideIn 0.35s ease-out;
+    }
+    @keyframes gateSlideIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .gate-card h2 {
+      font-size: 1.7em;
+      font-weight: 800;
+      margin-bottom: 10px;
+      color: #1a1a1a;
+    }
+    .gate-card > p {
+      color: #666;
+      margin-bottom: 24px;
+      font-size: 1.05em;
+      line-height: 1.5;
+    }
+    .gate-close {
+      position: absolute;
+      top: 14px;
+      right: 18px;
+      background: none;
+      border: none;
+      font-size: 26px;
+      cursor: pointer;
+      color: #999;
+      transition: color 0.2s;
+    }
+    .gate-close:hover { color: #333; }
+    .gate-form { text-align: left; }
+    .gate-form label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 4px;
+      font-size: 14px;
+      color: #333;
+    }
+    .gate-form input, .gate-form select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #eee;
+      border-radius: 10px;
+      font-size: 15px;
+      margin-bottom: 14px;
+      transition: border-color 0.3s;
+      font-family: inherit;
+    }
+    .gate-form input:focus, .gate-form select:focus {
+      border-color: #4caf50;
+      outline: none;
+    }
+    .gate-submit {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg,#4caf50,#66bb6a);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 6px;
+      font-family: inherit;
+    }
+    .gate-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(76,175,80,0.35);
+    }
+    .gate-success {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+    .gate-success h3 {
+      color: #4caf50;
+      font-size: 1.4em;
+      margin-bottom: 8px;
+    }
     
     .preview-image {
       max-width: 100%;
@@ -369,6 +493,13 @@
 </head>
 <body>
   <div class="container">
+    <a href="/features.html" style="display:inline-flex;align-items:center;gap:6px;color:#4caf50;text-decoration:none;font-weight:500;margin-bottom:16px;">← Back to Features</a>
+
+    <!-- Trial Banner -->
+    <div class="trial-banner" id="trialBanner">
+      <span class="trial-banner-text" id="trialBannerText">🎉 <span>1 Free Enhancement</span> — Try our AI photo magic, no sign-up needed!</span>
+    </div>
+
     <div class="header">
       <h1>✨ AI Photo Enhancement</h1>
       <p>Transform your menu photos with ethical AI enhancement. Make your real food photos pop without fakes.</p>
@@ -430,8 +561,14 @@
     <div class="preview-section" id="previewSection">
       <div class="processing" id="processingDiv" style="display: none;">
         <div class="spinner"></div>
-        <div class="processing-text">Enhancing your photo...</div>
-        <p style="color: #666; margin-top: 10px;">This may take 30-60 seconds</p>
+        <div class="processing-text" id="processingText">Enhancing your photo...</div>
+        <p id="processingSubtext" style="color: #666; margin-top: 10px;">This may take 15-30 seconds</p>
+      </div>
+
+      <!-- Shows after enhancement is complete — what the AI identified -->
+      <div id="identifiedItemsBanner" style="display:none; background:linear-gradient(135deg,#e8f5e9,#f1f8e9); border:1px solid #c8e6c9; border-radius:10px; padding:14px 18px; margin-bottom:15px;">
+        <div style="font-weight:600; color:#2e7d32; margin-bottom:4px;">🔍 Detected Food Items</div>
+        <div id="identifiedItemsText" style="color:#333; font-size:0.95em; line-height:1.4;"></div>
       </div>
       
       <div class="before-after-container" id="sliderContainer" style="display: none;">
@@ -444,8 +581,8 @@
             </div>
           </div>
           <div class="before-after-labels">
-            <span class="label-before">Before</span>
             <span class="label-after">After</span>
+            <span class="label-before">Before</span>
           </div>
         </div>
       </div>
@@ -457,9 +594,9 @@
     </div>
     
     <div class="info-box">
-      <h3>ℹ️ Ethical Enhancement</h3>
-      <p><strong>What we do:</strong> Enhance colors, lighting, textures, and sharpness to make your real food photos look professional and appetizing.</p>
-      <p><strong>What we don't do:</strong> We never add, remove, or fake ingredients. Your photos stay authentic—just better looking!</p>
+      <h3>⭐ Michelin-Star Quality</h3>
+      <p><strong>What we do:</strong> Transform your food photos into 5-star restaurant quality — professional lighting, razor-sharp textures, rich colors, and stunning composition.</p>
+      <p><strong>Your food stays your food:</strong> Our AI identifies every item in your photo first, then enhances the quality without changing a single dish. A burger stays a burger — just a gorgeous one.</p>
     </div>
   </div>
   
@@ -473,6 +610,10 @@
     let fictionalLevel = parseInt(localStorage.getItem('fictionalLevel') || '30'); // Default 30%
     let regenerationTimeout = null;
     let isRegenerating = false;
+
+    // Two-step flow state (identify → confirm → enhance)
+    let pendingBase64 = null;
+    let confirmedItems = '';
     
     // Slider state management
     let sliderInitialized = false;
@@ -564,8 +705,11 @@
       currentFile = null;
       beforeImageUrl = null;
       afterImageUrl = null;
+      pendingBase64 = null;
+      confirmedItems = '';
       previewContainer.style.display = 'none';
       previewSection.classList.remove('active');
+      document.getElementById('identifiedItemsBanner').style.display = 'none';
       fileInput.value = '';
       clearTimeout(regenerationTimeout);
       isRegenerating = false;
@@ -596,18 +740,22 @@
       updateFictionalLabel(fictionalLevel);
     }
     
-    // Regenerate enhancement with new fiction level
+    // Regenerate enhancement with new fiction level (reuses already-identified items)
     async function regenerateEnhancement() {
       if (!currentFile || isRegenerating) return;
       
       isRegenerating = true;
       processingDiv.style.display = 'block';
+      document.getElementById('processingText').textContent = '✨ Re-enhancing with new settings…';
+      document.getElementById('processingSubtext').textContent = 'Applying new intensity level';
       sliderContainer.style.display = 'none';
       actionsDiv.style.display = 'none';
       statusDiv.style.display = 'none';
       
+      startProcessingTimer();
+      
       try {
-        const base64 = await fileToBase64(currentFile);
+        const base64 = pendingBase64 || await fileToBase64(currentFile);
         const urlParams = new URLSearchParams(window.location.search);
         const restaurantId = urlParams.get('restaurant_id') || '1';
         
@@ -619,17 +767,18 @@
             filename: currentFile.name,
             restaurant_id: parseInt(restaurantId),
             style: 'upscale_casual',
-            fictional_level: fictionalLevel
+            fictional_level: fictionalLevel,
+            identified_items: confirmedItems // Reuses items from first identification
           })
         });
         
         const data = await response.json();
+        stopProcessingTimer();
         
         if (!response.ok) {
           throw new Error(data.message || data.error || 'Enhancement failed');
         }
         
-        // Update after image
         afterImage.src = data.afterUrl || data.output[0];
         afterImageUrl = data.afterUrl || data.output[0];
         
@@ -639,6 +788,7 @@
         actionsDiv.style.display = 'flex';
         
       } catch (error) {
+        stopProcessingTimer();
         console.error('Regeneration error:', error);
         showStatus(`Regeneration failed: ${error.message}`, 'error');
         processingDiv.style.display = 'none';
@@ -683,87 +833,143 @@
       });
     });
     
-    // Enhance button
+    // ── Processing timer ──
+    let processingTimer = null;
+    let processingStartTime = 0;
+
+    function startProcessingTimer() {
+      processingStartTime = Date.now();
+      const subtext = document.getElementById('processingSubtext');
+      clearInterval(processingTimer);
+      processingTimer = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - processingStartTime) / 1000);
+        subtext.textContent = `${elapsed}s elapsed`;
+      }, 1000);
+    }
+
+    function stopProcessingTimer() {
+      clearInterval(processingTimer);
+      processingTimer = null;
+    }
+
+    // ── Enhance button: Fully automatic — Identify → Enhance → Show ──
     enhanceBtn.addEventListener('click', async () => {
       if (!currentFile) return;
-      
-      // Hide preview, show processing
+
+      // ── Free trial check ──
+      if (!hasTrialRemaining()) {
+        openGate();
+        return;
+      }
+
+      // Reset UI — go straight to processing
       previewContainer.style.display = 'none';
       previewSection.classList.add('active');
       processingDiv.style.display = 'block';
+      document.getElementById('processingText').textContent = '🔍 Identifying food items…';
+      document.getElementById('processingSubtext').textContent = 'Analyzing your photo with AI vision';
+      document.getElementById('identifiedItemsBanner').style.display = 'none';
       sliderContainer.style.display = 'none';
       actionsDiv.style.display = 'none';
       statusDiv.style.display = 'none';
-      
+
+      startProcessingTimer();
+
       try {
-        // Convert file to base64
         const base64 = await fileToBase64(currentFile);
-        
-        // Get restaurant ID from URL or default to 1
+        pendingBase64 = base64;
+
+        // ── Step 1: Identify food items automatically ──
+        let identifiedItems = '';
+        try {
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 60000);
+
+          const idResponse = await fetch('/api/identify-food', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: base64 }),
+            signal: controller.signal
+          });
+          clearTimeout(timeout);
+          const idData = await idResponse.json();
+
+          if (idData.identified && idData.description) {
+            identifiedItems = idData.description;
+            console.log('✅ Auto-identified:', identifiedItems);
+          } else {
+            console.log('⚠️ Identification returned no results — enhancing with prompt rules only');
+          }
+        } catch (idError) {
+          console.warn('⚠️ Identification step failed (non-fatal):', idError.message);
+          // Continue to enhancement without identified items
+        }
+
+        confirmedItems = identifiedItems;
+
+        // ── Step 2: Enhance the image ──
+        document.getElementById('processingText').textContent = '✨ Enhancing to Michelin-star quality…';
+        document.getElementById('processingSubtext').textContent = 'Creating your perfect restaurant photo';
+
         const urlParams = new URLSearchParams(window.location.search);
         const restaurantId = urlParams.get('restaurant_id') || '1';
-        
-        // Call enhancement API
+
         const response = await fetch('/api/enhance-image', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            image: base64,
+            image: pendingBase64,
             filename: currentFile.name,
             restaurant_id: parseInt(restaurantId),
             style: 'upscale_casual',
-            fictional_level: fictionalLevel
+            fictional_level: fictionalLevel,
+            identified_items: confirmedItems
           })
         });
-        
+
         const data = await response.json();
-        
+        stopProcessingTimer();
+
         if (!response.ok) {
-          // Show detailed error message
           let errorMsg = data.message || data.error || `Enhancement failed (${response.status})`;
-          
-          // Provide helpful messages for common errors
           if (response.status === 403) {
-            errorMsg = 'Access forbidden. This usually means: (1) API key issue, (2) Insufficient credits, or (3) Rate limit exceeded. Please check your API configuration.';
+            errorMsg = 'Access forbidden. (1) API key issue, (2) Insufficient credits, or (3) Rate limit exceeded.';
           } else if (response.status === 401) {
-            errorMsg = 'Authentication failed. Please check your API key configuration.';
+            errorMsg = 'Authentication failed. Check your API key.';
           } else if (response.status === 402) {
-            errorMsg = 'Insufficient credits. Please add credits to your AI service account.';
+            errorMsg = 'Insufficient credits. Add credits to your AI service.';
           }
-          
-          console.error('Enhancement API error:', {
-            status: response.status,
-            statusText: response.statusText,
-            data: data
-          });
+          console.error('Enhancement API error:', { status: response.status, data });
           throw new Error(errorMsg);
         }
-        
-        // Show results - set images first
-        // IMPORTANT: beforeImage shows original (left side), afterImage shows enhanced (right side)
-        beforeImage.src = beforeImageUrl; // Original image - shown on LEFT side
-        afterImage.src = data.afterUrl || data.output[0]; // Enhanced image - shown on RIGHT side
+
+        // Show what was identified (from our detection or server-side)
+        const items = confirmedItems || data.identifiedItems;
+        if (items) {
+          document.getElementById('identifiedItemsText').textContent = items;
+          document.getElementById('identifiedItemsBanner').style.display = 'block';
+        }
+
+        // Show before/after results
+        beforeImage.src = beforeImageUrl;
+        afterImage.src = data.afterUrl || data.output[0];
         afterImageUrl = data.afterUrl || data.output[0];
-        
-        // Wait for images to load, then show slider
+
         await waitForImages();
-        
+
         processingDiv.style.display = 'none';
         sliderContainer.style.display = 'block';
         actionsDiv.style.display = 'flex';
-        
-        // Initialize slider after images are loaded
+
         await initSlider();
-        
-        // Show success
+
+        // Track usage for free trial
+        incrementEnhanceCount();
+
         showStatus('✅ Enhancement complete! Drag the slider to compare.', 'success');
-        
-        // Confetti effect (simple)
         triggerConfetti();
-        
       } catch (error) {
+        stopProcessingTimer();
         processingDiv.style.display = 'none';
         showStatus(`❌ Error: ${error.message}`, 'error');
       }
@@ -786,8 +992,13 @@
       currentFile = null;
       beforeImageUrl = null;
       afterImageUrl = null;
+      pendingBase64 = null;
+      confirmedItems = '';
+      stopProcessingTimer();
       previewContainer.style.display = 'none';
       previewSection.classList.remove('active');
+      processingDiv.style.display = 'none';
+      document.getElementById('identifiedItemsBanner').style.display = 'none';
       fileInput.value = '';
       statusDiv.style.display = 'none';
       cleanupSlider();
@@ -1065,6 +1276,116 @@
         document.head.appendChild(style);
       }
     }
+  </script>
+
+  <!-- Signup Gate Modal -->
+  <div class="gate-overlay" id="gateOverlay">
+    <div class="gate-card">
+      <button class="gate-close" onclick="closeGate()">&times;</button>
+      <div id="gateFormView">
+        <h2>You've Used Your Free Trial!</h2>
+        <p>Sign up and we'll contact you to set up a plan with <strong>unlimited</strong> photo enhancements.</p>
+        <form class="gate-form" id="gateForm" onsubmit="submitGate(event)">
+          <label for="gateName">Your Name</label>
+          <input type="text" id="gateName" name="name" required placeholder="John Smith">
+          <label for="gateEmail">Email Address</label>
+          <input type="email" id="gateEmail" name="email" required placeholder="john@restaurant.com">
+          <label for="gateRestaurant">Restaurant Name</label>
+          <input type="text" id="gateRestaurant" name="restaurant" placeholder="Joe's Diner">
+          <label for="gatePhone">Phone (optional)</label>
+          <input type="tel" id="gatePhone" name="phone" placeholder="(555) 555-5555">
+          <input type="hidden" name="feature" value="photo-enhancement">
+          <button type="submit" class="gate-submit">Sign Up — Unlock Unlimited Enhancements</button>
+        </form>
+      </div>
+      <div class="gate-success" id="gateSuccessView">
+        <div style="font-size:3em;margin-bottom:12px;">🎉</div>
+        <h3>You're All Set!</h3>
+        <p style="color:#666;">Thanks for signing up! We'll contact you within 24 hours to get your plan set up with unlimited enhancements.</p>
+        <a href="/features.html#pricing" class="btn btn-primary" style="margin-top:16px;">View Plans</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ── Free Trial Gate Logic ──────────────────────────
+    const FREE_ENHANCE_LIMIT = 1;
+    const TRIAL_KEY = 'mp_photo_enhances';
+
+    function getEnhanceCount() {
+      return parseInt(localStorage.getItem(TRIAL_KEY) || '0');
+    }
+
+    function incrementEnhanceCount() {
+      const count = getEnhanceCount() + 1;
+      localStorage.setItem(TRIAL_KEY, count.toString());
+      updateTrialBanner();
+      return count;
+    }
+
+    function hasTrialRemaining() {
+      return getEnhanceCount() < FREE_ENHANCE_LIMIT;
+    }
+
+    function updateTrialBanner() {
+      const banner = document.getElementById('trialBanner');
+      const text = document.getElementById('trialBannerText');
+      const used = getEnhanceCount();
+      if (used >= FREE_ENHANCE_LIMIT) {
+        banner.style.background = 'linear-gradient(135deg, #fce4ec, #ffebee)';
+        banner.style.borderColor = '#ef9a9a';
+        text.innerHTML = '⚡ <span>Free trial used</span> — Sign up to unlock unlimited enhancements!';
+        text.style.color = '#c62828';
+      } else {
+        const remaining = FREE_ENHANCE_LIMIT - used;
+        text.innerHTML = `🎉 <span>${remaining} Free Enhancement${remaining > 1 ? 's' : ''}</span> — Try our AI photo magic, no sign-up needed!`;
+      }
+    }
+
+    function openGate() {
+      document.getElementById('gateFormView').style.display = 'block';
+      document.getElementById('gateSuccessView').style.display = 'none';
+      document.getElementById('gateOverlay').classList.add('active');
+    }
+
+    function closeGate() {
+      document.getElementById('gateOverlay').classList.remove('active');
+    }
+
+    function submitGate(e) {
+      e.preventDefault();
+      const lead = {
+        name: document.getElementById('gateName').value,
+        email: document.getElementById('gateEmail').value,
+        restaurant: document.getElementById('gateRestaurant').value,
+        phone: document.getElementById('gatePhone').value,
+        feature: 'photo-enhancement',
+        date: new Date().toISOString()
+      };
+      const leads = JSON.parse(localStorage.getItem('mp_leads') || '[]');
+      leads.push(lead);
+      localStorage.setItem('mp_leads', JSON.stringify(leads));
+
+      fetch('/api/leads/capture', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(lead)
+      }).catch(() => {});
+
+      document.getElementById('gateFormView').style.display = 'none';
+      document.getElementById('gateSuccessView').style.display = 'block';
+    }
+
+    // Close modal on overlay click or Escape
+    document.getElementById('gateOverlay').addEventListener('click', function(e) {
+      if (e.target === this) closeGate();
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeGate();
+    });
+
+    // Initialize banner on load
+    updateTrialBanner();
   </script>
 </body>
 </html>

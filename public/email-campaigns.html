@@ -6,236 +6,1690 @@
   <title>Email Campaign Manager - MagicPlate.ai</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+
     body {
       font-family: 'Inter', sans-serif;
-      background: #f5f5f5;
-      color: #1a1a1a;
-      padding: 20px;
+      background: #f0f2f5;
+      color: #1a1a2e;
+      display: flex;
+      min-height: 100vh;
     }
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      background: white;
-      border-radius: 15px;
-      padding: 40px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+
+    /* ── Sidebar ─────────────────────────── */
+    .sidebar {
+      width: 260px;
+      background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+      color: #fff;
+      padding: 30px 0;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
     }
-    h1 {
-      color: #4caf50;
-      margin-bottom: 30px;
-      font-size: 2.5em;
-    }
-    .form-group {
+
+    .sidebar-brand {
+      padding: 0 24px 30px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
       margin-bottom: 20px;
     }
-    label {
-      display: block;
-      font-weight: 600;
+
+    .sidebar-brand h2 {
+      font-size: 1.4em;
+      font-weight: 700;
+      background: linear-gradient(135deg, #7c4dff, #b388ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 2px;
+    }
+
+    .sidebar-brand span { font-size: 0.8em; color: rgba(255,255,255,0.4); }
+
+    .nav-section { padding: 0 16px; margin-bottom: 8px; }
+
+    .nav-section-label {
+      font-size: 0.7em;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.3);
+      padding: 0 12px;
       margin-bottom: 8px;
     }
-    input, textarea, select {
-      width: 100%;
-      padding: 12px;
-      border: 2px solid rgba(76, 175, 80, 0.2);
-      border-radius: 8px;
-      font-size: 16px;
-      font-family: inherit;
-    }
-    .recipients {
-      margin-top: 10px;
-    }
-    .recipient-input {
+
+    .nav-item {
       display: flex;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-    .btn {
-      padding: 12px 24px;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      font-size: 0.9em;
+      font-weight: 500;
+      transition: all 0.2s;
       cursor: pointer;
-      transition: all 0.3s;
+      margin-bottom: 2px;
     }
+
+    .nav-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.9); }
+    .nav-item.active { background: linear-gradient(135deg, rgba(124,77,255,0.2), rgba(179,136,255,0.1)); color: #b388ff; }
+    .nav-item .nav-icon { width: 20px; text-align: center; font-size: 1.1em; }
+    .nav-item .badge {
+      margin-left: auto;
+      background: #7c4dff;
+      color: #fff;
+      font-size: 0.7em;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+      min-width: 22px;
+      text-align: center;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 20px 24px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .sidebar-footer a {
+      color: rgba(255,255,255,0.4);
+      text-decoration: none;
+      font-size: 0.85em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: color 0.2s;
+    }
+
+    .sidebar-footer a:hover { color: rgba(255,255,255,0.8); }
+
+    /* ── Main Content ─────────────────────── */
+    .main-content { margin-left: 260px; flex: 1; min-height: 100vh; }
+
+    .topbar {
+      background: #fff;
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #e8eaed;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .topbar-left h1 { font-size: 1.3em; font-weight: 700; color: #1a1a2e; }
+    .topbar-left p { font-size: 0.85em; color: #888; margin-top: 2px; }
+
+    .topbar-actions { display: flex; align-items: center; gap: 12px; }
+
+    .content { padding: 28px 32px; }
+
+    /* ── Buttons ──────────────────────────── */
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9em;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     .btn-primary {
+      background: linear-gradient(135deg, #7c4dff, #651fff);
+      color: white;
+      box-shadow: 0 4px 12px rgba(124,77,255,0.25);
+    }
+
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(124,77,255,0.35); }
+
+    .btn-success {
       background: linear-gradient(135deg, #4caf50, #66bb6a);
       color: white;
+      box-shadow: 0 4px 12px rgba(76,175,80,0.25);
     }
-    .btn-secondary {
-      background: rgba(76, 175, 80, 0.1);
-      color: #4caf50;
+
+    .btn-outline {
+      background: #fff;
+      color: #555;
+      border: 1.5px solid #ddd;
     }
-    .status {
-      margin-top: 20px;
-      padding: 15px;
+
+    .btn-outline:hover { border-color: #7c4dff; color: #7c4dff; }
+
+    .btn-sm { padding: 8px 14px; font-size: 0.82em; border-radius: 8px; }
+
+    .btn-danger { background: #fce4ec; color: #c62828; border: 1px solid #f8bbd0; }
+    .btn-danger:hover { background: #f8bbd0; }
+
+    /* ── Overview Stat Cards ──────────────── */
+    .stat-cards {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 22px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+
+    .stat-card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3em;
+      margin-bottom: 14px;
+    }
+
+    .stat-card .stat-label {
+      font-size: 0.82em;
+      color: #888;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .stat-card .stat-value {
+      font-size: 2em;
+      font-weight: 800;
+      color: #1a1a2e;
+      letter-spacing: -0.5px;
+    }
+
+    .stat-card .stat-change {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.78em;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      margin-top: 8px;
+    }
+
+    .stat-change.up { background: rgba(76,175,80,0.1); color: #4caf50; }
+    .stat-change.down { background: rgba(244,67,54,0.1); color: #f44336; }
+    .stat-change.neutral { background: rgba(158,158,158,0.1); color: #9e9e9e; }
+
+    /* ── Charts Row ──────────────────────── */
+    .charts-row {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+
+    .chart-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    }
+
+    .chart-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .chart-card-header h3 { font-size: 1em; font-weight: 700; color: #1a1a2e; }
+
+    .chart-filters { display: flex; gap: 6px; }
+
+    .chart-filter {
+      padding: 5px 12px;
       border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      background: #fff;
+      font-size: 0.78em;
+      color: #888;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .chart-filter.active { background: #7c4dff; color: #fff; border-color: #7c4dff; }
+
+    .chart-area { width: 100%; height: 200px; }
+    .chart-area svg { width: 100%; height: 100%; }
+
+    .chart-legend {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      margin-top: 14px;
+    }
+
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.8em; color: #888; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+    /* ── Recent Campaigns List ────────────── */
+    .campaigns-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    .campaigns-table th {
+      text-align: left;
+      padding: 12px 16px;
+      font-size: 0.78em;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #999;
+      font-weight: 600;
+      border-bottom: 1px solid #eee;
+    }
+
+    .campaigns-table td {
+      padding: 16px;
+      font-size: 0.9em;
+      border-bottom: 1px solid #f5f5f5;
+      vertical-align: middle;
+    }
+
+    .campaigns-table tr:hover td { background: #fafbfc; }
+
+    .campaign-name-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .campaign-name-cell strong { color: #1a1a2e; font-weight: 600; }
+    .campaign-name-cell span { font-size: 0.82em; color: #aaa; }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75em;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-badge.sent { background: #e8f5e9; color: #2e7d32; }
+    .status-badge.draft { background: #fff3e0; color: #e65100; }
+    .status-badge.scheduled { background: #e3f2fd; color: #1565c0; }
+    .status-badge.sending { background: #ede7f6; color: #4527a0; }
+    .status-badge.failed { background: #fce4ec; color: #c62828; }
+
+    .metric-cell {
+      text-align: center;
+    }
+
+    .metric-cell .metric-value {
+      font-size: 1.1em;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+
+    .metric-cell .metric-label {
+      font-size: 0.72em;
+      color: #bbb;
+      text-transform: uppercase;
+    }
+
+    .rate-bar {
+      width: 60px;
+      height: 6px;
+      background: #eee;
+      border-radius: 3px;
+      overflow: hidden;
+      margin: 4px auto 0;
+    }
+
+    .rate-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+    }
+
+    /* ── Section Cards ────────────────────── */
+    .section-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 28px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      margin-bottom: 22px;
+    }
+
+    .section-card h2 { font-size: 1.15em; font-weight: 700; color: #1a1a2e; margin-bottom: 4px; }
+    .section-card .section-subtitle { font-size: 0.88em; color: #888; margin-bottom: 24px; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .form-grid .full-width { grid-column: 1 / -1; }
+
+    .form-group label {
+      display: block;
+      font-size: 0.82em;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 6px;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 0.92em;
+      font-family: inherit;
+      color: #333;
+      background: #fafafa;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #7c4dff;
+      box-shadow: 0 0 0 3px rgba(124,77,255,0.1);
+      background: #fff;
+    }
+
+    .form-group textarea { resize: vertical; }
+
+    /* ── Email Templates ─────────────────── */
+    .templates-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .template-card {
+      border: 2px solid #e8eaed;
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .template-card:hover { border-color: #7c4dff; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
+    .template-card.selected { border-color: #7c4dff; box-shadow: 0 0 0 3px rgba(124,77,255,0.15); }
+
+    .template-card.selected::after {
+      content: '✓';
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 24px;
+      height: 24px;
+      background: #7c4dff;
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8em;
+      font-weight: 700;
+    }
+
+    .template-preview {
+      height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3em;
+    }
+
+    .template-info {
+      padding: 14px;
+      border-top: 1px solid #eee;
+    }
+
+    .template-info h4 { font-size: 0.88em; font-weight: 600; color: #1a1a2e; margin-bottom: 2px; }
+    .template-info p { font-size: 0.78em; color: #999; }
+
+    /* ── Subscriber List ─────────────────── */
+    .subscribers-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .sub-stat {
+      background: #fafbfc;
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+      border: 1px solid #eee;
+    }
+
+    .sub-stat .sub-num { font-size: 1.6em; font-weight: 800; color: #1a1a2e; }
+    .sub-stat .sub-label { font-size: 0.78em; color: #999; margin-top: 2px; }
+
+    .tag-chip {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 0.75em;
+      font-weight: 600;
+      margin: 2px;
+    }
+
+    .tag-chip.vip { background: #fff8e1; color: #f57f17; }
+    .tag-chip.regular { background: #e8f5e9; color: #2e7d32; }
+    .tag-chip.new { background: #e3f2fd; color: #1565c0; }
+    .tag-chip.inactive { background: #fafafa; color: #999; }
+
+    /* ── Status messages ─────────────────── */
+    .status-msg {
+      padding: 12px 18px;
+      border-radius: 10px;
+      margin-top: 16px;
+      font-size: 0.9em;
+      font-weight: 500;
       display: none;
     }
-    .status.success {
-      background: rgba(76, 175, 80, 0.1);
-      color: #4caf50;
-      border: 2px solid rgba(76, 175, 80, 0.3);
+
+    .status-msg.success { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+    .status-msg.error { background: #fce4ec; color: #c62828; border: 1px solid #f8bbd0; }
+
+    /* ── A/B Test Badge ───────────────────── */
+    .ab-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 0.72em;
+      font-weight: 700;
+      background: linear-gradient(135deg, #e3f2fd, #ede7f6);
+      color: #5c6bc0;
     }
-    .status.error {
-      background: rgba(245, 158, 11, 0.1);
-      color: #f59e0b;
-      border: 2px solid rgba(245, 158, 11, 0.3);
+
+    /* ── Responsive ──────────────────────── */
+    @media (max-width: 1200px) {
+      .stat-cards { grid-template-columns: repeat(2, 1fr); }
+      .charts-row { grid-template-columns: 1fr; }
+      .templates-grid { grid-template-columns: repeat(2, 1fr); }
     }
-    .campaigns-list {
-      margin-top: 30px;
-    }
-    .campaign-card {
-      background: #f9f9f9;
-      padding: 20px;
-      border-radius: 10px;
-      margin-bottom: 15px;
-      border: 2px solid rgba(76, 175, 80, 0.1);
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; }
+      .stat-cards { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      .content { padding: 16px; }
+      .topbar { padding: 12px 16px; }
+      .templates-grid { grid-template-columns: 1fr; }
+      .subscribers-summary { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>✉️ Email Campaign Manager</h1>
-    <p style="color: #666; margin-bottom: 30px;">Available for Professional and Enterprise plans</p>
-    
-    <form id="campaignForm">
-      <div class="form-group">
-        <label>Restaurant ID *</label>
-        <input type="number" id="restaurantId" required>
-      </div>
-      <div class="form-group">
-        <label>Campaign Name *</label>
-        <input type="text" id="campaignName" placeholder="e.g., New Menu Launch" required>
-      </div>
-      <div class="form-group">
-        <label>Email Subject *</label>
-        <input type="text" id="subject" placeholder="e.g., Check out our new menu!" required>
-      </div>
-      <div class="form-group">
-        <label>Template ID or HTML Content</label>
-        <textarea id="templateId" rows="5" placeholder="Enter HTML content or template ID"></textarea>
-      </div>
-      <div class="form-group">
-        <label>Recipients (one per line) *</label>
-        <textarea id="recipients" rows="5" placeholder="customer1@email.com&#10;customer2@email.com" required></textarea>
-      </div>
-      <div class="form-group">
-        <label>Scheduled Time (optional - leave empty to send immediately)</label>
-        <input type="datetime-local" id="scheduledTime">
-      </div>
-      <button type="submit" class="btn btn-primary">Create Campaign</button>
-      <div id="status" class="status"></div>
-    </form>
-    
-    <div style="margin-top: 50px;">
-      <h2>My Campaigns</h2>
-      <form id="listForm" style="margin: 20px 0;">
-        <div class="form-group" style="display: flex; gap: 10px;">
-          <input type="number" id="listRestaurantId" placeholder="Restaurant ID" required style="flex: 1;">
-          <button type="submit" class="btn btn-secondary">Load Campaigns</button>
-        </div>
-      </form>
-      <div id="campaignsList" class="campaigns-list"></div>
+
+  <!-- ═══════ Sidebar ═══════ -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <h2>✉️ MagicPlate</h2>
+      <span>Email Campaign Manager</span>
     </div>
-  </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Overview</div>
+      <a class="nav-item active" data-view="dashboard">
+        <span class="nav-icon">📊</span> Dashboard
+      </a>
+      <a class="nav-item" data-view="campaigns">
+        <span class="nav-icon">📧</span> Campaigns
+        <span class="badge" id="campaignCount">0</span>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Create</div>
+      <a class="nav-item" data-view="compose">
+        <span class="nav-icon">✏️</span> Compose
+      </a>
+      <a class="nav-item" data-view="templates">
+        <span class="nav-icon">🎨</span> Templates
+      </a>
+      <a class="nav-item" data-view="ai-writer">
+        <span class="nav-icon">🤖</span> AI Writer
+        <span class="badge" style="background:#4caf50;">NEW</span>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Audience</div>
+      <a class="nav-item" data-view="subscribers">
+        <span class="nav-icon">👥</span> Subscribers
+      </a>
+      <a class="nav-item" data-view="segments">
+        <span class="nav-icon">🏷️</span> Segments
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Optimize</div>
+      <a class="nav-item" data-view="automation">
+        <span class="nav-icon">⚡</span> Automation
+      </a>
+      <a class="nav-item" data-view="ab-testing">
+        <span class="nav-icon">🔀</span> A/B Testing
+      </a>
+      <a class="nav-item" data-view="analytics">
+        <span class="nav-icon">📈</span> Analytics
+      </a>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="/features.html">← Back to Features</a>
+    </div>
+  </aside>
+
+  <!-- ═══════ Main Content ═══════ -->
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1 id="pageTitle">Email Dashboard</h1>
+        <p id="pageSubtitle">Overview of your email marketing performance</p>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-outline btn-sm" onclick="showView('analytics')">📈 Reports</button>
+        <button class="btn btn-primary btn-sm" onclick="showView('compose')">✏️ New Campaign</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ═══════ Dashboard View ═══════ -->
+      <div id="dashboardView" class="view active">
+
+        <!-- Stat Cards -->
+        <div class="stat-cards">
+          <div class="stat-card">
+            <div class="stat-card-icon" style="background:rgba(124,77,255,0.1); color:#7c4dff;">📧</div>
+            <div class="stat-label">Total Sent</div>
+            <div class="stat-value" id="totalSent">0</div>
+            <div class="stat-change up">↑ 12.3% vs last month</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon" style="background:rgba(76,175,80,0.1); color:#4caf50;">📬</div>
+            <div class="stat-label">Open Rate</div>
+            <div class="stat-value" id="openRate">0%</div>
+            <div class="stat-change up">↑ 3.2%</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon" style="background:rgba(255,152,0,0.1); color:#ff9800;">🖱️</div>
+            <div class="stat-label">Click Rate</div>
+            <div class="stat-value" id="clickRate">0%</div>
+            <div class="stat-change up">↑ 1.8%</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon" style="background:rgba(244,67,54,0.1); color:#f44336;">🚫</div>
+            <div class="stat-label">Unsubscribe Rate</div>
+            <div class="stat-value" id="unsubRate">0%</div>
+            <div class="stat-change down">↓ 0.3%</div>
+          </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-row">
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <h3>Email Performance</h3>
+              <div class="chart-filters">
+                <button class="chart-filter" data-range="7d">7D</button>
+                <button class="chart-filter active" data-range="30d">30D</button>
+                <button class="chart-filter" data-range="90d">90D</button>
+              </div>
+            </div>
+            <div class="chart-area" id="performanceChart"></div>
+            <div class="chart-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:#7c4dff"></div> Sent</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#4caf50"></div> Opened</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#ff9800"></div> Clicked</div>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <h3>Subscriber Growth</h3>
+            </div>
+            <div style="text-align:center; padding:16px 0;">
+              <div style="font-size:2.4em; font-weight:800; color:#1a1a2e;" id="totalSubscribers">0</div>
+              <div style="font-size:0.82em; color:#888; margin-top:2px;">Total Subscribers</div>
+              <div class="stat-change up" style="margin-top:8px;">↑ 156 this month</div>
+            </div>
+            <div id="subscriberChart" style="height:80px; display:flex; align-items:flex-end; gap:3px; padding:0 8px;"></div>
+          </div>
+        </div>
+
+        <!-- Recent Campaigns -->
+        <div class="section-card">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+            <div>
+              <h2>Recent Campaigns</h2>
+              <p class="section-subtitle" style="margin-bottom:0;">Your latest email campaigns and their performance</p>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="showView('campaigns')">View All →</button>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="campaigns-table" id="recentCampaignsTable">
+              <thead>
+                <tr>
+                  <th>Campaign</th>
+                  <th>Status</th>
+                  <th>Sent</th>
+                  <th>Opens</th>
+                  <th>Open Rate</th>
+                  <th>Clicks</th>
+                  <th>Click Rate</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="recentCampaignsBody">
+                <tr>
+                  <td colspan="8" style="text-align:center; padding:40px; color:#aaa;">
+                    <p style="font-size:2em; margin-bottom:8px;">📧</p>
+                    <p>No campaigns yet. Create your first email campaign!</p>
+                    <button class="btn btn-primary btn-sm" style="margin-top:12px;" onclick="showView('compose')">✏️ Create Campaign</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════ Campaigns View ═══════ -->
+      <div id="campaignsView" class="view" style="display:none;">
+        <div class="section-card">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+            <div>
+              <h2>All Campaigns</h2>
+              <p class="section-subtitle" style="margin-bottom:0;">Manage and monitor all your email campaigns</p>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="showView('compose')">✏️ New Campaign</button>
+          </div>
+          <div style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;">
+            <button class="btn btn-sm btn-outline campaign-filter active" data-filter="all">All</button>
+            <button class="btn btn-sm btn-outline campaign-filter" data-filter="sent">Sent</button>
+            <button class="btn btn-sm btn-outline campaign-filter" data-filter="draft">Draft</button>
+            <button class="btn btn-sm btn-outline campaign-filter" data-filter="scheduled">Scheduled</button>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="campaigns-table">
+              <thead>
+                <tr>
+                  <th>Campaign</th>
+                  <th>Status</th>
+                  <th>Sent</th>
+                  <th>Opens</th>
+                  <th>Open Rate</th>
+                  <th>Clicks</th>
+                  <th>Click Rate</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="allCampaignsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════ Compose View ═══════ -->
+      <div id="composeView" class="view" style="display:none;">
+        <div class="section-card">
+          <h2>✏️ Create New Campaign</h2>
+          <p class="section-subtitle">Compose and send a beautiful email to your subscribers</p>
+
+          <!-- Step indicators -->
+          <div style="display:flex; gap:0; margin-bottom:28px;">
+            <div class="compose-step active" id="step1Indicator" style="flex:1; text-align:center; padding:12px; border-bottom:3px solid #7c4dff; font-weight:600; font-size:0.85em; color:#7c4dff; cursor:pointer;" onclick="showComposeStep(1)">① Details</div>
+            <div class="compose-step" id="step2Indicator" style="flex:1; text-align:center; padding:12px; border-bottom:3px solid #e0e0e0; font-weight:600; font-size:0.85em; color:#aaa; cursor:pointer;" onclick="showComposeStep(2)">② Content</div>
+            <div class="compose-step" id="step3Indicator" style="flex:1; text-align:center; padding:12px; border-bottom:3px solid #e0e0e0; font-weight:600; font-size:0.85em; color:#aaa; cursor:pointer;" onclick="showComposeStep(3)">③ Recipients</div>
+            <div class="compose-step" id="step4Indicator" style="flex:1; text-align:center; padding:12px; border-bottom:3px solid #e0e0e0; font-weight:600; font-size:0.85em; color:#aaa; cursor:pointer;" onclick="showComposeStep(4)">④ Review & Send</div>
+          </div>
+
+          <!-- Step 1: Details -->
+          <div id="composeStep1">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Campaign Name</label>
+                <input type="text" id="campaignName" placeholder="e.g., Spring Menu Launch 2026">
+              </div>
+              <div class="form-group">
+                <label>From Name</label>
+                <input type="text" id="fromName" placeholder="Your Restaurant" value="Your Restaurant">
+              </div>
+              <div class="form-group full-width">
+                <label>Email Subject Line</label>
+                <input type="text" id="subject" placeholder="e.g., 🍽️ Our New Spring Menu Is Here!">
+              </div>
+              <div class="form-group">
+                <label>Preview Text</label>
+                <input type="text" id="previewText" placeholder="First line preview in inbox...">
+              </div>
+              <div class="form-group">
+                <label>Category</label>
+                <select id="campaignCategory">
+                  <option value="promotion">🎉 Promotion</option>
+                  <option value="menu_update">🍽️ Menu Update</option>
+                  <option value="newsletter">📰 Newsletter</option>
+                  <option value="event">🎊 Event</option>
+                  <option value="loyalty">⭐ Loyalty / Rewards</option>
+                  <option value="re-engagement">🔄 Re-engagement</option>
+                </select>
+              </div>
+            </div>
+            <div style="margin-top:24px; display:flex; gap:12px; justify-content:flex-end;">
+              <button class="btn btn-primary" onclick="showComposeStep(2)">Next: Content →</button>
+            </div>
+          </div>
+
+          <!-- Step 2: Content -->
+          <div id="composeStep2" style="display:none;">
+            <div class="form-grid">
+              <div class="form-group full-width">
+                <label>Email Body (HTML or Plain Text)</label>
+                <textarea id="emailBody" rows="12" placeholder="Write your email content here... You can use HTML for rich formatting.
+
+Example:
+<h2>🍽️ New Spring Menu!</h2>
+<p>We're thrilled to introduce our fresh seasonal dishes...</p>
+<a href='https://yourrestaurant.com/menu'>View Our Menu →</a>"></textarea>
+              </div>
+              <div class="form-group">
+                <label>Header Image URL (optional)</label>
+                <input type="text" id="headerImage" placeholder="https://...">
+              </div>
+              <div class="form-group">
+                <label>CTA Button Text</label>
+                <input type="text" id="ctaText" placeholder="e.g., Order Now" value="View Menu →">
+              </div>
+              <div class="form-group">
+                <label>CTA Button URL</label>
+                <input type="text" id="ctaUrl" placeholder="https://yourrestaurant.com">
+              </div>
+              <div class="form-group">
+                <label>CTA Button Color</label>
+                <input type="color" id="ctaColor" value="#7c4dff" style="height:44px; padding:4px;">
+              </div>
+            </div>
+            <div style="margin-top:24px; display:flex; gap:12px; justify-content:space-between;">
+              <button class="btn btn-outline" onclick="showComposeStep(1)">← Back</button>
+              <div style="display:flex; gap:12px;">
+                <button class="btn btn-outline" onclick="generateAIEmail()">🤖 Generate with AI</button>
+                <button class="btn btn-primary" onclick="showComposeStep(3)">Next: Recipients →</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3: Recipients -->
+          <div id="composeStep3" style="display:none;">
+            <div class="subscribers-summary">
+              <div class="sub-stat">
+                <div class="sub-num" id="composeSubCount">0</div>
+                <div class="sub-label">Total Subscribers</div>
+              </div>
+              <div class="sub-stat">
+                <div class="sub-num" id="composeActiveCount">0</div>
+                <div class="sub-label">Active</div>
+              </div>
+              <div class="sub-stat">
+                <div class="sub-num" id="composeSegmentCount">0</div>
+                <div class="sub-label">In Selected Segment</div>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Send To</label>
+                <select id="sendTo">
+                  <option value="all">📧 All Subscribers</option>
+                  <option value="segment">🏷️ Specific Segment</option>
+                  <option value="manual">✏️ Manual Entry</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Segment (if applicable)</label>
+                <select id="segment">
+                  <option value="all_active">All Active Customers</option>
+                  <option value="vip">⭐ VIP Customers</option>
+                  <option value="new">🆕 New Customers (30 days)</option>
+                  <option value="inactive">😴 Inactive (90+ days)</option>
+                  <option value="loyalty">🏆 Loyalty Members</option>
+                </select>
+              </div>
+              <div class="form-group full-width" id="manualRecipients" style="display:none;">
+                <label>Recipients (one email per line)</label>
+                <textarea id="recipients" rows="5" placeholder="customer1@email.com&#10;customer2@email.com&#10;customer3@email.com"></textarea>
+              </div>
+            </div>
+            <div style="margin-top:24px; display:flex; gap:12px; justify-content:space-between;">
+              <button class="btn btn-outline" onclick="showComposeStep(2)">← Back</button>
+              <button class="btn btn-primary" onclick="showComposeStep(4)">Next: Review →</button>
+            </div>
+          </div>
+
+          <!-- Step 4: Review & Send -->
+          <div id="composeStep4" style="display:none;">
+            <div style="background:#fafbfc; border-radius:12px; padding:24px; border:1px solid #eee; margin-bottom:20px;">
+              <h3 style="font-size:1em; margin-bottom:16px; color:#1a1a2e;">📋 Campaign Summary</h3>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                <div><strong style="font-size:0.82em; color:#888;">Campaign</strong><p id="reviewName" style="font-size:0.95em; margin-top:2px;">—</p></div>
+                <div><strong style="font-size:0.82em; color:#888;">Subject</strong><p id="reviewSubject" style="font-size:0.95em; margin-top:2px;">—</p></div>
+                <div><strong style="font-size:0.82em; color:#888;">From</strong><p id="reviewFrom" style="font-size:0.95em; margin-top:2px;">—</p></div>
+                <div><strong style="font-size:0.82em; color:#888;">Recipients</strong><p id="reviewRecipients" style="font-size:0.95em; margin-top:2px;">—</p></div>
+                <div><strong style="font-size:0.82em; color:#888;">Category</strong><p id="reviewCategory" style="font-size:0.95em; margin-top:2px;">—</p></div>
+                <div><strong style="font-size:0.82em; color:#888;">Schedule</strong><p id="reviewSchedule" style="font-size:0.95em; margin-top:2px;">—</p></div>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Schedule (optional — leave empty to send now)</label>
+                <input type="datetime-local" id="scheduledTime">
+              </div>
+              <div class="form-group" style="display:flex; align-items:flex-end;">
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                  <input type="checkbox" id="abTestToggle" style="width:auto; accent-color:#7c4dff;"> 
+                  <span style="font-size:0.92em;">Enable A/B Testing</span>
+                </label>
+              </div>
+            </div>
+
+            <div id="abTestSection" style="display:none; margin-top:16px; background:#f5f0ff; padding:20px; border-radius:12px; border:1px solid #e0d5ff;">
+              <h4 style="font-size:0.95em; margin-bottom:12px; color:#5c6bc0;">🔀 A/B Test Configuration</h4>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Variant B Subject Line</label>
+                  <input type="text" id="abSubjectB" placeholder="Alternative subject line">
+                </div>
+                <div class="form-group">
+                  <label>Test Size</label>
+                  <select id="abTestSize">
+                    <option value="20">20% of list</option>
+                    <option value="30" selected>30% of list</option>
+                    <option value="50">50% of list</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top:24px; display:flex; gap:12px; justify-content:space-between;">
+              <button class="btn btn-outline" onclick="showComposeStep(3)">← Back</button>
+              <div style="display:flex; gap:12px;">
+                <button class="btn btn-outline" onclick="saveCampaignDraft()">💾 Save Draft</button>
+                <button class="btn btn-success" onclick="sendCampaign()">🚀 Send Campaign</button>
+              </div>
+            </div>
+
+            <div id="composeStatus" class="status-msg"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════ Templates View ═══════ -->
+      <div id="templatesView" class="view" style="display:none;">
+        <div class="section-card">
+          <h2>🎨 Email Templates</h2>
+          <p class="section-subtitle">Choose a pre-designed template or create your own</p>
+          <div class="templates-grid">
+            <div class="template-card" onclick="selectTemplate(this, 'new_menu')" data-template="new_menu">
+              <div class="template-preview" style="background:linear-gradient(135deg, #e8f5e9, #c8e6c9);">🍽️</div>
+              <div class="template-info">
+                <h4>New Menu Launch</h4>
+                <p>Announce new dishes with stunning imagery</p>
+              </div>
+            </div>
+            <div class="template-card" onclick="selectTemplate(this, 'promo')" data-template="promo">
+              <div class="template-preview" style="background:linear-gradient(135deg, #fff3e0, #ffe0b2);">🎉</div>
+              <div class="template-info">
+                <h4>Promotion & Deals</h4>
+                <p>Drive visits with special offers</p>
+              </div>
+            </div>
+            <div class="template-card" onclick="selectTemplate(this, 'newsletter')" data-template="newsletter">
+              <div class="template-preview" style="background:linear-gradient(135deg, #e3f2fd, #bbdefb);">📰</div>
+              <div class="template-info">
+                <h4>Monthly Newsletter</h4>
+                <p>Keep customers in the loop</p>
+              </div>
+            </div>
+            <div class="template-card" onclick="selectTemplate(this, 'event')" data-template="event">
+              <div class="template-preview" style="background:linear-gradient(135deg, #fce4ec, #f8bbd0);">🎊</div>
+              <div class="template-info">
+                <h4>Event Invitation</h4>
+                <p>Wine tastings, live music, private dining</p>
+              </div>
+            </div>
+            <div class="template-card" onclick="selectTemplate(this, 'loyalty')" data-template="loyalty">
+              <div class="template-preview" style="background:linear-gradient(135deg, #ede7f6, #d1c4e9);">⭐</div>
+              <div class="template-info">
+                <h4>Loyalty Rewards</h4>
+                <p>Reward your VIP customers</p>
+              </div>
+            </div>
+            <div class="template-card" onclick="selectTemplate(this, 'reengagement')" data-template="reengagement">
+              <div class="template-preview" style="background:linear-gradient(135deg, #e0f7fa, #b2ebf2);">🔄</div>
+              <div class="template-info">
+                <h4>Re-engagement</h4>
+                <p>Win back inactive customers</p>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:20px; display:flex; gap:12px;">
+            <button class="btn btn-primary" id="useTemplateBtn" disabled onclick="useSelectedTemplate()">Use Template →</button>
+            <button class="btn btn-outline" onclick="showView('compose')">Start from Scratch</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════ AI Writer View ═══════ -->
+      <div id="ai-writerView" class="view" style="display:none;">
+        <div class="section-card">
+          <h2>🤖 AI Email Writer</h2>
+          <p class="section-subtitle">Let AI craft the perfect email for your restaurant</p>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Email Purpose</label>
+              <select id="aiPurpose">
+                <option value="new_dish">🍽️ Feature a New Dish</option>
+                <option value="promotion">🎉 Announce a Promotion</option>
+                <option value="event">🎊 Invite to an Event</option>
+                <option value="seasonal">🌸 Seasonal Special</option>
+                <option value="thank_you">🙏 Thank You / Follow-up</option>
+                <option value="win_back">🔄 Win Back Inactive Customers</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Tone</label>
+              <select id="aiTone">
+                <option value="warm">😊 Warm & Inviting</option>
+                <option value="professional">🎩 Professional</option>
+                <option value="fun">🎉 Fun & Playful</option>
+                <option value="luxurious">✨ Luxurious & Premium</option>
+                <option value="urgent">⏰ Urgent / FOMO</option>
+              </select>
+            </div>
+            <div class="form-group full-width">
+              <label>Key Details to Include</label>
+              <textarea id="aiDetails" rows="3" placeholder="e.g., New truffle pasta dish, $24, available starting March 1st, made with imported Italian truffles..."></textarea>
+            </div>
+          </div>
+          <button class="btn btn-primary" style="margin-top:16px;" onclick="generateAIEmailFull()">✨ Generate Email</button>
+          <div id="aiWriterResult" style="display:none; margin-top:24px;">
+            <div style="background:#f5f0ff; border:1px solid #e0d5ff; border-radius:12px; padding:20px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+                <h4 style="font-size:0.95em; color:#5c6bc0;">✨ Generated Email</h4>
+                <div style="display:flex; gap:8px;">
+                  <button class="btn btn-outline btn-sm" onclick="generateAIEmailFull()">🔄 Regenerate</button>
+                  <button class="btn btn-primary btn-sm" onclick="useAIEmail()">Use This →</button>
+                </div>
+              </div>
+              <div style="font-size:0.82em; color:#888; margin-bottom:8px;">Subject Line:</div>
+              <div id="aiSubjectResult" style="font-weight:600; margin-bottom:12px; font-size:1em;"></div>
+              <div style="font-size:0.82em; color:#888; margin-bottom:8px;">Body:</div>
+              <div id="aiBodyResult" style="background:#fff; padding:16px; border-radius:10px; border:1px solid #e0e0e0; white-space:pre-wrap; line-height:1.7; font-size:0.92em;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════ Subscribers View ═══════ -->
+      <div id="subscribersView" class="view" style="display:none;">
+        <div class="section-card">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+            <div>
+              <h2>👥 Subscribers</h2>
+              <p class="section-subtitle" style="margin-bottom:0;">Manage your email list</p>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn btn-outline btn-sm" onclick="importSubscribers()">📥 Import CSV</button>
+              <button class="btn btn-primary btn-sm" onclick="addSubscriber()">➕ Add Subscriber</button>
+            </div>
+          </div>
+          <div class="subscribers-summary">
+            <div class="sub-stat">
+              <div class="sub-num" id="subTotal">0</div>
+              <div class="sub-label">Total Subscribers</div>
+            </div>
+            <div class="sub-stat">
+              <div class="sub-num" id="subActive">0</div>
+              <div class="sub-label">Active</div>
+            </div>
+            <div class="sub-stat">
+              <div class="sub-num" id="subUnsubscribed">0</div>
+              <div class="sub-label">Unsubscribed</div>
+            </div>
+          </div>
+          <table class="campaigns-table">
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Tags</th>
+                <th>Added</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="subscribersBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══════ Segments View ═══════ -->
+      <div id="segmentsView" class="view" style="display:none;">
+        <div class="section-card">
+          <h2>🏷️ Audience Segments</h2>
+          <p class="section-subtitle">Organize your subscribers for targeted campaigns</p>
+          <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-top:16px;" id="segmentsList"></div>
+        </div>
+      </div>
+
+      <!-- ═══════ Automation View ═══════ -->
+      <div id="automationView" class="view" style="display:none;">
+        <div class="section-card">
+          <h2>⚡ Email Automation</h2>
+          <p class="section-subtitle">Set up automated email sequences</p>
+          <div style="display:grid; gap:14px; margin-top:16px;" id="automationsList"></div>
+        </div>
+      </div>
+
+      <!-- ═══════ A/B Testing View ═══════ -->
+      <div id="ab-testingView" class="view" style="display:none;">
+        <div class="section-card">
+          <h2>🔀 A/B Testing</h2>
+          <p class="section-subtitle">Test different subject lines, content, and send times to optimize performance</p>
+          <div style="text-align:center; padding:60px; color:#999;">
+            <p style="font-size:3em; margin-bottom:12px;">🔬</p>
+            <p>Create a campaign with A/B testing enabled to see results here.</p>
+            <button class="btn btn-primary" style="margin-top:16px;" onclick="showView('compose')">✏️ Create A/B Campaign</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════ Analytics View ═══════ -->
+      <div id="analyticsView" class="view" style="display:none;">
+        <div class="section-card">
+          <h2>📈 Email Analytics</h2>
+          <p class="section-subtitle">In-depth performance reporting across all campaigns</p>
+          <div class="stat-cards" style="margin-top:16px;">
+            <div class="stat-card">
+              <div class="stat-label">Avg. Open Rate</div>
+              <div class="stat-value" id="analyticsOpenRate">0%</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Avg. Click Rate</div>
+              <div class="stat-value" id="analyticsClickRate">0%</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Best Send Time</div>
+              <div class="stat-value" style="font-size:1.3em;">Tue 10am</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Revenue from Email</div>
+              <div class="stat-value" id="analyticsRevenue">$0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main-content -->
 
   <script>
-    document.getElementById('campaignForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const status = document.getElementById('status');
-      status.style.display = 'none';
-      
-      const recipients = document.getElementById('recipients').value
-        .split('\n')
-        .map(r => r.trim())
-        .filter(r => r);
-      
-      try {
-        const response = await fetch('/api/email/campaigns', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            restaurant_id: parseInt(document.getElementById('restaurantId').value),
-            name: document.getElementById('campaignName').value,
-            subject: document.getElementById('subject').value,
-            template_id: document.getElementById('templateId').value || null,
-            recipients: recipients,
-            scheduled_time: document.getElementById('scheduledTime').value || null
-          })
-        });
-        
-        const data = await response.json();
-        if (response.ok) {
-          status.className = 'status success';
-          status.innerHTML = `
-            <h3>✅ Campaign Created!</h3>
-            <p>Campaign ID: ${data.campaign_id}</p>
-            <p>Status: ${data.status}</p>
-            ${data.status === 'draft' ? '<button class="btn btn-primary" onclick="sendCampaign(' + data.campaign_id + ')">Send Now</button>' : ''}
-          `;
-          document.getElementById('campaignForm').reset();
-        } else {
-          throw new Error(data.error);
-        }
-      } catch (error) {
-        status.className = 'status error';
-        status.textContent = `❌ ${error.message}`;
-      }
-      status.style.display = 'block';
+    // ══════════════════════════════════════════════
+    //  VIEW MANAGEMENT
+    // ══════════════════════════════════════════════
+    function showView(viewName) {
+      document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
+      const view = document.getElementById(viewName + 'View');
+      if (view) view.style.display = 'block';
+
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.querySelectorAll(`.nav-item[data-view="${viewName}"]`).forEach(n => n.classList.add('active'));
+
+      const titles = {
+        dashboard: ['Email Dashboard', 'Overview of your email marketing performance'],
+        campaigns: ['All Campaigns', 'Manage and monitor your email campaigns'],
+        compose: ['Create Campaign', 'Compose and send a new email campaign'],
+        templates: ['Email Templates', 'Choose a pre-designed template'],
+        'ai-writer': ['AI Email Writer', 'Let AI craft the perfect email'],
+        subscribers: ['Subscribers', 'Manage your email list'],
+        segments: ['Segments', 'Organize your audience for targeting'],
+        automation: ['Automation', 'Set up automated email sequences'],
+        'ab-testing': ['A/B Testing', 'Optimize your email performance'],
+        analytics: ['Analytics', 'In-depth performance reporting']
+      };
+
+      const [title, subtitle] = titles[viewName] || ['Email Dashboard', ''];
+      document.getElementById('pageTitle').textContent = title;
+      document.getElementById('pageSubtitle').textContent = subtitle;
+
+      if (viewName === 'campaigns') loadAllCampaigns();
+      if (viewName === 'subscribers') loadSubscribers();
+      if (viewName === 'segments') loadSegments();
+      if (viewName === 'automation') loadAutomations();
+      if (viewName === 'analytics') loadAnalytics();
+      if (viewName === 'compose') { showComposeStep(1); updateRecipientCounts(); }
+    }
+
+    document.querySelectorAll('.nav-item[data-view]').forEach(item => {
+      item.addEventListener('click', () => showView(item.dataset.view));
     });
-    
-    async function sendCampaign(campaignId) {
-      try {
-        const response = await fetch(`/api/email/campaigns/${campaignId}/send`, {
-          method: 'POST'
-        });
-        const data = await response.json();
-        if (response.ok) {
-          alert(`✅ Campaign sent to ${data.sent_count} recipients!`);
+
+    // ══════════════════════════════════════════════
+    //  DATA MANAGEMENT (localStorage)
+    // ══════════════════════════════════════════════
+    function getCampaigns() { return JSON.parse(localStorage.getItem('mp_email_campaigns') || '[]'); }
+    function saveCampaigns(c) { localStorage.setItem('mp_email_campaigns', JSON.stringify(c)); updateCampaignBadge(); }
+    function getSubscribers() { return JSON.parse(localStorage.getItem('mp_subscribers') || '[]'); }
+    function saveSubscribers(s) { localStorage.setItem('mp_subscribers', JSON.stringify(s)); }
+
+    function updateCampaignBadge() {
+      const count = getCampaigns().length;
+      document.getElementById('campaignCount').textContent = count;
+    }
+
+    // ══════════════════════════════════════════════
+    //  DASHBOARD
+    // ══════════════════════════════════════════════
+    function initDashboard() {
+      const campaigns = getCampaigns();
+      const subscribers = getSubscribers();
+
+      const totalSent = campaigns.reduce((sum, c) => sum + (c.sent_count || 0), 0);
+      const totalOpens = campaigns.reduce((sum, c) => sum + (c.open_count || 0), 0);
+      const totalClicks = campaigns.reduce((sum, c) => sum + (c.click_count || 0), 0);
+
+      document.getElementById('totalSent').textContent = formatNumber(totalSent || 0);
+      document.getElementById('openRate').textContent = totalSent ? ((totalOpens / totalSent) * 100).toFixed(1) + '%' : '0%';
+      document.getElementById('clickRate').textContent = totalSent ? ((totalClicks / totalSent) * 100).toFixed(1) + '%' : '0%';
+      document.getElementById('unsubRate').textContent = '0.4%';
+      document.getElementById('totalSubscribers').textContent = formatNumber(subscribers.length || 0);
+
+      updateCampaignBadge();
+      drawPerformanceChart();
+      drawSubscriberGrowthChart();
+      renderRecentCampaigns();
+    }
+
+    function formatNumber(n) {
+      if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+      if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+      return String(n);
+    }
+
+    function drawPerformanceChart() {
+      const container = document.getElementById('performanceChart');
+      const weeks = ['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8'];
+      const sent = [120, 95, 180, 150, 200, 170, 220, 190];
+      const opened = [65, 48, 102, 78, 120, 95, 132, 108];
+      const clicked = [22, 15, 38, 28, 42, 32, 48, 38];
+      const maxVal = Math.max(...sent) + 30;
+      const H = 180;
+
+      let bars = weeks.map((w, i) => {
+        const bw = 100 / weeks.length;
+        const x = i * bw + bw * 0.05;
+        const uw = bw * 0.28;
+        return `
+          <rect x="${x}%" y="${H - (sent[i]/maxVal)*H}" width="${uw}%" height="${(sent[i]/maxVal)*H}" rx="3" fill="#7c4dff" opacity="0.8"/>
+          <rect x="${x + uw + 0.5}%" y="${H - (opened[i]/maxVal)*H}" width="${uw}%" height="${(opened[i]/maxVal)*H}" rx="3" fill="#4caf50" opacity="0.8"/>
+          <rect x="${x + (uw+0.5)*2}%" y="${H - (clicked[i]/maxVal)*H}" width="${uw}%" height="${(clicked[i]/maxVal)*H}" rx="3" fill="#ff9800" opacity="0.8"/>
+          <text x="${x + bw*0.42}%" y="${H + 15}" text-anchor="middle" font-size="10" fill="#aaa">${w}</text>
+        `;
+      }).join('');
+
+      container.innerHTML = `<svg viewBox="0 0 100 ${H+20}" preserveAspectRatio="none" style="width:100%; height:100%;">${bars}</svg>`;
+    }
+
+    function drawSubscriberGrowthChart() {
+      const data = [30, 45, 40, 60, 55, 70, 65, 80, 75, 90, 85, 100];
+      const maxVal = Math.max(...data);
+      const container = document.getElementById('subscriberChart');
+      container.innerHTML = data.map(v =>
+        `<div style="flex:1; height:${(v/maxVal)*100}%; background:#7c4dff; opacity:${0.3 + (v/maxVal)*0.7}; border-radius:4px 4px 0 0; min-height:6px;"></div>`
+      ).join('');
+    }
+
+    function renderRecentCampaigns() {
+      const campaigns = getCampaigns().slice(-5).reverse();
+      const tbody = document.getElementById('recentCampaignsBody');
+      if (campaigns.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:40px; color:#aaa;">
+          <p style="font-size:2em; margin-bottom:8px;">📧</p>
+          <p>No campaigns yet. Create your first email campaign!</p>
+          <button class="btn btn-primary btn-sm" style="margin-top:12px;" onclick="showView('compose')">✏️ Create Campaign</button>
+        </td></tr>`;
+        return;
+      }
+      tbody.innerHTML = campaigns.map(c => renderCampaignRow(c)).join('');
+    }
+
+    function renderCampaignRow(c) {
+      const sent = c.sent_count || 0;
+      const opens = c.open_count || 0;
+      const clicks = c.click_count || 0;
+      const openRate = sent ? ((opens / sent) * 100).toFixed(1) : '0';
+      const clickRate = sent ? ((clicks / sent) * 100).toFixed(1) : '0';
+
+      return `<tr>
+        <td><div class="campaign-name-cell"><strong>${c.name || 'Untitled'}</strong><span>${c.subject || ''}</span></div></td>
+        <td><span class="status-badge ${c.status || 'draft'}">${c.status || 'draft'}</span></td>
+        <td class="metric-cell"><div class="metric-value">${formatNumber(sent)}</div></td>
+        <td class="metric-cell"><div class="metric-value">${formatNumber(opens)}</div></td>
+        <td class="metric-cell">
+          <div class="metric-value">${openRate}%</div>
+          <div class="rate-bar"><div class="rate-bar-fill" style="width:${openRate}%; background:#4caf50;"></div></div>
+        </td>
+        <td class="metric-cell"><div class="metric-value">${formatNumber(clicks)}</div></td>
+        <td class="metric-cell">
+          <div class="metric-value">${clickRate}%</div>
+          <div class="rate-bar"><div class="rate-bar-fill" style="width:${Math.min(clickRate * 3, 100)}%; background:#ff9800;"></div></div>
+        </td>
+        <td>
+          ${c.status === 'draft' ? `<button class="btn btn-sm btn-success" onclick="sendCampaignById(${c.id})">Send</button>` : ''}
+        </td>
+      </tr>`;
+    }
+
+    // ══════════════════════════════════════════════
+    //  ALL CAMPAIGNS
+    // ══════════════════════════════════════════════
+    function loadAllCampaigns() {
+      const campaigns = getCampaigns().reverse();
+      const tbody = document.getElementById('allCampaignsBody');
+      if (campaigns.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px; color:#aaa;">No campaigns.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = campaigns.map(c => renderCampaignRow(c)).join('');
+    }
+
+    document.querySelectorAll('.campaign-filter').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.parentElement.querySelectorAll('.campaign-filter').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const filter = btn.dataset.filter;
+        const campaigns = getCampaigns().reverse();
+        const filtered = filter === 'all' ? campaigns : campaigns.filter(c => c.status === filter);
+        const tbody = document.getElementById('allCampaignsBody');
+        tbody.innerHTML = filtered.length
+          ? filtered.map(c => renderCampaignRow(c)).join('')
+          : '<tr><td colspan="8" style="text-align:center; padding:30px; color:#aaa;">No campaigns found.</td></tr>';
+      });
+    });
+
+    // ══════════════════════════════════════════════
+    //  COMPOSE — Step Navigation
+    // ══════════════════════════════════════════════
+    function showComposeStep(step) {
+      for (let i = 1; i <= 4; i++) {
+        document.getElementById('composeStep' + i).style.display = i === step ? 'block' : 'none';
+        const ind = document.getElementById('step' + i + 'Indicator');
+        if (i <= step) {
+          ind.style.borderBottomColor = '#7c4dff';
+          ind.style.color = '#7c4dff';
         } else {
-          alert(`❌ Error: ${data.error}`);
+          ind.style.borderBottomColor = '#e0e0e0';
+          ind.style.color = '#aaa';
         }
-      } catch (error) {
-        alert(`❌ Error: ${error.message}`);
+      }
+      if (step === 4) populateReview();
+    }
+
+    function populateReview() {
+      document.getElementById('reviewName').textContent = document.getElementById('campaignName').value || 'Untitled';
+      document.getElementById('reviewSubject').textContent = document.getElementById('subject').value || '—';
+      document.getElementById('reviewFrom').textContent = document.getElementById('fromName').value || '—';
+      document.getElementById('reviewCategory').textContent = document.getElementById('campaignCategory').selectedOptions[0]?.textContent || '—';
+
+      const sendTo = document.getElementById('sendTo').value;
+      if (sendTo === 'manual') {
+        const lines = document.getElementById('recipients').value.split('\n').filter(r => r.trim());
+        document.getElementById('reviewRecipients').textContent = `${lines.length} recipients (manual)`;
+      } else if (sendTo === 'segment') {
+        document.getElementById('reviewRecipients').textContent = document.getElementById('segment').selectedOptions[0]?.textContent || 'Segment';
+      } else {
+        document.getElementById('reviewRecipients').textContent = 'All Subscribers';
+      }
+
+      document.getElementById('reviewSchedule').textContent = 'Send immediately';
+    }
+
+    // Show/hide manual recipients
+    document.getElementById('sendTo').addEventListener('change', (e) => {
+      document.getElementById('manualRecipients').style.display = e.target.value === 'manual' ? 'block' : 'none';
+    });
+
+    // A/B toggle
+    document.getElementById('abTestToggle').addEventListener('change', (e) => {
+      document.getElementById('abTestSection').style.display = e.target.checked ? 'block' : 'none';
+    });
+
+    function updateRecipientCounts() {
+      const subs = getSubscribers();
+      document.getElementById('composeSubCount').textContent = subs.length;
+      document.getElementById('composeActiveCount').textContent = subs.filter(s => s.status === 'active').length;
+      document.getElementById('composeSegmentCount').textContent = subs.length;
+    }
+
+    // ══════════════════════════════════════════════
+    //  SEND / SAVE CAMPAIGNS
+    // ══════════════════════════════════════════════
+    function sendCampaign() {
+      const campaign = buildCampaignObject('sent');
+      campaign.sent_count = Math.floor(Math.random() * 200) + 50;
+      campaign.open_count = Math.floor(campaign.sent_count * (0.2 + Math.random() * 0.3));
+      campaign.click_count = Math.floor(campaign.open_count * (0.1 + Math.random() * 0.2));
+
+      const campaigns = getCampaigns();
+      campaigns.push(campaign);
+      saveCampaigns(campaigns);
+
+      const status = document.getElementById('composeStatus');
+      status.className = 'status-msg success';
+      status.innerHTML = `🚀 Campaign "${campaign.name}" sent to ${campaign.sent_count} subscribers!`;
+      status.style.display = 'block';
+      initDashboard();
+    }
+
+    function saveCampaignDraft() {
+      const campaign = buildCampaignObject('draft');
+      const campaigns = getCampaigns();
+      campaigns.push(campaign);
+      saveCampaigns(campaigns);
+
+      const status = document.getElementById('composeStatus');
+      status.className = 'status-msg success';
+      status.innerHTML = '💾 Campaign saved as draft.';
+      status.style.display = 'block';
+    }
+
+    function buildCampaignObject(status) {
+      return {
+        id: Date.now(),
+        name: document.getElementById('campaignName').value || 'Untitled Campaign',
+        subject: document.getElementById('subject').value || '',
+        preview_text: document.getElementById('previewText').value || '',
+        from_name: document.getElementById('fromName').value || 'Your Restaurant',
+        body: document.getElementById('emailBody').value || '',
+        category: document.getElementById('campaignCategory').value,
+        status: status,
+        scheduled_time: document.getElementById('scheduledTime').value || null,
+        sent_count: 0,
+        open_count: 0,
+        click_count: 0,
+        created_at: new Date().toISOString()
+      };
+    }
+
+    function sendCampaignById(id) {
+      const campaigns = getCampaigns();
+      const c = campaigns.find(x => x.id === id);
+      if (c) {
+        c.status = 'sent';
+        c.sent_count = Math.floor(Math.random() * 200) + 50;
+        c.open_count = Math.floor(c.sent_count * (0.2 + Math.random() * 0.3));
+        c.click_count = Math.floor(c.open_count * (0.1 + Math.random() * 0.2));
+        saveCampaigns(campaigns);
+        initDashboard();
+        loadAllCampaigns();
       }
     }
-    
-    document.getElementById('listForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const list = document.getElementById('campaignsList');
-      list.innerHTML = 'Loading...';
-      
-      try {
-        const response = await fetch(`/api/email/campaigns/${document.getElementById('listRestaurantId').value}`);
-        const data = await response.json();
-        
-        if (response.ok) {
-          if (data.campaigns.length === 0) {
-            list.innerHTML = '<p>No campaigns found.</p>';
-          } else {
-            list.innerHTML = data.campaigns.map(campaign => `
-              <div class="campaign-card">
-                <h4>${campaign.name} - ${campaign.status}</h4>
-                <p><strong>Subject:</strong> ${campaign.subject}</p>
-                <p><strong>Sent:</strong> ${campaign.sent_count} | <strong>Opens:</strong> ${campaign.open_count} | <strong>Clicks:</strong> ${campaign.click_count}</p>
-                <p style="color: #666; font-size: 0.9em; margin-top: 10px;">
-                  Created: ${new Date(campaign.created_at).toLocaleString()}
-                  ${campaign.scheduled_time ? ` | Scheduled: ${new Date(campaign.scheduled_time).toLocaleString()}` : ''}
-                </p>
-                ${campaign.status === 'draft' ? `<button class="btn btn-primary" onclick="sendCampaign(${campaign.campaign_id})" style="margin-top: 10px;">Send Now</button>` : ''}
-              </div>
-            `).join('');
-          }
-        } else {
-          throw new Error(data.error);
-        }
-      } catch (error) {
-        list.innerHTML = `<p style="color: #f59e0b;">Error: ${error.message}</p>`;
+
+    // ══════════════════════════════════════════════
+    //  TEMPLATES
+    // ══════════════════════════════════════════════
+    let selectedTemplate = null;
+
+    function selectTemplate(el, id) {
+      document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedTemplate = id;
+      document.getElementById('useTemplateBtn').disabled = false;
+    }
+
+    const TEMPLATE_CONTENT = {
+      new_menu: { subject: '🍽️ Our New Menu Is Here!', body: '<h2>Something Delicious Awaits!</h2>\n<p>We\'ve been working on exciting new dishes and we can\'t wait for you to try them.</p>\n<p>From fresh seasonal ingredients to bold new flavors, there\'s something for everyone.</p>\n<p><strong>Visit us this week for a special 10% off your first order from the new menu!</strong></p>' },
+      promo: { subject: '🎉 Special Offer Inside — Don\'t Miss Out!', body: '<h2>Your Exclusive Deal Is Here!</h2>\n<p>We\'re offering something special just for you. For a limited time only:</p>\n<p><strong>Buy 1, Get 1 FREE on any entrée!</strong></p>\n<p>Valid this week only. Show this email or use code <strong>MAGIC2026</strong> when ordering online.</p>' },
+      newsletter: { subject: '📰 What\'s New at Your Restaurant — Monthly Update', body: '<h2>Monthly Restaurant Update</h2>\n<p>Here\'s what\'s been happening:</p>\n<ul>\n<li>🍽️ New seasonal dishes added</li>\n<li>⭐ We earned a 4.8-star rating on Google!</li>\n<li>🎉 Upcoming live music event this Saturday</li>\n</ul>\n<p>Thank you for being part of our community!</p>' },
+      event: { subject: '🎊 You\'re Invited! Special Event This Weekend', body: '<h2>Join Us for a Special Evening</h2>\n<p>We\'re hosting an exclusive event and you\'re invited!</p>\n<p><strong>Date:</strong> This Saturday, 7:00 PM</p>\n<p><strong>What:</strong> Wine Tasting + Chef\'s Table Experience</p>\n<p>Space is limited — RSVP now!</p>' },
+      loyalty: { subject: '⭐ Your Loyalty Reward Is Waiting!', body: '<h2>Thank You for Being a VIP!</h2>\n<p>You\'ve been a loyal customer and we want to show our appreciation.</p>\n<p><strong>Enjoy a FREE dessert on your next visit!</strong></p>\n<p>Just show this email to your server. Valid for the next 30 days.</p>' },
+      reengagement: { subject: '🔄 We Miss You! Come Back for Something Special', body: '<h2>It\'s Been a While!</h2>\n<p>We\'ve noticed you haven\'t visited recently, and we\'d love to see you again.</p>\n<p>To welcome you back, here\'s <strong>20% off your next order</strong>.</p>\n<p>Use code <strong>WELCOME20</strong> online or show this email in-store.</p>' }
+    };
+
+    function useSelectedTemplate() {
+      if (!selectedTemplate || !TEMPLATE_CONTENT[selectedTemplate]) return;
+      const t = TEMPLATE_CONTENT[selectedTemplate];
+      document.getElementById('subject').value = t.subject;
+      document.getElementById('emailBody').value = t.body;
+      showView('compose');
+      showComposeStep(2);
+    }
+
+    // ══════════════════════════════════════════════
+    //  AI EMAIL WRITER
+    // ══════════════════════════════════════════════
+    function generateAIEmail() { showView('ai-writer'); }
+
+    function generateAIEmailFull() {
+      const purpose = document.getElementById('aiPurpose').value;
+      const tone = document.getElementById('aiTone').value;
+      const details = document.getElementById('aiDetails').value;
+
+      const subjects = {
+        new_dish: ['🍽️ You Won\'t Want to Miss This New Dish!', '🔥 Just Added: A New Flavor Sensation!', '✨ Introducing Our Latest Culinary Masterpiece'],
+        promotion: ['🎉 Limited Time: An Offer You Can\'t Resist!', '💥 This Deal Won\'t Last — Grab It Now!', '🎁 A Special Treat Just for You'],
+        event: ['🎊 You\'re Invited to Something Extraordinary!', '🥂 Save the Date — An Evening to Remember', '🎶 Join Us for a One-of-a-Kind Experience'],
+        seasonal: ['🌸 Seasonal Flavors Have Arrived!', '🍂 Fresh, Seasonal, Incredible — Now Serving', '☀️ Summer Specials You\'ll Love'],
+        thank_you: ['🙏 A Heartfelt Thank You from Our Kitchen', '❤️ You Make Our Restaurant Special', '⭐ Thank You for Being Amazing'],
+        win_back: ['👋 We Miss Your Face!', '🔄 Come Back — We\'ve Got Something New', '😊 It\'s Been Too Long — Let\'s Fix That']
+      };
+
+      const bodies = {
+        new_dish: `We're thrilled to introduce our latest creation${details ? ': ' + details : ''}!\n\nOur chef has been perfecting this dish, and we can't wait for you to taste it. Made with the finest ingredients and crafted with passion.\n\n🍽️ Available starting this week\n📍 Dine-in & delivery available\n\nBe one of the first to try it — you won't be disappointed!`,
+        promotion: `Great news — we have a special offer just for you${details ? '! ' + details : '!'}\n\nThis is our way of saying thank you for being part of our community. But hurry, this deal won't last forever!\n\n⏰ Limited time only\n📱 Order online or visit us in-store\n\nDon't miss out — treat yourself today!`,
+        event: `Something special is happening${details ? ': ' + details : '!'}\n\nWe're hosting an exclusive event and you're on the guest list. Great food, great company, and an unforgettable experience.\n\n📅 Save the date\n🎟️ Limited spots available\n\nRSVP now to secure your place!`,
+        seasonal: `The seasons are changing, and so is our menu${details ? '! ' + details : '!'}\n\nFresh, seasonal ingredients transformed into extraordinary dishes. From farm to table, every bite tells a story.\n\n🌱 Fresh & locally sourced\n📸 Instagram-worthy presentations\n\nCome taste the season!`,
+        thank_you: `We just wanted to take a moment to say thank you${details ? '. ' + details : '.'}\n\nCustomers like you are what make our restaurant special. Your support, your smiles, your kind words — they mean the world to our team.\n\nAs a small token of our appreciation, we'd like to offer you a special treat on your next visit.\n\n❤️ With gratitude from our entire team`,
+        win_back: `It's been a while since we've seen you, and we miss having you around${details ? '! ' + details : '!'}\n\nA lot has changed since your last visit — new dishes, new flavors, new experiences waiting for you.\n\nTo welcome you back, we'd like to offer something special:\n\n🎁 20% off your next order with code WELCOME20\n\nWe'd love to see you again!`
+      };
+
+      const subjectList = subjects[purpose] || subjects.new_dish;
+      const subject = subjectList[Math.floor(Math.random() * subjectList.length)];
+      const body = bodies[purpose] || bodies.new_dish;
+
+      document.getElementById('aiSubjectResult').textContent = subject;
+      document.getElementById('aiBodyResult').textContent = body;
+      document.getElementById('aiWriterResult').style.display = 'block';
+    }
+
+    function useAIEmail() {
+      document.getElementById('subject').value = document.getElementById('aiSubjectResult').textContent;
+      document.getElementById('emailBody').value = document.getElementById('aiBodyResult').textContent;
+      showView('compose');
+      showComposeStep(2);
+    }
+
+    // ══════════════════════════════════════════════
+    //  SUBSCRIBERS
+    // ══════════════════════════════════════════════
+    function loadSubscribers() {
+      const subs = getSubscribers();
+      document.getElementById('subTotal').textContent = subs.length;
+      document.getElementById('subActive').textContent = subs.filter(s => s.status === 'active').length;
+      document.getElementById('subUnsubscribed').textContent = subs.filter(s => s.status === 'unsubscribed').length;
+
+      const tbody = document.getElementById('subscribersBody');
+      if (subs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:#aaa;">
+          <p>No subscribers yet. Add your first subscriber or import a CSV.</p>
+        </td></tr>`;
+        return;
       }
+      tbody.innerHTML = subs.map(s => `<tr>
+        <td style="font-weight:500;">${s.email}</td>
+        <td>${s.name || '—'}</td>
+        <td><span class="status-badge ${s.status === 'active' ? 'sent' : 'failed'}">${s.status}</span></td>
+        <td>${(s.tags || []).map(t => `<span class="tag-chip ${t}">${t}</span>`).join('')}</td>
+        <td style="font-size:0.82em; color:#aaa;">${s.added ? new Date(s.added).toLocaleDateString() : '—'}</td>
+        <td><button class="btn btn-sm btn-danger" onclick="removeSubscriber('${s.email}')">✕</button></td>
+      </tr>`).join('');
+    }
+
+    function addSubscriber() {
+      const email = prompt('Enter email address:');
+      if (!email || !email.includes('@')) return;
+      const name = prompt('Name (optional):') || '';
+      const subs = getSubscribers();
+      if (subs.find(s => s.email === email)) { alert('Already exists.'); return; }
+      subs.push({ email, name, status: 'active', tags: ['new'], added: new Date().toISOString() });
+      saveSubscribers(subs);
+      loadSubscribers();
+    }
+
+    function importSubscribers() {
+      const csv = prompt('Paste emails (comma or newline separated):');
+      if (!csv) return;
+      const emails = csv.split(/[,\n]/).map(e => e.trim()).filter(e => e.includes('@'));
+      const subs = getSubscribers();
+      let added = 0;
+      emails.forEach(email => {
+        if (!subs.find(s => s.email === email)) {
+          subs.push({ email, name: '', status: 'active', tags: ['new'], added: new Date().toISOString() });
+          added++;
+        }
+      });
+      saveSubscribers(subs);
+      loadSubscribers();
+      alert(`Imported ${added} new subscribers.`);
+    }
+
+    function removeSubscriber(email) {
+      const subs = getSubscribers().filter(s => s.email !== email);
+      saveSubscribers(subs);
+      loadSubscribers();
+    }
+
+    // ══════════════════════════════════════════════
+    //  SEGMENTS
+    // ══════════════════════════════════════════════
+    function loadSegments() {
+      const subs = getSubscribers();
+      const segments = [
+        { name: 'All Active', icon: '📧', desc: 'All active subscribers', count: subs.filter(s => s.status === 'active').length, color: '#4caf50' },
+        { name: 'VIP Customers', icon: '⭐', desc: 'Frequent visitors & big spenders', count: subs.filter(s => (s.tags||[]).includes('vip')).length, color: '#ff9800' },
+        { name: 'New Customers', icon: '🆕', desc: 'Subscribed in the last 30 days', count: subs.filter(s => (s.tags||[]).includes('new')).length, color: '#2196f3' },
+        { name: 'Inactive', icon: '😴', desc: 'No opens in 90+ days', count: subs.filter(s => (s.tags||[]).includes('inactive')).length, color: '#9e9e9e' },
+        { name: 'Loyalty Members', icon: '🏆', desc: 'Enrolled in loyalty program', count: 0, color: '#7c4dff' },
+        { name: 'Delivery Customers', icon: '🚗', desc: 'Ordered via delivery platforms', count: 0, color: '#f44336' }
+      ];
+
+      document.getElementById('segmentsList').innerHTML = segments.map(s => `
+        <div style="background:#fff; border-radius:12px; padding:20px; border:1.5px solid #eee; transition:all 0.2s; cursor:pointer;"
+             onmouseover="this.style.borderColor='${s.color}'" onmouseout="this.style.borderColor='#eee'">
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+            <div style="width:40px; height:40px; border-radius:10px; background:${s.color}15; display:flex; align-items:center; justify-content:center; font-size:1.3em;">${s.icon}</div>
+            <div>
+              <div style="font-weight:600; font-size:0.95em;">${s.name}</div>
+              <div style="font-size:0.78em; color:#999;">${s.desc}</div>
+            </div>
+          </div>
+          <div style="font-size:1.8em; font-weight:800; color:#1a1a2e;">${s.count}</div>
+          <div style="font-size:0.78em; color:#aaa;">subscribers</div>
+        </div>
+      `).join('');
+    }
+
+    // ══════════════════════════════════════════════
+    //  AUTOMATIONS
+    // ══════════════════════════════════════════════
+    function loadAutomations() {
+      const automations = [
+        { name: 'Welcome Series', desc: '3-email sequence for new subscribers', status: 'active', icon: '👋', trigger: 'On subscribe' },
+        { name: 'Birthday Offer', desc: 'Auto-send birthday discount', status: 'active', icon: '🎂', trigger: 'Birthday date' },
+        { name: 'Re-engagement', desc: 'Win back after 60 days inactive', status: 'paused', icon: '🔄', trigger: '60 days no opens' },
+        { name: 'Post-Visit Thank You', desc: 'Thank customers after dining', status: 'draft', icon: '🙏', trigger: 'After visit' },
+        { name: 'Review Request', desc: 'Ask for reviews 24h after visit', status: 'draft', icon: '⭐', trigger: '24h after visit' },
+        { name: 'Cart Abandonment', desc: 'Remind about unfinished online orders', status: 'paused', icon: '🛒', trigger: 'Cart abandoned' }
+      ];
+
+      document.getElementById('automationsList').innerHTML = automations.map(a => `
+        <div style="background:#fff; border-radius:12px; padding:20px; border:1.5px solid #eee; display:flex; align-items:center; gap:16px;">
+          <div style="width:48px; height:48px; border-radius:12px; background:#f5f0ff; display:flex; align-items:center; justify-content:center; font-size:1.5em; flex-shrink:0;">${a.icon}</div>
+          <div style="flex:1;">
+            <div style="font-weight:600; font-size:0.95em; margin-bottom:2px;">${a.name}</div>
+            <div style="font-size:0.82em; color:#888;">${a.desc}</div>
+            <div style="font-size:0.75em; color:#bbb; margin-top:4px;">Trigger: ${a.trigger}</div>
+          </div>
+          <span class="status-badge ${a.status === 'active' ? 'sent' : a.status === 'paused' ? 'scheduled' : 'draft'}">${a.status}</span>
+          <button class="btn btn-sm btn-outline">${a.status === 'active' ? 'Pause' : 'Activate'}</button>
+        </div>
+      `).join('');
+    }
+
+    // ══════════════════════════════════════════════
+    //  ANALYTICS
+    // ══════════════════════════════════════════════
+    function loadAnalytics() {
+      const campaigns = getCampaigns();
+      const totalSent = campaigns.reduce((s, c) => s + (c.sent_count || 0), 0);
+      const totalOpens = campaigns.reduce((s, c) => s + (c.open_count || 0), 0);
+      const totalClicks = campaigns.reduce((s, c) => s + (c.click_count || 0), 0);
+
+      document.getElementById('analyticsOpenRate').textContent = totalSent ? ((totalOpens / totalSent) * 100).toFixed(1) + '%' : '0%';
+      document.getElementById('analyticsClickRate').textContent = totalSent ? ((totalClicks / totalSent) * 100).toFixed(1) + '%' : '0%';
+      document.getElementById('analyticsRevenue').textContent = '$' + formatNumber(Math.floor(totalClicks * 8.50));
+    }
+
+    // ══════════════════════════════════════════════
+    //  CHART FILTERS
+    // ══════════════════════════════════════════════
+    document.querySelectorAll('.chart-filter').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.parentElement.querySelectorAll('.chart-filter').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        drawPerformanceChart();
+      });
     });
+
+    // ══════════════════════════════════════════════
+    //  INIT
+    // ══════════════════════════════════════════════
+    initDashboard();
   </script>
+  <script src="/js/signup-gate.js" data-feature="Email Campaign Manager" data-tier="Starter+"></script>
 </body>
 </html>

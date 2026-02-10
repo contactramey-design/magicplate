@@ -34,12 +34,12 @@ const fsPromises = require('fs').promises;
 // path already declared above
 
 // API Configuration - reload env vars to ensure latest values
-// Load .env.local first, then .env (overrides .env.local)
-if (fs.existsSync(envLocalPath)) {
-  require('dotenv').config({ path: envLocalPath });
-}
+// Load .env first, then .env.local overrides .env
 if (fs.existsSync(envPath)) {
-  require('dotenv').config({ path: envPath, override: true });
+  require('dotenv').config({ path: envPath });
+}
+if (fs.existsSync(envLocalPath)) {
+  require('dotenv').config({ path: envLocalPath, override: true });
 }
 
 const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN;
@@ -79,107 +79,107 @@ function styleBlock(style) {
   }
 }
 
-// Import the new prompt system
-const { getAIGatewayPrompt } = require('../lib/photo-enhancement-prompt');
+// Import prompt system
+const { buildRegenPrompt: buildPrompt, baseNegativePrompt: getNegativePrompt, getAIGatewayPrompt } = require('../lib/photo-enhancement-prompt');
 
-function buildRegenPrompt(style, fictionalLevel = 30) {
-  try {
-    // Use the comprehensive ethical food photography prompt
-    const basePrompt = getAIGatewayPrompt(style);
-    
-    // CRITICAL: Analysis instructions - AI must properly identify all elements first
-    const analysisInstructions = `CRITICAL FIRST STEP: Before enhancing, carefully analyze the original reference image. 
-You MUST identify and understand EVERY element in the image:
-- Main food items (burger, chicken, pizza, pasta, etc.)
-- Side dishes (fries, salad, bread, etc.)
-- Drinks and cups (soda, coffee, water, wine glasses, etc.)
-- Plates, bowls, and servingware
-- Utensils (forks, knives, spoons)
-- Garnishes (herbs, microgreens, parsley, etc.)
-- Sauces and condiments
-- All ingredients visible in the dish
-- Arrangement and composition
-- Portion sizes and quantities
+/**
+ * STEP 1: Server-side food identification using Gemini (free) or Replicate (paid).
+ * This is the fallback when the client doesn't send identified_items
+ * (i.e., when /api/identify-food wasn't called first).
+ *
+ * @param {Buffer} imageBuffer - Raw image bytes
+ * @returns {Promise<string>} - Detailed description of identified items, or '' on failure
+ */
+async function analyzeImageContents(imageBuffer) {
+  const geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_KEY;
+  const replicateToken = process.env.REPLICATE_API_TOKEN;
 
-After identifying ALL elements, recreate them ALL in the enhanced version. Do not miss any food items, cups, or elements. If you see a burger and fries, recreate both. If you see a cup, recreate the cup. Enhance everything you identify, but make it perfect.`;
-    
-    // Determine enhancement style based on fictional level (0-100)
-    let enhancementMode = '';
-    let backgroundInstructions = '';
-    let authenticityInstructions = '';
-    let plateInstructions = '';
-    let styleInstructions = '';
-    let elementInstructions = '';
-    
-    if (fictionalLevel <= 30) {
-      // AUTHENTIC: Enhance food only, keep original background
-      enhancementMode = 'AUTHENTIC ENHANCEMENT';
-      backgroundInstructions = 'Keep the original background exactly as shown - only enhance the food quality. Maintain original restaurant setting, table, plates, and environment exactly as they appear. Do not change the background at all.';
-      authenticityInstructions = 'Maintain complete authenticity - only improve food quality, colors, lighting, and textures. Keep everything else exactly as in the original photo. No background changes, no new settings, no fictional elements.';
-      plateInstructions = 'Keep original plates and servingware exactly as shown.';
-      styleInstructions = 'Realistic, natural food photography.';
-      elementInstructions = 'Enhance ALL identified food items, ingredients, cups, plates, and elements exactly as they appear - just make them look better quality. Do not add, remove, or change any elements.';
-    } else if (fictionalLevel <= 70) {
-      // BALANCED: Perfect food with subtle background improvements
-      enhancementMode = 'BALANCED PERFECTION';
-      backgroundInstructions = 'Improve the background subtly - enhance depth of field, soften distractions, clean up the table/surface, but keep the general restaurant setting recognizable. Make subtle improvements without changing the fundamental environment.';
-      authenticityInstructions = 'Perfect the food dramatically while making subtle background improvements. Maintain recognizable restaurant environment but make it cleaner and more professional.';
-      plateInstructions = 'Improve plates and servingware - make them cleaner, more elegant, but keep them recognizable.';
-      styleInstructions = 'Professional food photography with subtle enhancements.';
-      elementInstructions = 'Perfect ALL identified food items, ingredients, cups, plates, and elements - enhance them dramatically but keep them recognizable. Improve quality while maintaining the same elements.';
-    } else {
-      // FICTIONAL/MAGICAL: Complete transformation - like homepage slider
-      enhancementMode = 'MAGICAL TRANSFORMATION';
-      backgroundInstructions = 'COMPLETELY TRANSFORM the background - create a stunning blurred background (bokeh effect) with soft, out-of-focus elements. Professional food photography studio setting with dramatic depth of field. The background should be beautifully blurred, creating perfect separation between the food and background. Soft, creamy bokeh, professional studio lighting. Make it look exactly like the homepage slider - dramatic blurred background that makes the food pop.';
-      authenticityInstructions = 'DRAMATICALLY TRANSFORM the entire scene - create the most perfect, idealized version possible. Replicate the exact enhancement style from the homepage slider: vibrant enhanced colors, dramatic contrast, blurred background, professional lighting. Transform everything while keeping ALL identified food items, ingredients, cups, and elements recognizable but dramatically enhanced. Make it look like a high-end restaurant marketing photo with the same dramatic enhancement style.';
-      plateInstructions = 'Enhance or replace plates and servingware - clean white plates, elegant servingware, or sophisticated modern tableware. White ceramic plates work great for dramatic contrast.';
-      styleInstructions = 'Dramatic, high-contrast food photography exactly like the homepage slider. Vibrant, rich, saturated colors that pop. Enhanced contrast between food and background. Blurred background (bokeh effect) for perfect depth of field. Professional food photography lighting with perfect highlights and shadows. Sharp, crystal-clear food details. Make colors vibrant and rich - enhanced reds, greens, browns that look amazing.';
-      elementInstructions = 'CRITICAL: After analyzing the original image, recreate ALL identified food items, ingredients, cups, drinks, plates, utensils, and elements - but make them perfect and dramatically enhanced. If there is a burger, recreate the burger. If there are fries, recreate the fries. If there is a cup/drink, recreate the cup/drink. Enhance every element you identified in the original image. Do not add new elements that were not in the original, but make all existing elements look perfect and dramatically enhanced.';
-    }
-    
-    const qualityPrompt = `${analysisInstructions}
-
-${enhancementMode}: ${fictionalLevel <= 30 ? 'Enhance this food photo authentically' : fictionalLevel <= 70 ? 'Transform this food photo into a perfectly balanced' : 'DRAMATICALLY TRANSFORM this food photo to replicate the exact enhancement style from the homepage slider'} restaurant marketing photo. 
-
-${elementInstructions}
-
-Create the PERFECT version of this dish - make it look absolutely flawless and magazine-worthy, ${fictionalLevel > 70 ? 'exactly like the dramatic enhancement shown on the homepage slider' : ''}. 
-PERFECT sharpness and clarity - every detail should be razor-sharp and crystal clear. Food should be in perfect focus with incredible detail. 
-${fictionalLevel > 70 ? 'DRAMATICALLY ENHANCE colors - replicate the homepage slider style: vibrant, rich, saturated colors that pop. Enhanced reds for meat, brighter greens for vegetables, richer browns for breads. Make colors look amazing and vibrant - like the dramatic enhancement on the homepage. Rich, saturated, almost unreal colors that create stunning contrast.' : 'PERFECT colors - make them vibrant, rich, and ideal (perfectly cooked meat colors, fresh vibrant vegetables, glossy perfect sauces).'}
-PERFECT lighting - add ideal professional food photography lighting with perfect highlights, perfect shadows, perfect exposure - make it look like it was shot in a professional studio. ${fictionalLevel > 70 ? 'Dramatic lighting that creates perfect contrast and makes the food pop, just like the homepage slider.' : ''}
-PERFECT textures - make food look absolutely perfect (perfectly crispy edges, perfectly juicy meat, perfectly flaky pastry, perfectly glossy glazes). 
-PERFECT plating - idealize the presentation ${fictionalLevel > 70 ? 'dramatically' : 'subtly'} (perfect arrangement, perfect garnish placement, perfect composition). 
-${plateInstructions}
-${backgroundInstructions}
-Upscale to maximum resolution. 
-${authenticityInstructions}
-${styleInstructions}
-Ultra-high resolution, perfect magazine-quality food photography, ${fictionalLevel <= 30 ? 'authentic' : fictionalLevel <= 70 ? 'balanced' : 'magical idealized'} commercial food photo, flawless presentation. 
-${fictionalLevel > 70 ? 'Replicate the exact enhancement style from the homepage slider: vibrant colors, blurred background, dramatic contrast, professional food photography.' : ''}
-${basePrompt}`;
-    
-    // Ensure prompt is not too long (Leonardo has limits around 1000-2000 chars)
-    if (qualityPrompt && qualityPrompt.length > 1500) {
-      console.warn('Prompt is very long, truncating to 1500 chars');
-      return qualityPrompt.substring(0, 1500);
-    }
-    return qualityPrompt;
-  } catch (error) {
-    console.error('Error generating prompt, using fallback:', error);
-    // Fallback to perfection-focused prompt if new system fails
-    const fallbackPrompt = fictionalLevel > 70 
-      ? `MAGICAL TRANSFORMATION. Replicate homepage slider style: dramatically enhance colors (vibrant, rich, saturated), blurred background (bokeh effect), dramatic contrast, professional lighting, sharp details. Make it look exactly like the homepage slider enhancement. ${styleBlock(style)}`
-      : `PERFECT THIS FOOD PHOTO. Create the ideal, perfect version - flawless sharpness, perfect colors, perfect lighting, perfect textures, perfect plating. Magazine-quality, idealized commercial food photography. ${styleBlock(style)}`;
-    return fallbackPrompt;
+  if (!geminiKey && !replicateToken) {
+    console.log('⚠️ No vision API configured — skipping food identification');
+    return '';
   }
+
+  const base64 = imageBuffer.toString('base64');
+  const prompt = 'List every food item, drink, sauce, garnish, and side visible in this photo. Be specific (e.g. "grilled chicken breast" not "chicken"). Comma-separated list.';
+
+  // Try Gemini first (free, fast)
+  if (geminiKey) {
+    try {
+      console.log('🔍 Server-side food ID via Gemini…');
+      const resp = await axios.post(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
+        {
+          contents: [{ parts: [
+            { text: prompt },
+            { inline_data: { mime_type: 'image/jpeg', data: base64 } }
+          ]}],
+          generationConfig: { temperature: 0.2, maxOutputTokens: 300 }
+        },
+        { timeout: 20000 }
+      );
+      const text = resp.data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+      if (text && text.length > 10) {
+        console.log('🔍 Gemini identified:', text.substring(0, 120));
+        return text;
+      }
+    } catch (err) {
+      console.warn('⚠️ Gemini fallback failed:', err.response?.data?.error?.message || err.message);
+    }
+  }
+
+  // Fall back to Replicate
+  if (replicateToken) {
+    try {
+      console.log('🔍 Server-side food ID via Replicate…');
+      const dataUri = `data:image/jpeg;base64,${base64}`;
+      const { data } = await axios.post(
+        'https://api.replicate.com/v1/predictions',
+        {
+          version: '2facb4a474a0462c15041b78b1ad70952ea46b5ec6ad29583c0b29dbd4249591',
+          input: { image: dataUri, prompt, max_tokens: 300, temperature: 0.2 }
+        },
+        { headers: { Authorization: `Token ${replicateToken}`, 'Content-Type': 'application/json' }, timeout: 15000 }
+      );
+      let result = data;
+      const deadline = Date.now() + 45000;
+      while (['starting', 'processing'].includes(result.status) && Date.now() < deadline) {
+        await new Promise(r => setTimeout(r, 1500));
+        const poll = await axios.get(
+          `https://api.replicate.com/v1/predictions/${result.id}`,
+          { headers: { Authorization: `Token ${replicateToken}` }, timeout: 10000 }
+        );
+        result = poll.data;
+      }
+      if (result.status === 'succeeded' && result.output) {
+        const text = (Array.isArray(result.output) ? result.output.join('') : String(result.output)).trim();
+        if (text.length > 10) {
+          console.log('🔍 Replicate identified:', text.substring(0, 120));
+          return text;
+        }
+      }
+    } catch (err) {
+      console.warn('⚠️ Replicate fallback failed:', err.response?.data?.detail || err.message);
+    }
+  }
+
+  return '';
+}
+
+/**
+ * STEP 2: Build the enhancement prompt using the centralized prompt system.
+ * Wraps the imported buildPrompt with logging.
+ */
+function buildRegenPrompt(style, fictionalLevel = 30, identifiedItems = '') {
+  const prompt = buildPrompt(style, fictionalLevel, identifiedItems);
+  if (prompt.length > 1500) {
+    console.warn('Prompt too long, truncating to 1500 chars');
+    return prompt.substring(0, 1500);
+  }
+  return prompt;
 }
 
 function baseNegativePrompt() {
-  return (
-    'text, watermark, logo, menu text, handwriting, extra plates, extra food items, cluttered table, ' +
-    'blurry, low-res, noisy, grainy, oversaturated, underexposed, overexposed, harsh flash, ' +
-    'cartoon, illustration, CGI, plastic-looking, deformed food, duplicate garnish, messy smear'
-  );
+  return getNegativePrompt();
 }
 
 /**
@@ -189,7 +189,7 @@ function baseNegativePrompt() {
  * - fofr/realistic-vision-v5.1
  * - lucataco/flux-pro
  */
-async function enhanceImageWithReplicate(imageBuffer, imageName, style = 'upscale_casual', fictionalLevel = 30) {
+async function enhanceImageWithReplicate(imageBuffer, imageName, style = 'upscale_casual', fictionalLevel = 30, identifiedItems = '') {
   if (!REPLICATE_API_TOKEN) {
     throw new Error('REPLICATE_API_TOKEN not configured');
   }
@@ -219,39 +219,38 @@ async function enhanceImageWithReplicate(imageBuffer, imageName, style = 'upscal
   
   // Step 2: Use Flux model for img2img quality enhancement
   // Use quality-focused prompt (same as Leonardo/Together)
-  const prompt = buildRegenPrompt(style, fictionalLevel);
+  const prompt = buildRegenPrompt(style, fictionalLevel, identifiedItems);
   const negativePrompt = baseNegativePrompt();
   
   // Calculate strength based on fictional level
-  // More aggressive transformation for magical mode
-  let baseStrength = 0.75;
-  let strengthRange = 0.45;
+  // Lower strength = MORE dramatic transformation
+  // Prompt-level food identity rules handle keeping the right food items
+  const calculatedStrength = 0.75 - (fictionalLevel / 100 * 0.50);
+  // Authentic (0%):   0.75 — subtle cleanup, very close to original
+  // Authentic (30%):  0.60 — moderate enhancement
+  // Balanced (50%):   0.50 — noticeable improvement
+  // Balanced (70%):   0.40 — significant transformation
+  // Magical (100%):   0.25 — dramatic overhaul (colors, lighting, background)
+  const calculatedGuidance = 7 + (fictionalLevel / 100 * 2.5);
   
-  if (fictionalLevel > 70) {
-    baseStrength = 0.65;
-    strengthRange = 0.50; // More dramatic for magical
-  }
-  
-  const calculatedStrength = baseStrength - (fictionalLevel / 100 * strengthRange);
-  const calculatedGuidance = 7.5 + (fictionalLevel / 100 * 1.5);
+  console.log(`🎨 Replicate strength: ${calculatedStrength.toFixed(2)}, guidance: ${calculatedGuidance.toFixed(1)} (fictional: ${fictionalLevel}%)`);
   
   let prediction;
   let lastError = null;
   
   // Try Flux-dev first (faster, good quality)
-  // Version hash: 8f7948b0842357f6952009efe899d525887f713204de2a31a9c6ca24623093
   try {
     console.log('🔄 Using Replicate Flux-dev for quality enhancement...');
     prediction = await axios.post(
       `${REPLICATE_API_URL}/predictions`,
       {
-        version: "8f7948b0842357f6952009efe899d525887f713204de2a31a9c6ca24623093", // Flux-dev version
+        version: "8f7948b0842357f6952009efe899d525887f713204de2a31a9c6ca24623093",
         input: {
-          image: uploadedFileUrl, // Reference image for img2img
-          prompt: prompt, // Quality-focused prompt
+          image: uploadedFileUrl,
+          prompt: prompt,
           negative_prompt: negativePrompt,
-          prompt_strength: calculatedStrength, // Scale from 0.75 (authentic) to 0.3 (fictional)
-          num_inference_steps: 40, // Increased for better quality (was 20 in example)
+          prompt_strength: calculatedStrength,
+          num_inference_steps: 40,
           guidance_scale: calculatedGuidance, // Scale from 7.5 to 9.0
           output_format: 'jpg', // Output format
           output_quality: 95, // High quality output
@@ -363,7 +362,7 @@ async function enhanceImageWithReplicate(imageBuffer, imageName, style = 'upscal
  * Enhance image using Leonardo.ai API (Image-to-Image)
  * Uses Leonardo's image-to-image endpoint for food photography enhancement
  */
-async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale_casual', fictionalLevel = 30) {
+async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale_casual', fictionalLevel = 30, identifiedItems = '') {
   if (!LEONARDO_API_KEY) {
     throw new Error('LEONARDO_API_KEY not configured');
   }
@@ -775,28 +774,18 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
 
   // Step 3: Generate enhanced image using image-to-image with PhotoReal for food
   // Focus on QUALITY ENHANCEMENT (sharpness, detail, noise reduction) not style transformation
-  const prompt = buildRegenPrompt(style, fictionalLevel);
+  const prompt = buildRegenPrompt(style, fictionalLevel, identifiedItems);
   const negativePrompt = baseNegativePrompt();
   
   // Calculate strength based on fictional level
-  // Lower intensity = higher strength (stay closer to original)
-  // Higher intensity = lower strength (allow more transformation)
-  // For magical mode (70-100%), use even lower strength for dramatic transformation
-  let baseStrength = 0.75; // Base strength for authentic
-  let strengthRange = 0.45; // Range from 0.3 to 0.75
+  // Lower strength = MORE dramatic transformation
+  // Prompt-level food identity rules handle keeping the right food items
+  const calculatedStrength = 0.75 - (fictionalLevel / 100 * 0.50);
+  // Authentic (0%):  0.75 — subtle, Balanced (50%): 0.50, Magical (100%): 0.25
   
-  // More aggressive transformation for magical mode
-  if (fictionalLevel > 70) {
-    baseStrength = 0.65; // Start lower for magical
-    strengthRange = 0.50; // Range from 0.15 to 0.65 (more dramatic)
-  }
+  const calculatedGuidance = 7 + (fictionalLevel / 100 * 2.5); // 7 to 9.5
   
-  const calculatedStrength = baseStrength - (fictionalLevel / 100 * strengthRange); 
-  // Authentic (0-30%): 0.75 to 0.66
-  // Balanced (30-70%): 0.66 to 0.45
-  // Magical (70-100%): 0.15 to 0.45 (very dramatic transformation)
-  
-  const calculatedGuidance = 7 + (fictionalLevel / 100 * 2); // Scale from 7 to 9
+  console.log(`🎨 Leonardo strength: ${calculatedStrength.toFixed(2)}, guidance: ${calculatedGuidance.toFixed(1)} (fictional: ${fictionalLevel}%)`)
   
   // Calculate aspect ratio from original image to maintain proportions
   // Leonardo.ai maximum resolution: 1536x1536 (not 2048)
@@ -816,10 +805,10 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
     guidance_scale: calculatedGuidance, // 7 (authentic) to 9 (fictional)
     // MORE STEPS = better quality (more processing time but better results)
     num_inference_steps: 40, // Increased from 30 for better quality
-    // Scale init_strength based on fictional level
-    // Lower strength = more transformation (fictional)
-    // Higher strength = less transformation (authentic)
-    init_strength: calculatedStrength, // 0.75 (authentic) to 0.3 (fictional)
+    // init_strength: how much the original image influences the output
+    // Higher = stays closer to original, Lower = more dramatic transformation
+    // Food identity is preserved via explicit prompt rules, not strength alone
+    init_strength: calculatedStrength, // 0.75 (authentic) → 0.25 (Michelin/magical)
     scheduler: 'LEONARDO',
     seed: null,
     // PhotoReal settings for food photography
@@ -920,28 +909,22 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
 /**
  * Enhance image using Together.ai (Flux Pro) - Image-to-Image
  */
-async function enhanceImageWithTogether(imageBuffer, imageName, style = 'upscale_casual', fictionalLevel = 30) {
+async function enhanceImageWithTogether(imageBuffer, imageName, style = 'upscale_casual', fictionalLevel = 30, identifiedItems = '') {
   if (!TOGETHER_API_KEY) {
     throw new Error('TOGETHER_API_KEY not configured');
   }
 
   // Convert image to base64
   const base64Image = imageBuffer.toString('base64');
-  const prompt = buildRegenPrompt(style, fictionalLevel);
+  const prompt = buildRegenPrompt(style, fictionalLevel, identifiedItems);
   const negativePrompt = baseNegativePrompt();
   
   // Calculate strength based on fictional level
-  // More aggressive transformation for magical mode
-  let baseStrength = 0.75;
-  let strengthRange = 0.45;
+  // Lower strength = MORE dramatic transformation
+  const calculatedStrength = 0.75 - (fictionalLevel / 100 * 0.50);
+  const calculatedGuidance = 7 + (fictionalLevel / 100 * 2.5);
   
-  if (fictionalLevel > 70) {
-    baseStrength = 0.65;
-    strengthRange = 0.50; // More dramatic for magical
-  }
-  
-  const calculatedStrength = baseStrength - (fictionalLevel / 100 * strengthRange);
-  const calculatedGuidance = 7.5 + (fictionalLevel / 100 * 1.5);
+  console.log(`🎨 Together strength: ${calculatedStrength.toFixed(2)}, guidance: ${calculatedGuidance.toFixed(1)} (fictional: ${fictionalLevel}%)`);
   
   try {
     const response = await axios.post(
@@ -951,9 +934,9 @@ async function enhanceImageWithTogether(imageBuffer, imageName, style = 'upscale
         prompt: prompt,
         negative_prompt: negativePrompt,
         image: `data:image/jpeg;base64,${base64Image}`,
-        steps: 50,  // Increased for better quality (was 40)
-        guidance_scale: calculatedGuidance,  // Scale from 7.5 to 9.0
-        strength: calculatedStrength  // Scale from 0.75 (authentic) to 0.3 (fictional)
+        steps: 50,
+        guidance_scale: calculatedGuidance,
+        strength: calculatedStrength  // 0.75 (authentic) to 0.45 (magical) — never below 0.45
       },
       {
         headers: {
@@ -994,12 +977,12 @@ module.exports = async (req, res) => {
   }
   
   // Reload environment variables on each request (in case .env was updated)
-  // Load .env.local first, then .env (overrides .env.local)
-  if (fs.existsSync(envLocalPath)) {
-    require('dotenv').config({ path: envLocalPath });
-  }
+  // Load .env first, then .env.local overrides
   if (fs.existsSync(envPath)) {
-    require('dotenv').config({ path: envPath, override: true });
+    require('dotenv').config({ path: envPath });
+  }
+  if (fs.existsSync(envLocalPath)) {
+    require('dotenv').config({ path: envLocalPath, override: true });
   }
   
     // Re-read API keys after reloading env
@@ -1091,34 +1074,49 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'Image too large. Maximum size: 10MB' });
     }
     
-    // Choose enhancement service (priority: Leonardo > Together > Replicate)
-    // Leonardo is prioritized for food photography image-to-image
+    // ── STEP 1: Food item identification ──
+    // If the client already confirmed items (from /api/identify-food), use those.
+    // Otherwise fall back to server-side analysis (or prompt rules only).
+    let identifiedItems = req.body.identified_items || '';
+    if (identifiedItems) {
+      console.log(`🔍 Using client-confirmed food items: "${identifiedItems}"`);
+    } else {
+      try {
+        identifiedItems = await analyzeImageContents(imageBuffer);
+        if (identifiedItems) {
+          console.log(`🔍 Food identification complete: "${identifiedItems}"`);
+        } else {
+          console.log('⚠️ No food identification available — will rely on prompt rules only');
+        }
+      } catch (analysisError) {
+        console.warn('⚠️ Food identification step failed (non-fatal):', analysisError.message);
+      }
+    }
+
+    // ── STEP 2: Enhancement using identified items ──
     let result;
     let serviceUsed = 'none';
     
-    // Check which APIs are configured
     console.log('API Configuration check:');
     console.log('- LEONARDO_API_KEY:', LEONARDO_API_KEY ? 'Set (length: ' + LEONARDO_API_KEY.length + ')' : 'Not set');
     console.log('- TOGETHER_API_KEY:', TOGETHER_API_KEY ? 'Set (length: ' + TOGETHER_API_KEY.length + ')' : 'Not set');
     console.log('- REPLICATE_API_TOKEN:', REPLICATE_API_TOKEN ? 'Set (length: ' + REPLICATE_API_TOKEN.length + ')' : 'Not set');
     
     try {
-      // Use the reloaded keys (currentLeonardoKey, etc.)
       if (currentLeonardoKey) {
         console.log('✅ Using Leonardo.ai for enhancement...');
-        console.log('✅ Using Leonardo.ai for enhancement...');
         console.log(`📊 Fiction Level: ${fictionalLevel}%`);
-        result = await enhanceImageWithLeonardo(imageBuffer, imageName, style, fictionalLevel);
+        result = await enhanceImageWithLeonardo(imageBuffer, imageName, style, fictionalLevel, identifiedItems);
         serviceUsed = 'leonardo';
       } else if (currentTogetherKey) {
         console.log('✅ Using Together.ai for enhancement...');
         console.log(`📊 Fiction Level: ${fictionalLevel}%`);
-        result = await enhanceImageWithTogether(imageBuffer, imageName, style, fictionalLevel);
+        result = await enhanceImageWithTogether(imageBuffer, imageName, style, fictionalLevel, identifiedItems);
         serviceUsed = 'together';
       } else if (currentReplicateToken) {
         console.log('✅ Using Replicate for enhancement...');
         console.log(`📊 Fiction Level: ${fictionalLevel}%`);
-        result = await enhanceImageWithReplicate(imageBuffer, imageName, style, fictionalLevel);
+        result = await enhanceImageWithReplicate(imageBuffer, imageName, style, fictionalLevel, identifiedItems);
         serviceUsed = 'replicate';
       } else {
         // Provide detailed help message
@@ -1354,6 +1352,7 @@ Check: http://localhost:3000/api/check-config
       output: [enhancedImageUrl], // Also include in output array for compatibility
       jobId: result.id || result.generationId || result.jobId,
       service: serviceUsed,
+      identifiedItems: identifiedItems || null, // What the vision AI detected
       message: 'Image enhanced successfully'
     });
     

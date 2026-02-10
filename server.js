@@ -26,15 +26,12 @@ if (fs.existsSync(envLocalPath)) {
   console.log('✅ Loaded .env.local (overrides .env where set)');
 }
 
-// Verify Leonardo key
+// Verify API keys
 const leonardoKey = process.env.LEONARDO_API_KEY;
-if (leonardoKey) {
-  console.log(`✅ LEONARDO_API_KEY: Set (${leonardoKey.length} characters)`);
-  console.log(`   Preview: ${leonardoKey.substring(0, 15)}...`);
-} else {
-  console.log('❌ LEONARDO_API_KEY: NOT SET');
-  console.log('   Make sure it\'s in .env.local and saved (Cmd+S)');
-}
+const replicateToken = process.env.REPLICATE_API_TOKEN;
+console.log(`${leonardoKey ? '✅' : '❌'} LEONARDO_API_KEY: ${leonardoKey ? `Set (${leonardoKey.length} chars)` : 'NOT SET — add to .env.local'}`);
+console.log(`${replicateToken ? '✅' : '❌'} REPLICATE_API_TOKEN: ${replicateToken ? `Set (${replicateToken.length} chars)` : 'NOT SET — food identification disabled'}`);
+
 // fsPromises for async file operations
 const fsPromises = require('fs').promises;
 const express = require('express');
@@ -149,6 +146,44 @@ app.get('/api/check-config', (req, res) => {
 
 // Test enhancement setup
 app.get('/api/test-enhancement', require('./api/test-enhancement'));
+
+// Dish image generation (text-to-image for digital menus)
+app.options('/api/generate-dish-image', (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.status(200).end();
+});
+app.post('/api/generate-dish-image', async (req, res) => {
+  try {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    require('dotenv').config();
+    const handler = require('./api/generate-dish-image');
+    return await handler(req, res);
+  } catch (error) {
+    console.error('Generate dish image error:', error);
+    return res.status(500).json({ error: 'Generation failed', message: error.message });
+  }
+});
+
+// Food identification (vision-only, lightweight)
+app.options('/api/identify-food', (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.status(200).end();
+});
+app.post('/api/identify-food', async (req, res) => {
+  try {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    require('dotenv').config();
+    const handler = require('./api/identify-food');
+    return await handler(req, res);
+  } catch (error) {
+    console.error('Identify food error:', error);
+    return res.status(500).json({ error: 'Identification failed', message: error.message });
+  }
+});
 
 // Image enhancement API endpoint (for local development)
 // Handle OPTIONS for CORS preflight

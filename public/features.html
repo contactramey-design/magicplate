@@ -6,426 +6,865 @@
   <title>Features - MagicPlate.ai</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Inter', sans-serif;
       background: #ffffff;
       color: #1a1a1a;
-      line-height: 1.8;
+      line-height: 1.7;
     }
+
+    /* ── Header ───────────────────────────────────────── */
     .header {
-      background: rgba(255, 255, 255, 0.98);
+      background: rgba(255,255,255,0.98);
+      backdrop-filter: blur(15px);
       padding: 20px 40px;
-      border-bottom: 1px solid rgba(76, 175, 80, 0.2);
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      box-shadow: 0 4px 30px rgba(0,0,0,0.1);
+      border-bottom: 1px solid rgba(76,175,80,0.2);
+      position: sticky; top: 0; z-index: 1000;
+      box-shadow: 0 4px 30px rgba(0,0,0,0.08);
     }
     .header-content {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      max-width: 1200px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
     }
-    .logo {
-      font-size: 24px;
-      font-weight: 700;
-      color: #4caf50;
-      text-decoration: none;
-    }
+    .logo { font-size: 24px; font-weight: 700; color: #4caf50; text-decoration: none; }
+    .header-nav { display: flex; align-items: center; gap: 28px; }
     .nav-link {
-      color: rgba(26, 26, 26, 0.9);
-      text-decoration: none;
-      margin-left: 30px;
-      font-weight: 500;
-      transition: color 0.3s;
+      color: rgba(26,26,26,0.9); text-decoration: none; font-weight: 500;
+      font-size: 15px; transition: color 0.3s; position: relative;
     }
-    .nav-link:hover {
-      color: #4caf50;
+    .nav-link:hover { color: #4caf50; }
+    .nav-link::after {
+      content:''; position: absolute; bottom: -4px; left: 0;
+      width: 0; height: 2px; background: #4caf50; transition: width 0.3s;
     }
+    .nav-link:hover::after { width: 100%; }
+    .nav-button {
+      background: linear-gradient(135deg,#4caf50,#66bb6a);
+      color: white; padding: 10px 24px; border-radius: 30px;
+      text-decoration: none; font-weight: 600; font-size: 14px;
+      box-shadow: 0 4px 15px rgba(76,175,80,0.3); transition: all 0.3s;
+    }
+    .nav-button:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(76,175,80,0.5); }
+
+    /* ── Hero ──────────────────────────────────────────── */
     .hero {
-      background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(255, 255, 255, 0.98) 100%);
-      padding: 100px 20px 60px;
-      text-align: center;
+      background: linear-gradient(135deg, rgba(76,175,80,0.06) 0%, #fff 100%);
+      padding: 100px 20px 60px; text-align: center;
     }
-    h1 {
-      font-size: 3.5em;
-      color: #1a1a1a;
-      margin-bottom: 20px;
-      font-weight: 700;
+    .hero h1 {
+      font-size: 3.2em; font-weight: 800; margin-bottom: 16px;
+      background: linear-gradient(135deg, #1a1a1a 40%, #4caf50);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
-    .hero-subtitle {
-      font-size: 1.3em;
-      color: rgba(26, 26, 26, 0.7);
-      max-width: 700px;
-      margin: 0 auto;
+    .hero-sub { font-size: 1.25em; color: rgba(26,26,26,0.65); max-width: 680px; margin: 0 auto 30px; }
+    .hero-badges { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(76,175,80,0.08); border: 1px solid rgba(76,175,80,0.2);
+      padding: 8px 18px; border-radius: 30px; font-size: 13px; font-weight: 600; color: #4caf50;
     }
-    .content {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 80px 20px;
+
+    /* ── Feature Sections ─────────────────────────────── */
+    .content { max-width: 1200px; margin: 0 auto; padding: 60px 20px; }
+
+    .feature-section { margin-bottom: 80px; }
+    .section-label {
+      display: inline-block; background: rgba(76,175,80,0.1);
+      color: #4caf50; padding: 6px 16px; border-radius: 20px;
+      font-size: 12px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1px; margin-bottom: 12px;
     }
-    .feature-section {
-      margin-bottom: 80px;
+    .section-title {
+      font-size: 2.2em; font-weight: 800; color: #1a1a1a; margin-bottom: 8px;
     }
-    .feature-section h2 {
-      font-size: 2.5em;
-      color: #4caf50;
-      margin-bottom: 40px;
-      font-weight: 700;
-      text-align: center;
+    .section-desc {
+      color: rgba(26,26,26,0.6); font-size: 1.1em; margin-bottom: 40px; max-width: 700px;
     }
+
     .feature-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-      gap: 30px;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 24px;
     }
     .feature-card {
-      background: rgba(255, 255, 255, 0.9);
-      border: 2px solid rgba(76, 175, 80, 0.15);
-      border-radius: 20px;
-      padding: 40px;
-      transition: all 0.3s;
+      background: #fff; border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 16px; padding: 32px; transition: all 0.3s;
+      position: relative; overflow: hidden;
     }
     .feature-card:hover {
-      border-color: #4caf50;
-      box-shadow: 0 10px 40px rgba(76, 175, 80, 0.2);
-      transform: translateY(-5px);
+      border-color: rgba(76,175,80,0.3); box-shadow: 0 12px 40px rgba(76,175,80,0.12);
+      transform: translateY(-4px);
     }
-    .feature-icon {
-      font-size: 3em;
-      margin-bottom: 20px;
-    }
-    .feature-card h3 {
-      color: #4caf50;
-      font-size: 1.8em;
-      margin-bottom: 15px;
-      font-weight: 600;
-    }
-    .feature-card p {
-      color: rgba(26, 26, 26, 0.8);
-      line-height: 1.8;
-      margin-bottom: 20px;
-    }
-    .feature-card ul {
-      list-style: none;
-      padding: 0;
-    }
+    .card-icon { font-size: 2.4em; margin-bottom: 16px; }
+    .feature-card h3 { font-size: 1.3em; font-weight: 700; margin-bottom: 10px; color: #1a1a1a; }
+    .feature-card p { color: rgba(26,26,26,0.7); margin-bottom: 16px; font-size: 0.95em; }
+    .feature-card ul { list-style: none; padding: 0; margin-bottom: 20px; }
     .feature-card li {
-      padding: 8px 0;
-      color: rgba(26, 26, 26, 0.8);
-      border-bottom: 1px solid rgba(76, 175, 80, 0.1);
+      padding: 5px 0; color: rgba(26,26,26,0.7); font-size: 0.9em;
+      display: flex; align-items: center; gap: 8px;
     }
-    .feature-card li:last-child {
-      border-bottom: none;
+    .feature-card li::before { content: "✓"; color: #4caf50; font-weight: 700; font-size: 14px; }
+
+    /* Badges */
+    .badge-live {
+      display: inline-block; background: #4caf50; color: white;
+      padding: 3px 10px; border-radius: 12px; font-size: 10px;
+      font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
     }
-    .feature-card li:before {
-      content: "✅ ";
-      color: #4caf50;
-      font-weight: bold;
+    .badge-free {
+      display: inline-block; background: #ff9800; color: white;
+      padding: 3px 10px; border-radius: 12px; font-size: 10px;
+      font-weight: 700; text-transform: uppercase;
     }
-    .cta-section {
-      background: linear-gradient(135deg, #4caf50, #66bb6a);
-      color: white;
-      padding: 80px 20px;
-      text-align: center;
-      border-radius: 20px;
-      margin-top: 60px;
+    .badge-pro {
+      display: inline-block; background: rgba(76,175,80,0.1); color: #4caf50;
+      padding: 3px 10px; border-radius: 12px; font-size: 10px;
+      font-weight: 700; text-transform: uppercase; border: 1px solid rgba(76,175,80,0.3);
     }
-    .cta-button {
-      display: inline-block;
-      background: white;
-      color: #4caf50;
-      padding: 18px 45px;
-      border-radius: 35px;
-      text-decoration: none;
-      font-weight: 700;
-      font-size: 18px;
-      margin-top: 30px;
-      transition: all 0.3s;
-      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
+    .badge-enterprise {
+      display: inline-block; background: #1a1a1a; color: #4caf50;
+      padding: 3px 10px; border-radius: 12px; font-size: 10px;
+      font-weight: 700; text-transform: uppercase;
     }
-    .cta-button:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+
+    /* Buttons */
+    .btn-try {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: linear-gradient(135deg,#4caf50,#66bb6a);
+      color: white; padding: 10px 22px; border-radius: 10px;
+      text-decoration: none; font-weight: 600; font-size: 14px;
+      transition: all 0.3s; border: none; cursor: pointer;
+    }
+    .btn-try:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(76,175,80,0.3); }
+    .btn-view {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: transparent; color: #4caf50; padding: 10px 22px;
+      border-radius: 10px; text-decoration: none; font-weight: 600;
+      font-size: 14px; border: 2px solid rgba(76,175,80,0.3);
+      transition: all 0.3s; cursor: pointer;
+    }
+    .btn-view:hover { background: rgba(76,175,80,0.08); border-color: #4caf50; }
+    .card-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+    /* ── Pricing Summary ──────────────────────────────── */
+    .pricing-section {
+      background: linear-gradient(135deg, #f8fdf8 0%, #fff 100%);
+      border-radius: 20px; padding: 60px 40px; margin: 60px 0;
+      border: 1px solid rgba(76,175,80,0.1);
+    }
+    .pricing-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px; margin-top: 40px;
+    }
+    .pricing-card {
+      background: white; border: 2px solid rgba(0,0,0,0.06);
+      border-radius: 16px; padding: 36px; text-align: center;
+      transition: all 0.3s; position: relative;
+    }
+    .pricing-card:hover { border-color: rgba(76,175,80,0.3); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.08); }
+    .pricing-card.featured { border-color: #4caf50; box-shadow: 0 8px 30px rgba(76,175,80,0.15); }
+    .pricing-card.featured::before {
+      content: 'MOST POPULAR'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+      background: #4caf50; color: white; padding: 4px 16px; border-radius: 12px;
+      font-size: 11px; font-weight: 700;
+    }
+    .pricing-tier { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #4caf50; margin-bottom: 8px; }
+    .pricing-price { font-size: 2.8em; font-weight: 800; color: #1a1a1a; }
+    .pricing-price span { font-size: 0.35em; color: #999; font-weight: 500; }
+    .pricing-list { list-style: none; padding: 0; margin: 24px 0; text-align: left; }
+    .pricing-list li {
+      padding: 8px 0; color: rgba(26,26,26,0.75); font-size: 0.92em;
+      display: flex; align-items: flex-start; gap: 8px;
+      border-bottom: 1px solid rgba(0,0,0,0.04);
+    }
+    .pricing-list li:last-child { border-bottom: none; }
+    .pricing-list li::before { content: "✅"; flex-shrink: 0; }
+    .pricing-list li.disabled { color: rgba(26,26,26,0.3); }
+    .pricing-list li.disabled::before { content: "—"; color: rgba(26,26,26,0.2); }
+    .btn-contact {
+      display: block; width: 100%;
+      background: linear-gradient(135deg,#4caf50,#66bb6a);
+      color: white; padding: 14px; border-radius: 12px;
+      text-decoration: none; font-weight: 700; font-size: 15px;
+      text-align: center; transition: all 0.3s; border: none; cursor: pointer;
+    }
+    .btn-contact:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(76,175,80,0.35); }
+
+    /* ── Signup Gate Modal ─────────────────────────────── */
+    .gate-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(6px);
+      z-index: 9999; align-items: center; justify-content: center;
+    }
+    .gate-overlay.active { display: flex; }
+    .gate-card {
+      background: white; border-radius: 20px; padding: 48px; max-width: 480px; width: 90%;
+      text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.2); position: relative;
+    }
+    .gate-card h2 { font-size: 1.8em; font-weight: 800; margin-bottom: 12px; }
+    .gate-card p { color: #666; margin-bottom: 24px; font-size: 1.05em; }
+    .gate-close {
+      position: absolute; top: 16px; right: 20px;
+      background: none; border: none; font-size: 24px; cursor: pointer; color: #999;
+    }
+    .gate-form { text-align: left; }
+    .gate-form label { display: block; font-weight: 600; margin-bottom: 4px; font-size: 14px; }
+    .gate-form input, .gate-form select {
+      width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 10px;
+      font-size: 15px; margin-bottom: 14px; transition: border-color 0.3s;
+    }
+    .gate-form input:focus, .gate-form select:focus { border-color: #4caf50; outline: none; }
+    .gate-submit {
+      width: 100%; padding: 14px; background: linear-gradient(135deg,#4caf50,#66bb6a);
+      color: white; border: none; border-radius: 12px; font-size: 16px;
+      font-weight: 700; cursor: pointer; transition: all 0.3s; margin-top: 6px;
+    }
+    .gate-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(76,175,80,0.35); }
+    .gate-success {
+      display: none; text-align: center; padding: 20px;
+    }
+    .gate-success h3 { color: #4caf50; font-size: 1.4em; margin-bottom: 8px; }
+
+    /* ── CTA Banner ───────────────────────────────────── */
+    .cta-banner {
+      background: linear-gradient(135deg, #4caf50, #2e7d32);
+      color: white; padding: 60px 40px; border-radius: 20px;
+      text-align: center; margin: 40px 0;
+    }
+    .cta-banner h2 { font-size: 2.2em; font-weight: 800; margin-bottom: 12px; }
+    .cta-banner p { font-size: 1.15em; opacity: 0.9; margin-bottom: 24px; }
+    .btn-cta {
+      display: inline-block; background: white; color: #4caf50;
+      padding: 16px 40px; border-radius: 30px; font-weight: 700;
+      font-size: 16px; text-decoration: none; transition: all 0.3s;
+      box-shadow: 0 6px 25px rgba(0,0,0,0.15);
+    }
+    .btn-cta:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(0,0,0,0.25); }
+
+    /* ── Footer ───────────────────────────────────────── */
+    .footer {
+      background: linear-gradient(180deg,#1a1a1a,#2a2a2a);
+      color: white; padding: 60px 20px 30px; margin-top: 0;
+    }
+    .footer-grid {
+      max-width: 1200px; margin: 0 auto;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 40px; margin-bottom: 40px;
+    }
+    .footer h4 { color: #4caf50; margin-bottom: 16px; font-weight: 600; }
+    .footer a { color: rgba(255,255,255,0.65); text-decoration: none; transition: color 0.3s; }
+    .footer a:hover { color: #4caf50; }
+    .footer ul { list-style: none; padding: 0; }
+    .footer li { margin-bottom: 10px; }
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 24px; text-align: center; color: rgba(255,255,255,0.4); font-size: 14px;
+    }
+
+    /* ── Responsive ───────────────────────────────────── */
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 2em; }
+      .header-nav { gap: 16px; }
+      .nav-link { font-size: 13px; }
+      .feature-grid { grid-template-columns: 1fr; }
+      .pricing-grid { grid-template-columns: 1fr; }
+      .pricing-section { padding: 40px 20px; }
+      .header { padding: 16px 20px; }
     }
   </style>
 </head>
 <body>
+
+  <!-- Header -->
   <div class="header">
     <div class="header-content">
       <a href="/" class="logo">MagicPlate.ai</a>
-      <nav>
+      <nav class="header-nav">
         <a href="/" class="nav-link">Home</a>
-        <a href="/features.html" class="nav-link">Features</a>
-        <a href="/#pricing" class="nav-link">Pricing</a>
+        <a href="/features.html" class="nav-link" style="color:#4caf50;">Features</a>
+        <a href="#pricing" class="nav-link">Pricing</a>
         <a href="/faq.html" class="nav-link">FAQ</a>
         <a href="/#contact" class="nav-link">Contact</a>
+        <a href="#pricing" class="nav-button">Get Started</a>
       </nav>
     </div>
   </div>
 
+  <!-- Hero -->
   <div class="hero">
-    <h1>Powerful Features for Your Restaurant</h1>
-    <p class="hero-subtitle">Everything you need to transform your menu presentation, boost your online presence, and grow your business.</p>
+    <h1>Everything Your Restaurant Needs</h1>
+    <p class="hero-sub">Explore every feature, try our tools for free, and see how MagicPlate transforms your restaurant's digital presence.</p>
+    <div class="hero-badges">
+      <span class="hero-badge">✨ AI Photo Enhancement</span>
+      <span class="hero-badge">📱 Digital Menus</span>
+      <span class="hero-badge">📊 SEO & Marketing</span>
+      <span class="hero-badge">🎬 Video Avatars</span>
+    </div>
   </div>
 
   <div class="content">
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- SECTION 1: FREE TRIAL TOOLS                    -->
+    <!-- ═══════════════════════════════════════════════ -->
     <div class="feature-section">
-      <h2>AI Photo Enhancement</h2>
+      <span class="section-label">Try Free — No Sign-Up Required</span>
+      <h2 class="section-title">Try Our Core Tools</h2>
+      <p class="section-desc">Test-drive our most popular features with no account needed. One free photo enhancement and a practice menu builder — see the quality for yourself.</p>
+
       <div class="feature-grid">
+        <!-- Photo Enhancement -->
         <div class="feature-card">
-          <div class="feature-icon">✨</div>
-          <h3>Ethical AI Enhancement</h3>
-          <p>Transform your existing food photos with AI-powered enhancement. We improve lighting, colors, and composition while maintaining authenticity.</p>
+          <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <span class="badge-live">Live</span>
+            <span class="badge-free">1 Free Try</span>
+          </div>
+          <div class="card-icon">📸</div>
+          <h3>AI Photo Enhancement</h3>
+          <p>Upload any food photo and watch our AI transform it into Michelin-star quality. Professional lighting, color correction, and detail enhancement — instantly.</p>
           <ul>
-            <li>Enhance lighting and shadows</li>
-            <li>Improve color saturation</li>
-            <li>Remove unwanted reflections</li>
-            <li>Maintain food authenticity</li>
-            <li>Professional quality results</li>
+            <li>Drag & drop upload — JPG/PNG, up to 10 MB</li>
+            <li>Automatic food item identification</li>
+            <li>Michelin-star quality enhancement</li>
+            <li>Before/after comparison slider</li>
+            <li>Download enhanced image instantly</li>
           </ul>
+          <div class="card-actions">
+            <a href="/photo-enhancer.html" class="btn-try">Try Free Enhancement →</a>
+          </div>
         </div>
+
+        <!-- Digital Menu Creator -->
         <div class="feature-card">
-          <div class="feature-icon">🎨</div>
-          <h3>Style-Specific Enhancement</h3>
-          <p>Choose from restaurant-specific styles: Fine Dining, Casual, Fast Casual, Sushi, BBQ, and more. Each style is optimized for that cuisine type.</p>
+          <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <span class="badge-live">Live</span>
+            <span class="badge-free">Practice Menu</span>
+          </div>
+          <div class="card-icon">📱</div>
+          <h3>Digital Menu Creator</h3>
+          <p>Upload any file — CSV, Excel, plain text, or just paste your menu — and we'll generate a beautiful, shareable digital menu with QR code.</p>
           <ul>
-            <li>10+ restaurant style presets</li>
-            <li>Custom style options</li>
-            <li>Before/after comparison</li>
-            <li>Batch processing available</li>
-            <li>High-resolution output</li>
+            <li>Accepts CSV, Excel, TSV, JSON, or pasted text</li>
+            <li>Auto-detects items, prices & ingredients</li>
+            <li>AI-generated food images per dish</li>
+            <li>QR code for sharing</li>
+            <li>Inline editing before publish</li>
           </ul>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">📸</div>
-          <h3>Easy Upload & Download</h3>
-          <p>Simple drag-and-drop interface. Upload photos, enhance them instantly, and download professional-quality results.</p>
-          <ul>
-            <li>Drag & drop upload</li>
-            <li>Multiple format support</li>
-            <li>Instant processing</li>
-            <li>Download enhanced images</li>
-            <li>Cloud storage included</li>
-          </ul>
+          <div class="card-actions">
+            <a href="/create-digital-menu.html" class="btn-try">Try Practice Menu →</a>
+          </div>
         </div>
       </div>
     </div>
 
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- SECTION 2: MARKETING & SOCIAL                  -->
+    <!-- ═══════════════════════════════════════════════ -->
     <div class="feature-section">
-      <h2>Digital Menu Creation</h2>
-      <div class="feature-grid">
-        <div class="feature-card">
-          <div class="feature-icon">📱</div>
-          <h3>Interactive Digital Menus</h3>
-          <p>Create beautiful, shareable digital menus with QR codes. Perfect for tables, social media, and online sharing.</p>
-          <ul>
-            <li>Easy menu builder</li>
-            <li>QR code generation</li>
-            <li>Mobile-responsive design</li>
-            <li>Item previews with photos</li>
-            <li>Shareable links</li>
-          </ul>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🎬</div>
-          <h3>Video Previews</h3>
-          <p>Add video previews to menu items. Show your food in action with short clips that make customers hungry.</p>
-          <ul>
-            <li>Video upload support</li>
-            <li>Automatic optimization</li>
-            <li>Mobile-friendly playback</li>
-            <li>Custom video thumbnails</li>
-            <li>Embedded player</li>
-          </ul>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🔄</div>
-          <h3>Easy Updates</h3>
-          <p>Update your menu anytime, anywhere. Changes sync instantly across all platforms and QR codes.</p>
-          <ul>
-            <li>Real-time updates</li>
-            <li>Version history</li>
-            <li>Bulk item management</li>
-            <li>Price updates</li>
-            <li>Seasonal menu support</li>
-          </ul>
-        </div>
-      </div>
-    </div>
+      <span class="section-label">Marketing & Engagement</span>
+      <h2 class="section-title">Social Media & Email Marketing</h2>
+      <p class="section-desc">AI-powered content creation and campaign management to keep your audience engaged and drive repeat business.</p>
 
-    <div class="feature-section">
-      <h2>Marketing & Social Media</h2>
       <div class="feature-grid">
+        <!-- Social Media Manager -->
         <div class="feature-card">
-          <div class="feature-icon">📱</div>
-          <h3>AI Social Media Posts</h3>
-          <p>Generate engaging social media content automatically. Keep your Instagram, Facebook, and TikTok feeds active.</p>
+          <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <span class="badge-live">Live</span>
+            <span class="badge-pro">Starter+</span>
+          </div>
+          <div class="card-icon">📱</div>
+          <h3>Social Media Manager</h3>
+          <p>Full dashboard with AI-generated posts, scheduling, content calendar, analytics, and multi-platform support.</p>
           <ul>
-            <li>AI-generated captions</li>
-            <li>Hashtag suggestions</li>
-            <li>Post scheduling</li>
-            <li>Multi-platform support</li>
-            <li>Content calendar</li>
+            <li>AI post generation by platform & tone</li>
+            <li>Schedule & publish across platforms</li>
+            <li>Content calendar & post management</li>
+            <li>Follower growth & engagement analytics</li>
+            <li>Connected accounts management</li>
           </ul>
+          <div class="card-actions">
+            <a href="/social-manager.html" class="btn-view" onclick="return gateCheck(event)">Preview Dashboard →</a>
+          </div>
         </div>
+
+        <!-- Email Campaign Manager -->
         <div class="feature-card">
-          <div class="feature-icon">✉️</div>
-          <h3>Email Marketing</h3>
-          <p>Create and send personalized email campaigns to engage customers and drive repeat business.</p>
+          <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <span class="badge-live">Live</span>
+            <span class="badge-pro">Starter+</span>
+          </div>
+          <div class="card-icon">✉️</div>
+          <h3>Email Campaign Manager</h3>
+          <p>Professional email campaigns with pre-built templates, AI writer, subscriber management, A/B testing, and automation flows.</p>
           <ul>
-            <li>Email template library</li>
-            <li>Customer segmentation</li>
-            <li>Automated campaigns</li>
-            <li>Open/click tracking</li>
-            <li>A/B testing</li>
+            <li>4-step compose wizard</li>
+            <li>6 pre-built restaurant templates</li>
+            <li>AI email writer & subject lines</li>
+            <li>Subscriber segmentation</li>
+            <li>Open/click analytics & A/B testing</li>
           </ul>
+          <div class="card-actions">
+            <a href="/email-campaigns.html" class="btn-view" onclick="return gateCheck(event)">Preview Dashboard →</a>
+          </div>
         </div>
+
+        <!-- Menu Notifications -->
         <div class="feature-card">
-          <div class="feature-icon">🔔</div>
+          <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <span class="badge-live">Live</span>
+            <span class="badge-pro">Professional+</span>
+          </div>
+          <div class="card-icon">🔔</div>
           <h3>Menu Update Notifications</h3>
-          <p>Automatically notify customers when you add new items or update your menu. Keep your audience engaged.</p>
+          <p>Automatically notify your customers via email or SMS when you add new dishes, update prices, or launch seasonal specials.</p>
           <ul>
-            <li>Automatic notifications</li>
-            <li>Email & SMS options</li>
-            <li>Customizable messages</li>
-            <li>Customer preferences</li>
-            <li>Engagement tracking</li>
+            <li>Automatic change detection</li>
+            <li>Email & SMS delivery</li>
+            <li>Custom notification templates</li>
+            <li>Customer preference management</li>
+            <li>Engagement tracking & analytics</li>
           </ul>
+          <div class="card-actions">
+            <a href="/menu-notifications.html" class="btn-view" onclick="return gateCheck(event)">Preview →</a>
+          </div>
         </div>
       </div>
     </div>
 
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- SECTION 3: SEO & ANALYTICS                     -->
+    <!-- ═══════════════════════════════════════════════ -->
     <div class="feature-section">
-      <h2>SEO & Online Presence</h2>
+      <span class="section-label">SEO & Online Presence</span>
+      <h2 class="section-title">SEO Optimization & Analytics</h2>
+      <p class="section-desc">Boost your restaurant's search visibility with AI-powered SEO tools, Google Business integration, citation building, and performance analytics.</p>
+
       <div class="feature-grid">
+        <!-- SEO Optimizer -->
         <div class="feature-card">
-          <div class="feature-icon">🔍</div>
-          <h3>SEO Optimization</h3>
-          <p>Optimize your menu descriptions and content for search engines. Improve your Google Business Profile and local SEO.</p>
+          <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <span class="badge-live">Live</span>
+            <span class="badge-pro">Professional+</span>
+          </div>
+          <div class="card-icon">🔍</div>
+          <h3>SEO Optimization Dashboard</h3>
+          <p>Complete SEO toolkit — menu description optimizer, keyword tracker, citation builder, review responder, site audit, and best practices checklist.</p>
           <ul>
-            <li>Keyword optimization</li>
-            <li>Meta descriptions</li>
-            <li>Schema markup</li>
-            <li>Local SEO tools</li>
-            <li>Performance analytics</li>
+            <li>SEO score dashboard with health gauge</li>
+            <li>Menu description AI optimizer</li>
+            <li>Keyword tracking & difficulty analysis</li>
+            <li>Google Business Profile integration</li>
+            <li>10-directory citation builder</li>
+            <li>AI review response generator</li>
           </ul>
+          <div class="card-actions">
+            <a href="/seo-optimizer.html" class="btn-view" onclick="return gateCheck(event)">Preview Dashboard →</a>
+          </div>
         </div>
+
+        <!-- Analytics -->
         <div class="feature-card">
-          <div class="feature-icon">📍</div>
-          <h3>Google Business Profile</h3>
-          <p>Integrate with Google Business Profile to improve your local search visibility and customer engagement.</p>
+          <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <span class="badge-live">Live</span>
+            <span class="badge-enterprise">Enterprise</span>
+          </div>
+          <div class="card-icon">📊</div>
+          <h3>Advanced Analytics & Reporting</h3>
+          <p>Comprehensive analytics with multi-location comparison, ROI reporting, menu performance, and customer engagement metrics.</p>
           <ul>
-            <li>Profile optimization</li>
-            <li>Review response generation</li>
-            <li>Post scheduling</li>
-            <li>Photo uploads</li>
-            <li>Analytics integration</li>
+            <li>Menu view & engagement analytics</li>
+            <li>Social media performance metrics</li>
+            <li>Email campaign statistics</li>
+            <li>Multi-location comparison</li>
+            <li>ROI reporting & recommendations</li>
           </ul>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">📊</div>
-          <h3>Analytics & Reporting</h3>
-          <p>Track your performance with comprehensive analytics. See what's working and optimize your strategy.</p>
-          <ul>
-            <li>Menu view analytics</li>
-            <li>Social media metrics</li>
-            <li>Email campaign stats</li>
-            <li>Customer engagement</li>
-            <li>ROI reporting</li>
-          </ul>
+          <div class="card-actions">
+            <a href="/analytics-dashboard.html" class="btn-view" onclick="return gateCheck(event)">Preview →</a>
+          </div>
         </div>
       </div>
     </div>
 
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- SECTION 4: ENTERPRISE & FRANCHISE              -->
+    <!-- ═══════════════════════════════════════════════ -->
     <div class="feature-section">
-      <h2>Enterprise Features</h2>
+      <span class="section-label">Enterprise & Franchise Tools</span>
+      <h2 class="section-title">Multi-Location & Branding</h2>
+      <p class="section-desc">Manage multiple locations, maintain brand consistency, train staff with AI video modules, and scale your operations.</p>
+
       <div class="feature-grid">
+        <!-- HeyGen -->
         <div class="feature-card">
-          <div class="feature-icon">🌐</div>
-          <h3>Multi-Location Management</h3>
-          <p>Manage unlimited restaurant locations from one central dashboard. Perfect for franchises and chains.</p>
-          <ul>
-            <li>Unlimited locations</li>
-            <li>Centralized control</li>
-            <li>Location-specific customization</li>
-            <li>Bulk operations</li>
-            <li>Location analytics</li>
-          </ul>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🎨</div>
-          <h3>Brand Consistency</h3>
-          <p>Ensure all locations maintain consistent branding, colors, fonts, and messaging across your franchise.</p>
-          <ul>
-            <li>Brand guidelines dashboard</li>
-            <li>Content validation</li>
-            <li>Template enforcement</li>
-            <li>Approval workflows</li>
-            <li>Brand compliance reports</li>
-          </ul>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🎓</div>
-          <h3>Franchise Training</h3>
-          <p>Complete training system with HeyGen video modules for staff onboarding and brand standards.</p>
-          <ul>
-            <li>Video training modules</li>
-            <li>Completion tracking</li>
-            <li>Certification system</li>
-            <li>Multi-language support</li>
-            <li>Progress analytics</li>
-          </ul>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🎬</div>
+          <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <span class="badge-live">Live</span>
+            <span class="badge-pro">Professional+</span>
+          </div>
+          <div class="card-icon">🎬</div>
           <h3>HeyGen Avatar Videos</h3>
-          <p>Create personalized virtual host videos for your restaurant. Welcome customers with custom avatars.</p>
+          <p>Create personalized virtual host welcome videos for your restaurant. Custom AI avatars that represent your brand.</p>
           <ul>
             <li>Custom avatar creation</li>
-            <li>Welcome video generation</li>
+            <li>Welcome & menu video generation</li>
             <li>Multi-language support</li>
             <li>Location-specific avatars</li>
-            <li>Video customization</li>
           </ul>
+          <div class="card-actions">
+            <a href="/heygen-manager.html" class="btn-view" onclick="return gateCheck(event)">Preview →</a>
+          </div>
         </div>
+
+        <!-- Multi-Location -->
         <div class="feature-card">
-          <div class="feature-icon">🔌</div>
-          <h3>API Access</h3>
-          <p>Full API access to integrate MagicPlate with your existing systems, POS, and custom applications.</p>
+          <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <span class="badge-live">Live</span>
+            <span class="badge-pro">Professional+</span>
+          </div>
+          <div class="card-icon">📍</div>
+          <h3>Multi-Location Management</h3>
+          <p>Manage multiple restaurant locations from one centralized dashboard. Sync content and customize per location.</p>
           <ul>
-            <li>RESTful API</li>
-            <li>Comprehensive documentation</li>
+            <li>Centralized dashboard control</li>
+            <li>Location-specific customization</li>
+            <li>Bulk operations & syncing</li>
+            <li>Per-location analytics</li>
+          </ul>
+          <div class="card-actions">
+            <a href="/locations-manager.html" class="btn-view" onclick="return gateCheck(event)">Preview →</a>
+          </div>
+        </div>
+
+        <!-- Brand Consistency -->
+        <div class="feature-card">
+          <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <span class="badge-live">Live</span>
+            <span class="badge-enterprise">Enterprise</span>
+          </div>
+          <div class="card-icon">🎨</div>
+          <h3>Brand Consistency Dashboard</h3>
+          <p>Centralized brand guidelines management. Ensure all locations maintain consistent branding, colors, fonts, and messaging.</p>
+          <ul>
+            <li>Brand guidelines repository</li>
+            <li>Content validation rules</li>
+            <li>Template enforcement</li>
+            <li>Brand compliance reports</li>
+          </ul>
+          <div class="card-actions">
+            <a href="/branding-manager.html" class="btn-view" onclick="return gateCheck(event)">Preview →</a>
+          </div>
+        </div>
+
+        <!-- Training -->
+        <div class="feature-card">
+          <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <span class="badge-live">Live</span>
+            <span class="badge-enterprise">Enterprise</span>
+          </div>
+          <div class="card-icon">🎓</div>
+          <h3>Franchise Training System</h3>
+          <p>Complete training system with HeyGen video modules for staff onboarding, certification tracking, and multi-language support.</p>
+          <ul>
+            <li>Video training modules</li>
+            <li>Completion & certification tracking</li>
+            <li>Multi-language support</li>
+            <li>Progress analytics per location</li>
+          </ul>
+          <div class="card-actions">
+            <a href="/training-manager.html" class="btn-view" onclick="return gateCheck(event)">Preview →</a>
+          </div>
+        </div>
+
+        <!-- API Access -->
+        <div class="feature-card">
+          <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <span class="badge-live">Live</span>
+            <span class="badge-enterprise">Enterprise</span>
+          </div>
+          <div class="card-icon">🔌</div>
+          <h3>API Access</h3>
+          <p>Full REST API access to integrate MagicPlate with your POS system, custom applications, and third-party tools.</p>
+          <ul>
+            <li>RESTful API with docs</li>
             <li>Webhook support</li>
-            <li>Rate limiting</li>
+            <li>Rate limiting & auth</li>
             <li>Developer support</li>
           </ul>
+          <div class="card-actions">
+            <a href="/api-documentation.html" class="btn-view" onclick="return gateCheck(event)">Preview →</a>
+          </div>
         </div>
+
+        <!-- White-Label -->
         <div class="feature-card">
-          <div class="feature-icon">🏷️</div>
+          <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <span class="badge-live">Live</span>
+            <span class="badge-enterprise">Enterprise</span>
+          </div>
+          <div class="card-icon">🏷️</div>
           <h3>White-Label Options</h3>
-          <p>White-label the platform with your branding. Perfect for franchise systems wanting their own brand identity.</p>
+          <p>White-label the platform with your own branding. Perfect for franchise systems wanting their own brand identity.</p>
           <ul>
-            <li>Custom branding</li>
-            <li>Logo replacement</li>
-            <li>Color customization</li>
+            <li>Custom branding & logo</li>
+            <li>Color & font customization</li>
             <li>Domain mapping</li>
-            <li>Brand removal</li>
+            <li>Complete brand removal</li>
           </ul>
+          <div class="card-actions">
+            <a href="/white-label.html" class="btn-view" onclick="return gateCheck(event)">Preview →</a>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="cta-section">
-      <h2 style="color: white; font-size: 2.5em; margin-bottom: 20px;">Ready to Transform Your Restaurant?</h2>
-      <p style="font-size: 1.2em; margin-bottom: 20px;">Choose a plan and get lifetime access to all these powerful features.</p>
-      <a href="/#pricing" class="cta-button">View Pricing</a>
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- SECTION 5: SUPPORT                             -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="feature-section">
+      <span class="section-label">Support & Account</span>
+      <h2 class="section-title">Help & Support</h2>
+      <p class="section-desc">Get the help you need — from basic support to a dedicated account manager.</p>
+
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <span class="badge-live">Live</span>
+            <span class="badge-pro">Professional+</span>
+          </div>
+          <div class="card-icon">💬</div>
+          <h3>Priority Support</h3>
+          <p>Priority email and chat support with faster response times and dedicated assistance.</p>
+          <ul>
+            <li>Priority ticket system</li>
+            <li>Faster response times</li>
+            <li>Knowledge base access</li>
+          </ul>
+          <div class="card-actions">
+            <a href="/support-center.html" class="btn-view" onclick="return gateCheck(event)">Preview →</a>
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <span class="badge-live">Live</span>
+            <span class="badge-enterprise">Enterprise</span>
+          </div>
+          <div class="card-icon">👤</div>
+          <h3>Dedicated Account Manager</h3>
+          <p>Your own dedicated account manager for personalized support, strategic guidance, and priority assistance.</p>
+          <ul>
+            <li>Personalized onboarding</li>
+            <li>Strategic guidance</li>
+            <li>Quarterly business reviews</li>
+          </ul>
+          <div class="card-actions">
+            <a href="/account-manager.html" class="btn-view" onclick="return gateCheck(event)">Preview →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- PRICING SUMMARY                                -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="pricing-section" id="pricing">
+      <div style="text-align:center;">
+        <span class="section-label">Pricing</span>
+        <h2 class="section-title" style="text-align:center;">Simple, One-Time Pricing</h2>
+        <p class="section-desc" style="text-align:center; margin: 0 auto 0;">Pay once, get lifetime access. No subscriptions, no hidden fees. Sign up to be contacted for a plan that fits your restaurant.</p>
+      </div>
+
+      <div class="pricing-grid">
+        <!-- Starter -->
+        <div class="pricing-card">
+          <div class="pricing-tier">Starter</div>
+          <div class="pricing-price">$99 <span>(one-time)</span></div>
+          <ul class="pricing-list">
+            <li>10 AI photo enhancements (lifetime)</li>
+            <li>1 Digital menu</li>
+            <li>5 Social media posts</li>
+            <li>Basic email templates</li>
+            <li>1 Location</li>
+            <li>Basic support</li>
+            <li class="disabled">HeyGen avatar videos</li>
+            <li class="disabled">SEO optimization tools</li>
+            <li class="disabled">Multi-location management</li>
+          </ul>
+          <button class="btn-contact" onclick="openGate('Starter')">Sign Up — Get Contacted</button>
+        </div>
+
+        <!-- Professional -->
+        <div class="pricing-card featured">
+          <div class="pricing-tier">Professional</div>
+          <div class="pricing-price">$299 <span>(one-time)</span></div>
+          <ul class="pricing-list">
+            <li>Unlimited photo enhancements</li>
+            <li>Unlimited digital menus</li>
+            <li>Unlimited social media posts</li>
+            <li>Email marketing campaigns</li>
+            <li>HeyGen avatar welcome video</li>
+            <li>SEO optimization tools</li>
+            <li>Menu update notifications</li>
+            <li>Up to 3 locations</li>
+            <li>Priority support</li>
+            <li class="disabled">Brand consistency dashboard</li>
+            <li class="disabled">Franchise training</li>
+            <li class="disabled">API access</li>
+          </ul>
+          <button class="btn-contact" onclick="openGate('Professional')">Sign Up — Get Contacted</button>
+        </div>
+
+        <!-- Enterprise -->
+        <div class="pricing-card">
+          <div class="pricing-tier">Enterprise</div>
+          <div class="pricing-price">$799 <span>(one-time)</span></div>
+          <ul class="pricing-list">
+            <li>Everything in Professional</li>
+            <li>Unlimited locations</li>
+            <li>Brand consistency dashboard</li>
+            <li>Franchise training system</li>
+            <li>Custom HeyGen avatars per location</li>
+            <li>Advanced analytics & reporting</li>
+            <li>API access</li>
+            <li>White-label options</li>
+            <li>Dedicated account manager</li>
+          </ul>
+          <button class="btn-contact" onclick="openGate('Enterprise')">Sign Up — Get Contacted</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-banner">
+      <h2>Ready to Transform Your Restaurant?</h2>
+      <p>Try our free photo enhancement or practice menu builder right now — no sign-up needed.</p>
+      <a href="/photo-enhancer.html" class="btn-cta">Try Free Photo Enhancement</a>
     </div>
   </div>
+
+  <!-- Signup Gate Modal -->
+  <div class="gate-overlay" id="gateOverlay">
+    <div class="gate-card">
+      <button class="gate-close" onclick="closeGate()">&times;</button>
+      <div id="gateFormView">
+        <h2>Get Started with MagicPlate</h2>
+        <p>Sign up and we'll contact you to set up your <strong id="gateTierName">Professional</strong> plan.</p>
+        <form class="gate-form" id="gateForm" onsubmit="submitGate(event)">
+          <label for="gateName">Your Name</label>
+          <input type="text" id="gateName" name="name" required placeholder="John Smith">
+          <label for="gateEmail">Email Address</label>
+          <input type="email" id="gateEmail" name="email" required placeholder="john@restaurant.com">
+          <label for="gateRestaurant">Restaurant Name</label>
+          <input type="text" id="gateRestaurant" name="restaurant" placeholder="Joe's Diner">
+          <label for="gatePhone">Phone (optional)</label>
+          <input type="tel" id="gatePhone" name="phone" placeholder="(555) 555-5555">
+          <input type="hidden" id="gateTier" name="tier" value="">
+          <button type="submit" class="gate-submit">Sign Up — We'll Be In Touch</button>
+        </form>
+      </div>
+      <div class="gate-success" id="gateSuccessView">
+        <div style="font-size:3em;margin-bottom:12px;">🎉</div>
+        <h3>You're All Set!</h3>
+        <p style="color:#666;">Thanks for signing up! We'll contact you within 24 hours to get your <strong id="gateSuccessTier"></strong> plan set up.</p>
+        <button class="btn-try" onclick="closeGate()" style="margin-top:16px;">Got It</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-grid">
+      <div>
+        <h3 style="color:#4caf50;font-size:1.4em;margin-bottom:16px;font-weight:700;">MagicPlate.ai</h3>
+        <p style="color:rgba(255,255,255,0.6);line-height:1.7;">Transform your restaurant's digital presence with AI-powered tools. Make every plate magical.</p>
+      </div>
+      <div>
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/features.html">Features</a></li>
+          <li><a href="/features.html#pricing">Pricing</a></li>
+          <li><a href="/faq.html">FAQ</a></li>
+          <li><a href="/#contact">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Free Tools</h4>
+        <ul>
+          <li><a href="/photo-enhancer.html">Photo Enhancement</a></li>
+          <li><a href="/create-digital-menu.html">Menu Creator</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="/privacy-policy.html">Privacy Policy</a></li>
+          <li><a href="/terms-of-service.html">Terms of Service</a></li>
+          <li><a href="/refund-policy.html">Refund Policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 MagicPlate.ai. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    // ── Signup Gate Logic ──────────────────────────────
+    function openGate(tier) {
+      document.getElementById('gateTierName').textContent = tier;
+      document.getElementById('gateTier').value = tier;
+      document.getElementById('gateFormView').style.display = 'block';
+      document.getElementById('gateSuccessView').style.display = 'none';
+      document.getElementById('gateOverlay').classList.add('active');
+    }
+
+    function closeGate() {
+      document.getElementById('gateOverlay').classList.remove('active');
+    }
+
+    function gateCheck(e) {
+      // Allow viewing but show a banner at the top of the page
+      // For now, let them browse freely — the tool pages will have their own gates
+      return true;
+    }
+
+    function submitGate(e) {
+      e.preventDefault();
+      const name = document.getElementById('gateName').value;
+      const email = document.getElementById('gateEmail').value;
+      const restaurant = document.getElementById('gateRestaurant').value;
+      const phone = document.getElementById('gatePhone').value;
+      const tier = document.getElementById('gateTier').value;
+
+      // Store lead locally
+      const lead = { name, email, restaurant, phone, tier, date: new Date().toISOString() };
+      const leads = JSON.parse(localStorage.getItem('mp_leads') || '[]');
+      leads.push(lead);
+      localStorage.setItem('mp_leads', JSON.stringify(leads));
+
+      // Try to send to server (non-blocking)
+      fetch('/api/leads/capture', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(lead)
+      }).catch(() => {}); // silently fail if no backend
+
+      // Show success
+      document.getElementById('gateFormView').style.display = 'none';
+      document.getElementById('gateSuccessView').style.display = 'block';
+      document.getElementById('gateSuccessTier').textContent = tier;
+    }
+
+    // Close modal on overlay click
+    document.getElementById('gateOverlay').addEventListener('click', function(e) {
+      if (e.target === this) closeGate();
+    });
+
+    // Close on Escape
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeGate();
+    });
+  </script>
 </body>
 </html>
