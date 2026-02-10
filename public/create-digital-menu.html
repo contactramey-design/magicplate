@@ -7,7 +7,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- CSV parser -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <!-- Excel parser (SheetJS) -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <!-- QR Code -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -118,7 +123,94 @@
     .upload-zone .hint { color: #777; font-size: 0.85em; }
     .upload-zone input[type="file"] { display: none; }
 
-    /* Sample CSV */
+    /* Format badges */
+    .format-badges {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+    .format-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.75em;
+      font-weight: 600;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #999;
+    }
+    .format-badge.csv { border-color: rgba(76,175,80,0.3); color: #81c784; }
+    .format-badge.excel { border-color: rgba(33,150,83,0.3); color: #66bb6a; }
+    .format-badge.text { border-color: rgba(255,193,7,0.3); color: #ffd54f; }
+    .format-badge.json { border-color: rgba(33,150,243,0.3); color: #64b5f6; }
+    .format-badge.paste { border-color: rgba(171,71,188,0.3); color: #ce93d8; }
+
+    /* Divider */
+    .or-divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 24px 0;
+      color: #555;
+      font-size: 0.85em;
+      font-weight: 600;
+    }
+    .or-divider::before, .or-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.08);
+    }
+
+    /* Paste area */
+    .paste-area {
+      position: relative;
+    }
+    .paste-area textarea {
+      width: 100%;
+      min-height: 160px;
+      padding: 16px;
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.04);
+      color: #ccc;
+      font-family: 'Inter', monospace;
+      font-size: 0.9em;
+      line-height: 1.6;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .paste-area textarea:focus { border-color: #4caf50; }
+    .paste-area textarea::placeholder { color: #555; }
+    .paste-area .paste-hint {
+      font-size: 0.78em;
+      color: #666;
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+    .paste-btn {
+      margin-top: 12px;
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #7c4dff, #651fff);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .paste-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(124,77,255,0.3); }
+    .paste-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    /* Sample */
     .sample-section {
       margin-top: 16px;
       text-align: center;
@@ -138,6 +230,24 @@
       background: rgba(76,175,80,0.1);
       border-color: #4caf50;
     }
+
+    /* Detected source badge */
+    .source-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.8em;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .source-badge.csv { background: rgba(76,175,80,0.1); color: #81c784; }
+    .source-badge.excel { background: rgba(33,150,83,0.1); color: #66bb6a; }
+    .source-badge.tsv { background: rgba(0,188,212,0.1); color: #4dd0e1; }
+    .source-badge.json { background: rgba(33,150,243,0.1); color: #64b5f6; }
+    .source-badge.text { background: rgba(255,193,7,0.1); color: #ffd54f; }
+    .source-badge.paste { background: rgba(171,71,188,0.1); color: #ce93d8; }
 
     /* Style selector */
     .style-row {
@@ -345,6 +455,67 @@
       border-color: #4caf50;
     }
 
+    /* QR Section */
+    .qr-section {
+      margin-top: 28px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .qr-section h3 {
+      color: #ccc;
+      font-size: 1.1em;
+      margin-bottom: 4px;
+    }
+    .qr-section .qr-desc {
+      color: #777;
+      font-size: 0.85em;
+      margin-bottom: 16px;
+    }
+    .qr-wrapper {
+      display: inline-block;
+      background: white;
+      padding: 20px;
+      border-radius: 14px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+    }
+    .qr-wrapper #resultQrCode canvas,
+    .qr-wrapper #resultQrCode img {
+      display: block;
+    }
+    .qr-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+    .qr-actions button {
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.06);
+      color: #ccc;
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 0.85em;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .qr-actions button:hover { background: rgba(255,255,255,0.12); border-color: #4caf50; color: #fff; }
+    .copy-toast {
+      display: none;
+      padding: 8px 16px;
+      background: #4caf50;
+      color: white;
+      border-radius: 8px;
+      font-size: 0.82em;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+
     /* Alert */
     .alert {
       padding: 14px 18px;
@@ -372,6 +543,7 @@
       .steps { flex-direction: column; }
       .style-row { flex-direction: column; }
       .style-option { text-align: center; }
+      .format-badges { gap: 6px; }
     }
   </style>
 </head>
@@ -379,11 +551,11 @@
   <div class="container">
     <a href="/dashboard.html" class="back-link">← Back to Dashboard</a>
     <h1>Create Digital Menu</h1>
-    <p class="subtitle">Upload your menu as a CSV, and we'll generate AI food photos for every dish.</p>
+    <p class="subtitle">Upload your menu from any source — CSV, Excel, Notes, text, or just paste it — and we'll generate AI food photos for every dish.</p>
 
     <!-- Steps indicator -->
     <div class="steps">
-      <div class="step active" id="step1"><span class="step-num">1</span> Upload CSV</div>
+      <div class="step active" id="step1"><span class="step-num">1</span> Upload Menu</div>
       <div class="step" id="step2"><span class="step-num">2</span> Preview &amp; Configure</div>
       <div class="step" id="step3"><span class="step-num">3</span> Generate Images</div>
       <div class="step" id="step4"><span class="step-num">4</span> Your Menu</div>
@@ -393,14 +565,44 @@
 
     <!-- STEP 1: Upload -->
     <div class="card" id="uploadCard">
-      <h2>Upload Your Menu CSV</h2>
-      <p class="desc">Your CSV should have columns for dish name, ingredients/description, and price. Column names are auto-detected.</p>
+      <h2>📁 Upload or Paste Your Menu</h2>
+      <p class="desc">We'll auto-detect dish names, prices, and ingredients from any format. Column names and layouts are auto-detected.</p>
+
       <div class="upload-zone" id="uploadZone">
         <div class="icon">📄</div>
-        <div class="label">Drag &amp; drop your CSV file here</div>
-        <div class="hint">or click to browse (CSV files only)</div>
-        <input type="file" id="csvInput" accept=".csv,text/csv">
+        <div class="label">Drag &amp; drop your menu file here</div>
+        <div class="hint">or click to browse</div>
+        <input type="file" id="fileInput" accept=".csv,.xlsx,.xls,.tsv,.txt,.json,.numbers">
       </div>
+
+      <div class="format-badges">
+        <span class="format-badge csv">📊 CSV</span>
+        <span class="format-badge excel">📗 Excel (.xlsx)</span>
+        <span class="format-badge text">📝 Text / Notes</span>
+        <span class="format-badge tsv" style="border-color:rgba(0,188,212,0.3); color:#4dd0e1;">📋 TSV</span>
+        <span class="format-badge json">📦 JSON</span>
+        <span class="format-badge paste">📱 Paste</span>
+      </div>
+
+      <div class="or-divider">or paste your menu below</div>
+
+      <div class="paste-area">
+        <textarea id="pasteInput" placeholder="Paste your menu here — from Notes, Google Sheets, a PDF copy, or just type it out...
+
+Examples of formats we understand:
+
+Margherita Pizza - Tomato, mozzarella, basil - $12.99
+Grilled Salmon    $24.99    Atlantic salmon, lemon butter
+Caesar Salad      11.49     Romaine, parmesan, croutons
+
+Or even a simple list:
+Burger $15
+Pasta $18
+Salad $11"></textarea>
+        <p class="paste-hint">💡 <strong>Tip:</strong> We understand most formats — tables, lists, tabs, commas, dashes. Just paste whatever you have and we'll figure it out. Prices are optional.</p>
+        <button class="paste-btn" id="parsePasteBtn" type="button">✨ Parse Menu</button>
+      </div>
+
       <div class="sample-section">
         <button class="sample-btn" id="loadSampleBtn">Load sample menu to try it out</button>
         <span style="color:#666; font-size:0.8em; margin-left:10px;">or</span>
@@ -411,7 +613,9 @@
     <!-- STEP 2: Preview -->
     <div class="card" id="previewCard" style="display:none;">
       <h2>Preview Your Menu</h2>
-      <p class="desc">Review the parsed items below. Remove any rows you don't want.</p>
+      <p class="desc">Review the parsed items below. Remove any rows you don't want, or edit inline.</p>
+
+      <div id="sourceBadge" style="margin-bottom:16px;"></div>
 
       <div class="input-group">
         <label>Restaurant Name</label>
@@ -445,7 +649,7 @@
 
       <div class="btn-row">
         <button class="btn btn-secondary" id="backToUpload">← Back</button>
-        <button class="btn btn-primary" id="generateBtn">Generate Menu Images</button>
+        <button class="btn btn-primary" id="generateBtn">🚀 Generate Menu Images</button>
       </div>
     </div>
 
@@ -470,16 +674,37 @@
         <button class="btn btn-secondary" id="downloadMenuBtn">⬇ Download as HTML</button>
         <button class="btn btn-secondary" id="createAnotherBtn">+ Create Another Menu</button>
       </div>
+
+      <!-- QR Code Section -->
+      <div class="qr-section">
+        <h3>📱 Share via QR Code</h3>
+        <p class="qr-desc">Print this QR code on table tents, receipts, or flyers — customers scan to see your menu instantly.</p>
+        <div class="qr-wrapper">
+          <div id="resultQrCode"></div>
+        </div>
+        <div class="qr-actions">
+          <button id="downloadQrBtn" type="button">⬇ Download QR Code</button>
+          <button id="copyLinkBtn" type="button">📋 Copy Menu Link</button>
+          <button id="shareBtn" type="button">📤 Share</button>
+        </div>
+        <div class="copy-toast" id="copyToast">✅ Link copied to clipboard!</div>
+      </div>
     </div>
   </div>
 
   <script>
-    // ---- State ----
-    let parsedDishes = [];       // [{dish_name, ingredients, price}, ...]
-    let generatedMenu = null;    // {id, restaurant, style, items: [{...dish, imageUrl}]}
+    // ═══════════════════════════════════════════════
+    //  STATE
+    // ═══════════════════════════════════════════════
+    let parsedDishes = [];
+    let generatedMenu = null;
     let selectedStyle = 'professional';
+    let detectedSource = '';
+    let menuViewerUrl = '';
 
-    // ---- Sample Data ----
+    // ═══════════════════════════════════════════════
+    //  SAMPLE DATA
+    // ═══════════════════════════════════════════════
     const SAMPLE_CSV = `dish_name,ingredients,price
 Margherita Pizza,"Tomato sauce, mozzarella, fresh basil, olive oil",$12.99
 Grilled Salmon,"Atlantic salmon, lemon butter sauce, asparagus, roasted potatoes",$24.99
@@ -489,53 +714,258 @@ Chicken Tikka Masala,"Tandoori chicken, creamy tomato curry sauce, basmati rice,
 Pasta Carbonara,"Spaghetti, pancetta, egg yolk, pecorino Romano, black pepper",$16.99
 Chocolate Lava Cake,"Dark chocolate, molten center, vanilla ice cream, raspberry coulis",$9.99`;
 
-    // ---- Column name mapping ----
+    // ═══════════════════════════════════════════════
+    //  COLUMN DETECTION (for structured data)
+    // ═══════════════════════════════════════════════
     function detectColumns(headers) {
       const lower = headers.map(h => h.toLowerCase().trim());
       const nameCol = lower.findIndex(h =>
-        ['dish_name','dishname','dish','name','item','item_name','itemname','menu_item','food','food_name'].includes(h)
+        ['dish_name','dishname','dish','name','item','item_name','itemname','menu_item','food','food_name','product','title','menu item','dish name','item name','food name','entree','entrée','meal'].includes(h)
       );
       const ingredCol = lower.findIndex(h =>
-        ['ingredients','ingredient','description','desc','details','contents'].includes(h)
+        ['ingredients','ingredient','description','desc','details','contents','notes','info','about','composition'].includes(h)
       );
       const priceCol = lower.findIndex(h =>
-        ['price','cost','amount','menu_price'].includes(h)
+        ['price','cost','amount','menu_price','rate','value','$','usd'].includes(h)
       );
       return { nameCol, ingredCol, priceCol };
     }
 
-    function parseCSVData(results) {
-      if (!results.data || results.data.length === 0) {
-        showAlert('CSV appears to be empty.', 'error');
-        return [];
-      }
-      // PapaParse with header:true gives array of objects
-      const headers = results.meta.fields || Object.keys(results.data[0] || {});
+    // ═══════════════════════════════════════════════
+    //  STRUCTURED PARSERS (CSV, Excel, TSV, JSON)
+    // ═══════════════════════════════════════════════
+    function parseStructuredRows(headers, rows) {
       const { nameCol, ingredCol, priceCol } = detectColumns(headers);
 
-      if (nameCol === -1) {
-        showAlert('Could not find a "dish_name" or "name" column. Please ensure your CSV has a column for dish names.', 'error');
-        return [];
+      // If no name column detected, try first non-price column
+      let actualNameCol = nameCol;
+      if (actualNameCol === -1) {
+        // Use first column that doesn't look like a price
+        for (let i = 0; i < headers.length; i++) {
+          if (i !== priceCol) { actualNameCol = i; break; }
+        }
       }
+      if (actualNameCol === -1) actualNameCol = 0;
 
-      const nameKey = headers[nameCol];
+      const nameKey = headers[actualNameCol];
       const ingredKey = ingredCol !== -1 ? headers[ingredCol] : null;
       const priceKey = priceCol !== -1 ? headers[priceCol] : null;
 
+      // If no explicit ingredient column, try to find one that's not name or price
+      let fallbackIngredKey = null;
+      if (!ingredKey) {
+        for (let i = 0; i < headers.length; i++) {
+          if (i !== actualNameCol && i !== priceCol) {
+            fallbackIngredKey = headers[i];
+            break;
+          }
+        }
+      }
+
       const dishes = [];
-      for (const row of results.data) {
-        const name = (row[nameKey] || '').trim();
+      for (const row of rows) {
+        const name = (row[nameKey] || '').toString().trim();
         if (!name) continue;
+        // Skip header-like rows
+        if (name.toLowerCase() === 'name' || name.toLowerCase() === 'dish' || name.toLowerCase() === 'item') continue;
+
         dishes.push({
           dish_name: name,
-          ingredients: ingredKey ? (row[ingredKey] || '').trim() : '',
-          price: priceKey ? (row[priceKey] || '').trim() : ''
+          ingredients: ingredKey ? (row[ingredKey] || '').toString().trim() : (fallbackIngredKey ? (row[fallbackIngredKey] || '').toString().trim() : ''),
+          price: priceKey ? normalizePrice((row[priceKey] || '').toString().trim()) : ''
         });
       }
       return dishes;
     }
 
-    // ---- UI Helpers ----
+    function parseCSVData(results) {
+      if (!results.data || results.data.length === 0) {
+        showAlert('File appears to be empty.', 'error');
+        return [];
+      }
+      const headers = results.meta.fields || Object.keys(results.data[0] || {});
+      return parseStructuredRows(headers, results.data);
+    }
+
+    function parseExcelFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheet = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheet];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+
+            if (!jsonData || jsonData.length === 0) {
+              reject(new Error('Spreadsheet appears to be empty.'));
+              return;
+            }
+
+            const headers = Object.keys(jsonData[0]);
+            const dishes = parseStructuredRows(headers, jsonData);
+            resolve(dishes);
+          } catch (err) {
+            reject(err);
+          }
+        };
+        reader.onerror = () => reject(new Error('Failed to read file.'));
+        reader.readAsArrayBuffer(file);
+      });
+    }
+
+    function parseJSONData(text) {
+      try {
+        let data = JSON.parse(text);
+
+        // Handle common JSON shapes:
+        // 1. Array of objects [{name, price, ...}]
+        // 2. Object with items key { items: [...], menu: [...] }
+        if (!Array.isArray(data)) {
+          const keys = Object.keys(data);
+          const arrayKey = keys.find(k => Array.isArray(data[k]));
+          if (arrayKey) {
+            data = data[arrayKey];
+          } else {
+            showAlert('JSON must contain an array of menu items.', 'error');
+            return [];
+          }
+        }
+
+        if (data.length === 0) {
+          showAlert('JSON array is empty.', 'error');
+          return [];
+        }
+
+        const headers = Object.keys(data[0]);
+        return parseStructuredRows(headers, data);
+      } catch (e) {
+        showAlert('Invalid JSON: ' + e.message, 'error');
+        return [];
+      }
+    }
+
+    // ═══════════════════════════════════════════════
+    //  SMART TEXT PARSER (Notes, plain text, etc.)
+    // ═══════════════════════════════════════════════
+    function normalizePrice(s) {
+      if (!s) return '';
+      s = s.toString().trim();
+      // Already has $
+      if (/^\$/.test(s)) return s;
+      // Just a number like "12.99" or "15"
+      if (/^\d+(\.\d{1,2})?$/.test(s)) return '$' + s;
+      return s;
+    }
+
+    function parseSmartText(text) {
+      const lines = text.split(/\n/).map(l => l.trim()).filter(l => l.length > 0);
+      const dishes = [];
+      const priceRegex = /\$?\d{1,4}(?:\.\d{1,2})?/;
+      const skipWords = new Set([
+        'menu', 'appetizers', 'appetizer', 'entrees', 'entrées', 'entree', 'entrée',
+        'mains', 'main course', 'sides', 'side dishes', 'desserts', 'dessert',
+        'beverages', 'drinks', 'salads', 'soups', 'specials', 'starters',
+        'breakfast', 'lunch', 'dinner', 'brunch', 'happy hour', 'kids menu',
+        'sandwiches', 'burgers', 'pizzas', 'pasta', 'seafood', 'from the grill',
+        'chef\'s specials', 'wine list', 'beer', 'cocktails'
+      ]);
+
+      for (let line of lines) {
+        // Skip section headers (all caps, short, or matching known headers)
+        const lower = line.toLowerCase().replace(/[^a-z\s]/g, '').trim();
+        if (skipWords.has(lower)) continue;
+        if (/^[A-Z\s\-—]{2,30}$/.test(line) && !priceRegex.test(line)) continue;
+        if (/^[-=_*#]{2,}$/.test(line)) continue; // decorative lines
+
+        // Try to extract price
+        let price = '';
+        const priceMatch = line.match(/\$\s?\d{1,4}(?:\.\d{1,2})?|\b\d{1,4}\.\d{2}\b/);
+        if (priceMatch) {
+          price = normalizePrice(priceMatch[0].trim());
+          line = line.replace(priceMatch[0], '').trim();
+        }
+
+        // Clean up separators at the end after price removal
+        line = line.replace(/[\s\-—|:;,.\t]+$/, '').trim();
+        if (!line) continue;
+
+        // Try to split name from description
+        // Patterns: "Name - description", "Name: description", "Name | description",
+        //           "Name\tdescription", "Name  description" (double space)
+        let dishName = '';
+        let ingredients = '';
+
+        // Tab-separated
+        if (line.includes('\t')) {
+          const parts = line.split('\t').map(s => s.trim()).filter(s => s);
+          dishName = parts[0] || '';
+          ingredients = parts.slice(1).join(', ');
+        }
+        // Dash/em-dash separator (but not inside words)
+        else if (/\s[-–—]\s/.test(line)) {
+          const idx = line.search(/\s[-–—]\s/);
+          dishName = line.substring(0, idx).trim();
+          ingredients = line.substring(idx + 3).trim();
+        }
+        // Pipe separator
+        else if (line.includes('|')) {
+          const parts = line.split('|').map(s => s.trim()).filter(s => s);
+          dishName = parts[0] || '';
+          ingredients = parts.slice(1).join(', ');
+        }
+        // Colon separator (but not if it's a time like 10:00)
+        else if (/:\s/.test(line) && !/\d:\d/.test(line)) {
+          const idx = line.indexOf(':');
+          dishName = line.substring(0, idx).trim();
+          ingredients = line.substring(idx + 1).trim();
+        }
+        // Double-space separator
+        else if (/\s{2,}/.test(line)) {
+          const parts = line.split(/\s{2,}/).map(s => s.trim()).filter(s => s);
+          dishName = parts[0] || '';
+          // Rest could be ingredients or additional price-like stuff
+          const restParts = parts.slice(1);
+          const ingredParts = restParts.filter(p => !/^\$?\d+(\.\d{2})?$/.test(p));
+          const priceParts = restParts.filter(p => /^\$?\d+(\.\d{2})?$/.test(p));
+          ingredients = ingredParts.join(', ');
+          if (!price && priceParts.length > 0) {
+            price = normalizePrice(priceParts[0]);
+          }
+        }
+        // Comma-separated with first part as name
+        else if (line.includes(',') && line.split(',').length >= 2) {
+          const parts = line.split(',').map(s => s.trim());
+          dishName = parts[0];
+          ingredients = parts.slice(1).join(', ');
+        }
+        // Just a name
+        else {
+          dishName = line;
+        }
+
+        // Clean up dish name
+        dishName = dishName.replace(/^[\d.)\]\s]+/, '').trim(); // Remove leading numbers "1. Burger" -> "Burger"
+        dishName = dishName.replace(/^\*+|\*+$/g, '').trim(); // Remove markdown bold
+
+        if (!dishName || dishName.length < 2) continue;
+        // Skip if it looks like a price only
+        if (/^\$?\d+(\.\d{2})?$/.test(dishName)) continue;
+
+        dishes.push({
+          dish_name: dishName,
+          ingredients: ingredients,
+          price: price
+        });
+      }
+
+      return dishes;
+    }
+
+    // ═══════════════════════════════════════════════
+    //  UI HELPERS
+    // ═══════════════════════════════════════════════
     function showAlert(msg, type = 'error') {
       const box = document.getElementById('alertBox');
       box.textContent = msg;
@@ -560,33 +990,59 @@ Chocolate Lava Cake,"Dark chocolate, molten center, vanilla ice cream, raspberry
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${i + 1}</td>
-          <td>${esc(d.dish_name)}</td>
-          <td>${esc(d.ingredients)}</td>
-          <td>${esc(d.price)}</td>
+          <td contenteditable="true" class="editable" data-idx="${i}" data-field="dish_name">${esc(d.dish_name)}</td>
+          <td contenteditable="true" class="editable" data-idx="${i}" data-field="ingredients">${esc(d.ingredients)}</td>
+          <td contenteditable="true" class="editable" data-idx="${i}" data-field="price">${esc(d.price)}</td>
           <td><button class="remove-row" data-idx="${i}" title="Remove">✕</button></td>
         `;
         tbody.appendChild(tr);
       });
-      // Attach remove handlers
+
+      // Remove handlers
       tbody.querySelectorAll('.remove-row').forEach(btn => {
         btn.addEventListener('click', () => {
           parsedDishes.splice(parseInt(btn.dataset.idx), 1);
           renderPreviewTable();
         });
       });
+
+      // Inline edit handlers
+      tbody.querySelectorAll('.editable').forEach(cell => {
+        cell.addEventListener('blur', () => {
+          const idx = parseInt(cell.dataset.idx);
+          const field = cell.dataset.field;
+          parsedDishes[idx][field] = cell.textContent.trim();
+        });
+      });
+    }
+
+    function showSourceBadge(source) {
+      const labels = {
+        csv: { icon: '📊', label: 'CSV', cls: 'csv' },
+        excel: { icon: '📗', label: 'Excel Spreadsheet', cls: 'excel' },
+        tsv: { icon: '📋', label: 'Tab-Separated', cls: 'tsv' },
+        json: { icon: '📦', label: 'JSON', cls: 'json' },
+        text: { icon: '📝', label: 'Text / Notes', cls: 'text' },
+        paste: { icon: '📱', label: 'Pasted Text', cls: 'paste' }
+      };
+      const s = labels[source] || labels.text;
+      document.getElementById('sourceBadge').innerHTML =
+        `<span class="source-badge ${s.cls}">${s.icon} Detected: ${s.label} — ${parsedDishes.length} items found</span>`;
     }
 
     function esc(s) {
       const d = document.createElement('div');
-      d.textContent = s;
+      d.textContent = s || '';
       return d.innerHTML;
     }
 
-    // ---- Upload Zone ----
+    // ═══════════════════════════════════════════════
+    //  FILE HANDLING — UNIVERSAL
+    // ═══════════════════════════════════════════════
     const uploadZone = document.getElementById('uploadZone');
-    const csvInput = document.getElementById('csvInput');
+    const fileInput = document.getElementById('fileInput');
 
-    uploadZone.addEventListener('click', () => csvInput.click());
+    uploadZone.addEventListener('click', () => fileInput.click());
     uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
     uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
     uploadZone.addEventListener('drop', e => {
@@ -595,36 +1051,176 @@ Chocolate Lava Cake,"Dark chocolate, molten center, vanilla ice cream, raspberry
       const file = e.dataTransfer.files[0];
       if (file) handleFile(file);
     });
-    csvInput.addEventListener('change', () => {
-      if (csvInput.files[0]) handleFile(csvInput.files[0]);
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files[0]) handleFile(fileInput.files[0]);
     });
 
-    function handleFile(file) {
-      if (!file.name.toLowerCase().endsWith('.csv') && file.type !== 'text/csv') {
-        showAlert('Please upload a CSV file.', 'error');
+    async function handleFile(file) {
+      const name = file.name.toLowerCase();
+      const ext = name.split('.').pop();
+
+      try {
+        // ── Excel ──
+        if (['xlsx', 'xls', 'numbers'].includes(ext) || file.type.includes('spreadsheet') || file.type.includes('excel')) {
+          detectedSource = 'excel';
+          parsedDishes = await parseExcelFile(file);
+          if (parsedDishes.length > 0) {
+            showAlert(`✅ Parsed ${parsedDishes.length} items from Excel spreadsheet.`, 'info');
+            goToPreview();
+          } else {
+            showAlert('Could not find menu items in this spreadsheet. Make sure it has dish names.', 'error');
+          }
+          return;
+        }
+
+        // ── JSON ──
+        if (ext === 'json' || file.type === 'application/json') {
+          const text = await file.text();
+          detectedSource = 'json';
+          parsedDishes = parseJSONData(text);
+          if (parsedDishes.length > 0) {
+            showAlert(`✅ Parsed ${parsedDishes.length} items from JSON.`, 'info');
+            goToPreview();
+          }
+          return;
+        }
+
+        // ── TSV ──
+        if (ext === 'tsv') {
+          const text = await file.text();
+          detectedSource = 'tsv';
+          Papa.parse(text, {
+            header: true,
+            skipEmptyLines: true,
+            delimiter: '\t',
+            complete: (results) => {
+              parsedDishes = parseCSVData(results);
+              if (parsedDishes.length > 0) {
+                showAlert(`✅ Parsed ${parsedDishes.length} items from TSV.`, 'info');
+                goToPreview();
+              } else {
+                showAlert('Could not find menu items in this file.', 'error');
+              }
+            },
+            error: (err) => showAlert('Parse error: ' + err.message, 'error')
+          });
+          return;
+        }
+
+        // ── CSV ──
+        if (ext === 'csv' || file.type === 'text/csv') {
+          detectedSource = 'csv';
+          Papa.parse(file, {
+            header: true,
+            skipEmptyLines: true,
+            complete: (results) => {
+              parsedDishes = parseCSVData(results);
+              if (parsedDishes.length > 0) {
+                showAlert(`✅ Parsed ${parsedDishes.length} items from CSV.`, 'info');
+                goToPreview();
+              } else {
+                showAlert('Could not find menu items. Check column names.', 'error');
+              }
+            },
+            error: (err) => showAlert('CSV parse error: ' + err.message, 'error')
+          });
+          return;
+        }
+
+        // ── Plain text (.txt, or anything else) ──
+        const text = await file.text();
+        detectedSource = 'text';
+
+        // First try PapaParse auto-detect (handles CSVs saved as .txt)
+        const papaResult = Papa.parse(text, { header: true, skipEmptyLines: true });
+        if (papaResult.meta.fields && papaResult.meta.fields.length >= 2 && papaResult.data.length > 0) {
+          const { nameCol } = detectColumns(papaResult.meta.fields);
+          if (nameCol !== -1) {
+            detectedSource = 'csv';
+            parsedDishes = parseCSVData(papaResult);
+            if (parsedDishes.length > 0) {
+              showAlert(`✅ Detected structured data — parsed ${parsedDishes.length} items.`, 'info');
+              goToPreview();
+              return;
+            }
+          }
+        }
+
+        // Fall back to smart text parser
+        parsedDishes = parseSmartText(text);
+        if (parsedDishes.length > 0) {
+          showAlert(`✅ Parsed ${parsedDishes.length} items from text file.`, 'info');
+          goToPreview();
+        } else {
+          showAlert('Could not find menu items in this file. Try pasting the content below instead.', 'error');
+        }
+
+      } catch (err) {
+        console.error('File parse error:', err);
+        showAlert('Failed to parse file: ' + err.message, 'error');
+      }
+    }
+
+    // ═══════════════════════════════════════════════
+    //  PASTE HANDLER
+    // ═══════════════════════════════════════════════
+    document.getElementById('parsePasteBtn').addEventListener('click', () => {
+      const text = document.getElementById('pasteInput').value.trim();
+      if (!text) {
+        showAlert('Please paste your menu content first.', 'error');
         return;
       }
-      Papa.parse(file, {
-        header: true,
-        skipEmptyLines: true,
-        complete: (results) => {
-          parsedDishes = parseCSVData(results);
-          if (parsedDishes.length > 0) goToPreview();
-        },
-        error: (err) => showAlert(`CSV parse error: ${err.message}`, 'error')
-      });
-    }
 
-    function handleCSVText(text) {
-      const results = Papa.parse(text, { header: true, skipEmptyLines: true });
+      detectedSource = 'paste';
+
+      // Try structured parse first (CSV pasted as text)
+      const papaResult = Papa.parse(text, { header: true, skipEmptyLines: true });
+      if (papaResult.meta.fields && papaResult.meta.fields.length >= 2 && papaResult.data.length > 0) {
+        const { nameCol } = detectColumns(papaResult.meta.fields);
+        if (nameCol !== -1) {
+          detectedSource = 'csv';
+          parsedDishes = parseCSVData(papaResult);
+          if (parsedDishes.length > 0) {
+            showAlert(`✅ Detected structured data — parsed ${parsedDishes.length} items.`, 'info');
+            goToPreview();
+            return;
+          }
+        }
+      }
+
+      // Try JSON
+      if (text.startsWith('[') || text.startsWith('{')) {
+        try {
+          detectedSource = 'json';
+          parsedDishes = parseJSONData(text);
+          if (parsedDishes.length > 0) {
+            showAlert(`✅ Parsed ${parsedDishes.length} items from JSON.`, 'info');
+            goToPreview();
+            return;
+          }
+        } catch (e) { /* Not JSON, continue */ }
+      }
+
+      // Smart text parser
+      parsedDishes = parseSmartText(text);
+      if (parsedDishes.length > 0) {
+        showAlert(`✅ Parsed ${parsedDishes.length} items from pasted text.`, 'info');
+        goToPreview();
+      } else {
+        showAlert('Could not find menu items. Try formatting as: "Dish Name - Ingredients - $Price" (one per line).', 'error');
+      }
+    });
+
+    // ═══════════════════════════════════════════════
+    //  SAMPLE BUTTONS
+    // ═══════════════════════════════════════════════
+    document.getElementById('loadSampleBtn').addEventListener('click', () => {
+      detectedSource = 'csv';
+      const results = Papa.parse(SAMPLE_CSV, { header: true, skipEmptyLines: true });
       parsedDishes = parseCSVData(results);
       if (parsedDishes.length > 0) goToPreview();
-    }
-
-    // ---- Sample Buttons ----
-    document.getElementById('loadSampleBtn').addEventListener('click', () => {
-      handleCSVText(SAMPLE_CSV);
     });
+
     document.getElementById('downloadSampleBtn').addEventListener('click', () => {
       const blob = new Blob([SAMPLE_CSV], { type: 'text/csv' });
       const a = document.createElement('a');
@@ -633,13 +1229,16 @@ Chocolate Lava Cake,"Dark chocolate, molten center, vanilla ice cream, raspberry
       a.click();
     });
 
-    // ---- Navigation ----
+    // ═══════════════════════════════════════════════
+    //  NAVIGATION
+    // ═══════════════════════════════════════════════
     function goToPreview() {
       document.getElementById('uploadCard').style.display = 'none';
       document.getElementById('previewCard').style.display = 'block';
       document.getElementById('progressCard').style.display = 'none';
       document.getElementById('resultCard').style.display = 'none';
       setStep(2);
+      showSourceBadge(detectedSource);
       renderPreviewTable();
     }
 
@@ -649,7 +1248,9 @@ Chocolate Lava Cake,"Dark chocolate, molten center, vanilla ice cream, raspberry
       setStep(1);
     });
 
-    // ---- Style Selector ----
+    // ═══════════════════════════════════════════════
+    //  STYLE SELECTOR
+    // ═══════════════════════════════════════════════
     document.querySelectorAll('.style-option').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.style-option').forEach(b => b.classList.remove('selected'));
@@ -658,7 +1259,9 @@ Chocolate Lava Cake,"Dark chocolate, molten center, vanilla ice cream, raspberry
       });
     });
 
-    // ---- Generation ----
+    // ═══════════════════════════════════════════════
+    //  GENERATION
+    // ═══════════════════════════════════════════════
     document.getElementById('generateBtn').addEventListener('click', startGeneration);
 
     async function startGeneration() {
@@ -669,13 +1272,11 @@ Chocolate Lava Cake,"Dark chocolate, molten center, vanilla ice cream, raspberry
 
       const restaurantName = document.getElementById('restaurantName').value.trim() || 'My Restaurant';
 
-      // Show progress
       document.getElementById('previewCard').style.display = 'none';
       const progressCard = document.getElementById('progressCard');
       progressCard.style.display = 'block';
       setStep(3);
 
-      // Build progress list
       const list = document.getElementById('dishProgressList');
       list.innerHTML = '';
       parsedDishes.forEach((d, i) => {
@@ -693,7 +1294,6 @@ Chocolate Lava Cake,"Dark chocolate, molten center, vanilla ice cream, raspberry
         const dish = parsedDishes[i];
         const itemEl = document.getElementById(`dish-prog-${i}`);
 
-        // Mark generating
         itemEl.className = 'dish-progress-item generating';
         itemEl.querySelector('.status-icon').innerHTML = '<span class="spinner">⏳</span>';
         document.getElementById('progressStatus').textContent = `Generating image ${i + 1} of ${parsedDishes.length}: ${dish.dish_name}`;
@@ -735,20 +1335,22 @@ Chocolate Lava Cake,"Dark chocolate, molten center, vanilla ice cream, raspberry
         id: menuId,
         restaurant: restaurantName,
         style: selectedStyle,
+        source: detectedSource,
         items: completed,
         createdAt: new Date().toISOString()
       };
       localStorage.setItem(menuId, JSON.stringify(generatedMenu));
 
-      // Also save a list of all menu IDs for the viewer
       const menuList = JSON.parse(localStorage.getItem('magicplate_menus') || '[]');
       menuList.push({ id: menuId, restaurant: restaurantName, createdAt: generatedMenu.createdAt, itemCount: completed.length });
       localStorage.setItem('magicplate_menus', JSON.stringify(menuList));
 
-      // Show result after a short delay
       setTimeout(() => showResult(menuId, errors), 1200);
     }
 
+    // ═══════════════════════════════════════════════
+    //  RESULT + QR CODE
+    // ═══════════════════════════════════════════════
     function showResult(menuId, errors) {
       document.getElementById('progressCard').style.display = 'none';
       const resultCard = document.getElementById('resultCard');
@@ -756,17 +1358,89 @@ Chocolate Lava Cake,"Dark chocolate, molten center, vanilla ice cream, raspberry
       setStep(4);
 
       const viewerUrl = `/menu-viewer.html?id=${menuId}`;
+      menuViewerUrl = `${window.location.origin}${viewerUrl}`;
+
       document.getElementById('viewMenuLink').href = viewerUrl;
-      document.getElementById('viewMenuLink').textContent = `${window.location.origin}${viewerUrl}`;
+      document.getElementById('viewMenuLink').textContent = menuViewerUrl;
 
       if (errors > 0) {
         document.getElementById('resultDesc').textContent = `Generated with ${errors} failed image(s). Failed dishes will show a placeholder.`;
       } else {
         document.getElementById('resultDesc').textContent = `All ${generatedMenu.items.length} dishes have AI-generated food photos!`;
       }
+
+      // Generate QR Code
+      const qrContainer = document.getElementById('resultQrCode');
+      qrContainer.innerHTML = '';
+      new QRCode(qrContainer, {
+        text: menuViewerUrl,
+        width: 220,
+        height: 220,
+        colorDark: '#1a1a2e',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+      });
     }
 
-    // ---- Download as HTML ----
+    // ── Copy Link ──
+    document.getElementById('copyLinkBtn').addEventListener('click', () => {
+      navigator.clipboard.writeText(menuViewerUrl).then(() => {
+        const toast = document.getElementById('copyToast');
+        toast.style.display = 'inline-block';
+        setTimeout(() => { toast.style.display = 'none'; }, 2500);
+      }).catch(() => {
+        // Fallback
+        const input = document.createElement('input');
+        input.value = menuViewerUrl;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+        const toast = document.getElementById('copyToast');
+        toast.style.display = 'inline-block';
+        setTimeout(() => { toast.style.display = 'none'; }, 2500);
+      });
+    });
+
+    // ── Download QR Code ──
+    document.getElementById('downloadQrBtn').addEventListener('click', () => {
+      const canvas = document.querySelector('#resultQrCode canvas');
+      if (canvas) {
+        const a = document.createElement('a');
+        a.href = canvas.toDataURL('image/png');
+        a.download = `${(generatedMenu?.restaurant || 'menu').replace(/[^a-z0-9]/gi, '_')}_qr_code.png`;
+        a.click();
+      } else {
+        // Fallback: try img element
+        const img = document.querySelector('#resultQrCode img');
+        if (img) {
+          const a = document.createElement('a');
+          a.href = img.src;
+          a.download = `${(generatedMenu?.restaurant || 'menu').replace(/[^a-z0-9]/gi, '_')}_qr_code.png`;
+          a.click();
+        }
+      }
+    });
+
+    // ── Share (Web Share API) ──
+    document.getElementById('shareBtn').addEventListener('click', async () => {
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: `${generatedMenu?.restaurant || 'Restaurant'} — Digital Menu`,
+            text: `Check out our digital menu!`,
+            url: menuViewerUrl
+          });
+        } catch (e) { /* User cancelled */ }
+      } else {
+        // Fallback: copy
+        document.getElementById('copyLinkBtn').click();
+      }
+    });
+
+    // ═══════════════════════════════════════════════
+    //  DOWNLOAD AS HTML
+    // ═══════════════════════════════════════════════
     document.getElementById('downloadMenuBtn').addEventListener('click', async () => {
       if (!generatedMenu) return;
       const btn = document.getElementById('downloadMenuBtn');
@@ -774,7 +1448,6 @@ Chocolate Lava Cake,"Dark chocolate, molten center, vanilla ice cream, raspberry
       btn.textContent = 'Preparing download...';
 
       try {
-        // Convert image URLs to base64 for self-contained HTML
         const itemsWithBase64 = [];
         for (const item of generatedMenu.items) {
           let imgData = null;
@@ -852,13 +1525,19 @@ Chocolate Lava Cake,"Dark chocolate, molten center, vanilla ice cream, raspberry
 </html>`;
     }
 
-    // ---- Create Another ----
+    // ═══════════════════════════════════════════════
+    //  CREATE ANOTHER
+    // ═══════════════════════════════════════════════
     document.getElementById('createAnotherBtn').addEventListener('click', () => {
       parsedDishes = [];
       generatedMenu = null;
-      csvInput.value = '';
+      detectedSource = '';
+      menuViewerUrl = '';
+      fileInput.value = '';
+      document.getElementById('pasteInput').value = '';
       document.getElementById('resultCard').style.display = 'none';
       document.getElementById('uploadCard').style.display = 'block';
+      document.getElementById('resultQrCode').innerHTML = '';
       setStep(1);
     });
   </script>
