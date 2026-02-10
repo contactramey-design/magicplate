@@ -297,9 +297,21 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
       throw new Error('Missing presigned URL or init image ID from Leonardo response');
     }
     
-    // Leonardo API may return fields for multipart/form-data upload
-    // Check if there are additional fields required for the upload
-    const uploadFields = uploadInitImage.fields || uploadInitImage.uploadFields || {};
+    // Leonardo API returns fields as a JSON string that must be parsed
+    // According to Leonardo docs: POST with multipart/form-data, include all fields
+    let uploadFields = {};
+    if (uploadInitImage.fields) {
+      // Fields might be a JSON string or already an object
+      if (typeof uploadInitImage.fields === 'string') {
+        try {
+          uploadFields = JSON.parse(uploadInitImage.fields);
+        } catch (e) {
+          console.warn('Could not parse fields JSON:', e);
+        }
+      } else {
+        uploadFields = uploadInitImage.fields;
+      }
+    }
     const hasUploadFields = Object.keys(uploadFields).length > 0;
     
     // Check if URL points to bucket root (ends with /) - Leonardo may return base URL + separate key
@@ -398,14 +410,44 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
         console.warn('⚠️ Could not parse URL, attempting upload anyway:', urlError.message);
       }
       
-      // S3 presigned URLs - try different approaches
-      // Some presigned URLs require specific headers that are part of the signature
+      // Leonardo API requires POST with multipart/form-data (not PUT)
+      // According to Leonardo docs: POST to presigned URL with all fields + file
       let uploadResponse;
-      let lastError;
       
-      // Try 1: Minimal headers (just Content-Length)
-      try {
-        console.log('Attempt 1: Uploading with minimal headers (Content-Length only)...');
+      if (hasUploadFields) {
+        // Leonardo's documented method: POST with multipart/form-data
+        console.log('Using Leonardo method: POST with multipart/form-data');
+        console.log('Upload fields:', Object.keys(uploadFields));
+        
+        const FormData = require('form-data');
+        const formData = new FormData();
+        
+        // Add all required fields from Leonardo's response
+        Object.entries(uploadFields).forEach(([key, value]) => {
+          formData.append(key, value);
+          console.log(`Added field: ${key} = ${value}`);
+        });
+        
+        // Add the file - field name is typically 'file' for Leonardo
+        const fileFieldName = uploadInitImage.fileField || 'file';
+        formData.append(fileFieldName, imageBuffer, {
+          filename: `${initImageId}.${extension}`,
+          contentType: contentType
+        });
+        
+        console.log('POSTing to:', presignedUrl);
+        uploadResponse = await axios.post(presignedUrl, formData, {
+          headers: {
+            ...formData.getHeaders()
+          },
+          maxContentLength: Infinity,
+          maxBodyLength: Infinity,
+          timeout: 120000,
+          validateStatus: (status) => status < 500
+        });
+      } else {
+        // Fallback: Try PUT (standard S3 presigned URL method)
+        console.log('No upload fields found, trying PUT method (standard S3)...');
         uploadResponse = await axios.put(presignedUrl, imageBuffer, {
           headers: {
             'Content-Length': imageBuffer.length.toString()
@@ -419,60 +461,6 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
           }],
           validateStatus: (status) => status < 500
         });
-        
-        if (uploadResponse.status === 200 || uploadResponse.status === 204) {
-          console.log('✅ Upload successful with minimal headers');
-        } else {
-          throw new Error(`Upload returned status ${uploadResponse.status}`);
-        }
-      } catch (error1) {
-        lastError = error1;
-        console.log('❌ Attempt 1 failed:', error1.response?.status, error1.response?.data || error1.message);
-        
-        // Try 2: With Content-Type header (some presigned URLs require it)
-        try {
-          console.log('Attempt 2: Uploading with Content-Type header...');
-          uploadResponse = await axios.put(presignedUrl, imageBuffer, {
-            headers: {
-              'Content-Type': contentType,
-              'Content-Length': imageBuffer.length.toString()
-            },
-            maxContentLength: Infinity,
-            maxBodyLength: Infinity,
-            timeout: 120000,
-            validateStatus: (status) => status < 500
-          });
-          
-          if (uploadResponse.status === 200 || uploadResponse.status === 204) {
-            console.log('✅ Upload successful with Content-Type header');
-          } else {
-            throw new Error(`Upload returned status ${uploadResponse.status}`);
-          }
-        } catch (error2) {
-          lastError = error2;
-          console.log('❌ Attempt 2 failed:', error2.response?.status, error2.response?.data || error2.message);
-          
-          // Try 3: No headers at all (let axios handle it)
-          try {
-            console.log('Attempt 3: Uploading with no custom headers...');
-            uploadResponse = await axios.put(presignedUrl, imageBuffer, {
-              maxContentLength: Infinity,
-              maxBodyLength: Infinity,
-              timeout: 120000,
-              validateStatus: (status) => status < 500
-            });
-            
-            if (uploadResponse.status === 200 || uploadResponse.status === 204) {
-              console.log('✅ Upload successful with no custom headers');
-            } else {
-              throw new Error(`Upload returned status ${uploadResponse.status}`);
-            }
-          } catch (error3) {
-            lastError = error3;
-            console.log('❌ Attempt 3 failed:', error3.response?.status, error3.response?.data || error3.message);
-            throw new Error(`All upload attempts failed. Last error: ${error3.response?.status} - ${JSON.stringify(error3.response?.data || error3.message)}`);
-          }
-        }
       }
       
       // Check response status
