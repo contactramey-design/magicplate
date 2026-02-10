@@ -124,13 +124,12 @@ function baseNegativePrompt() {
  * - fofr/realistic-vision-v5.1
  * - lucataco/flux-pro
  */
-async function enhanceImageWithReplicate(imageBuffer, imageName) {
+async function enhanceImageWithReplicate(imageBuffer, imageName, style = 'upscale_casual') {
   if (!REPLICATE_API_TOKEN) {
     throw new Error('REPLICATE_API_TOKEN not configured');
   }
 
   // Step 1: Upload image to Replicate
-  // Replicate's /files endpoint expects multipart/form-data with a "content" part.
   const uploadForm = new FormData();
   uploadForm.append('content', imageBuffer, {
     filename: imageName || 'upload.jpg',
@@ -153,20 +152,33 @@ async function enhanceImageWithReplicate(imageBuffer, imageName) {
     throw new Error('Invalid file URL from Replicate upload');
   }
   
-  // Step 2: Use a reliable image enhancement model
-  // Try owner/model format first (Replicate's preferred format)
+  // Step 2: Use Flux model for img2img quality enhancement
+  // Use quality-focused prompt (same as Leonardo/Together)
+  const prompt = buildRegenPrompt(style);
+  const negativePrompt = baseNegativePrompt();
+  
   let prediction;
   let lastError = null;
   
-  // Try format 1: owner/model
+  // Try Flux-dev first (faster, good quality)
+  // Version hash: 8f7948b0842357f6952009efe899d525887f713204de2a31a9c6ca24623093
   try {
+    console.log('🔄 Using Replicate Flux-dev for quality enhancement...');
     prediction = await axios.post(
       `${REPLICATE_API_URL}/predictions`,
       {
-        version: "nightmareai/real-esrgan",
+        version: "8f7948b0842357f6952009efe899d525887f713204de2a31a9c6ca24623093", // Flux-dev version
         input: {
-          image: uploadedFileUrl,
-          scale: 2
+          image: uploadedFileUrl, // Reference image for img2img
+          prompt: prompt, // Quality-focused prompt
+          negative_prompt: negativePrompt,
+          prompt_strength: 0.85, // HIGHER = quality enhancement (stays closer to original, improves quality)
+          // LOWER = style transformation (changes appearance more)
+          // 0.85 = 85% original, 15% enhancement (quality improvement, not transformation)
+          num_inference_steps: 40, // Increased for better quality (was 20 in example)
+          guidance_scale: 7.5, // Balanced adherence to prompt
+          output_format: 'jpg', // Output format
+          output_quality: 95, // High quality output
         }
       },
       {
@@ -178,17 +190,25 @@ async function enhanceImageWithReplicate(imageBuffer, imageName) {
     );
   } catch (error) {
     lastError = error;
-    console.error('Format 1 (owner/model) failed:', error.response?.data || error.message);
+    console.error('❌ Flux-dev failed:', error.response?.data || error.message);
     
-    // Try format 2: version hash
+    // Fallback: Try alternative Flux model or version
     try {
+      console.log('🔄 Trying alternative Flux model...');
       prediction = await axios.post(
         `${REPLICATE_API_URL}/predictions`,
         {
-          version: "42fed1c4974146d4d2414e2be2c527b0af8b7f5",
+          // Try using model string format instead of version hash
+          model: 'black-forest-labs/flux-dev',
           input: {
             image: uploadedFileUrl,
-            scale: 2
+            prompt: prompt,
+            negative_prompt: negativePrompt,
+            prompt_strength: 0.85, // Quality-focused
+            num_inference_steps: 40,
+            guidance_scale: 7.5,
+            output_format: 'jpg',
+            output_quality: 95,
           }
         },
         {
@@ -200,18 +220,40 @@ async function enhanceImageWithReplicate(imageBuffer, imageName) {
       );
     } catch (error2) {
       lastError = error2;
-      console.error('Format 2 (version hash) failed:', error2.response?.data || error2.message);
+      console.error('❌ Alternative Flux model failed:', error2.response?.data || error2.message);
       
-      // If both fail, throw with detailed error
-      const errorDetails = error2.response?.data || error.response?.data || {};
-      throw new Error(`Both model formats failed. Last error: ${errorDetails.detail || errorDetails.error || error2.message}`);
+      // Final fallback: Use simple upscaler (old method) if Flux fails
+      console.log('🔄 Falling back to upscaler model...');
+      try {
+        prediction = await axios.post(
+          `${REPLICATE_API_URL}/predictions`,
+          {
+            version: "42fed1c4974146d4d2414e2be2c527b0af8b7f5", // Real-ESRGAN upscaler
+            input: {
+              image: uploadedFileUrl,
+              scale: 2 // 2x upscale
+            }
+          },
+          {
+            headers: {
+              'Authorization': `Token ${REPLICATE_API_TOKEN}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+      } catch (error3) {
+        const errorDetails = error3.response?.data || error2.response?.data || error.response?.data || {};
+        throw new Error(`All Replicate models failed. Last error: ${errorDetails.detail || errorDetails.error || error3.message}`);
+      }
     }
   }
   
-  // Step 3: Poll for completion
+  // Step 3: Poll for completion (check every 2 seconds)
   let result = prediction.data;
+  console.log('⏳ Polling for Replicate result, prediction ID:', result.id);
+  
   while (result.status === 'starting' || result.status === 'processing') {
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 2000)); // Poll every 2s
     const statusResponse = await axios.get(
       `${REPLICATE_API_URL}/predictions/${result.id}`,
       {
@@ -221,12 +263,23 @@ async function enhanceImageWithReplicate(imageBuffer, imageName) {
       }
     );
     result = statusResponse.data;
+    
+    if (result.status === 'processing') {
+      console.log('⏳ Still processing...');
+    }
   }
   
   if (result.status === 'failed') {
-    throw new Error(result.error || 'Enhancement failed');
+    const errorMsg = result.error || 'Enhancement failed';
+    console.error('❌ Replicate prediction failed:', errorMsg);
+    throw new Error(`Replicate enhancement failed: ${errorMsg}`);
   }
   
+  if (!result.output || !result.output[0]) {
+    throw new Error('No output from Replicate prediction');
+  }
+  
+  console.log('✅ Replicate enhancement completed');
   return result;
 }
 
