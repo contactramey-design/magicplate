@@ -786,9 +786,9 @@ async function enhanceImageWithTogether(imageBuffer, imageName, style = 'upscale
         prompt: prompt,
         negative_prompt: negativePrompt,
         image: `data:image/jpeg;base64,${base64Image}`,
-        steps: 40,  // Balanced quality/speed
+        steps: 50,  // Increased for better quality (was 40)
         guidance_scale: 7.5,  // Balanced stylization
-        strength: 0.7  // Image-to-image strength (0.7 = good balance between original and transformation)
+        strength: 0.85  // Increased from 0.7 - focus on quality enhancement, not transformation
       },
       {
         headers: {
