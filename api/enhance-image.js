@@ -372,70 +372,51 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
         throw new Error(`Invalid presigned URL format - appears to point to bucket root: ${presignedUrl.substring(0, 200)}`);
       }
       
-      // Check if Leonardo requires multipart/form-data upload (has upload fields)
-      const uploadFields = uploadInitImage.fields || uploadInitImage.uploadFields || {};
-      const hasUploadFields = Object.keys(uploadFields).length > 0;
+      // S3 presigned URLs ALWAYS require PUT method, not POST
+      // Leonardo's presigned URLs are standard S3 presigned URLs
+      console.log('Using S3 PUT upload (presigned URLs require PUT, not POST)');
       
-      let uploadResponse;
-      
-      if (hasUploadFields) {
-        // Leonardo requires multipart/form-data upload with specific fields
-        console.log('Using multipart/form-data upload with fields:', Object.keys(uploadFields));
-        
-        const FormData = require('form-data');
-        const formData = new FormData();
-        
-        // Add all required fields from Leonardo's response
-        Object.entries(uploadFields).forEach(([key, value]) => {
-          formData.append(key, value);
-          console.log(`Added field: ${key} = ${value}`);
-        });
-        
-        // Add the file - field name might be 'file' or 'content' or from uploadFields
-        const fileFieldName = uploadInitImage.fileField || 'file';
-        formData.append(fileFieldName, imageBuffer, {
-          filename: `${initImageId}.${extension}`,
-          contentType: contentType
-        });
-        
-        // Extract the actual upload URL (might be different from presignedUrl)
-        const uploadUrl = uploadInitImage.uploadUrl || presignedUrl;
-        
-        uploadResponse = await axios.post(uploadUrl, formData, {
-          headers: {
-            ...formData.getHeaders()
-          },
-          maxContentLength: Infinity,
-          maxBodyLength: Infinity,
-          timeout: 120000,
-          validateStatus: (status) => status < 500
-        });
-      } else {
-        // Standard S3 presigned URL PUT upload
-        console.log('Using standard S3 PUT upload');
-        
-        // S3 presigned URLs - use raw buffer, no Content-Type header
-        // The signature is calculated without Content-Type, so adding it breaks the signature
-        uploadResponse = await axios.put(presignedUrl, imageBuffer, {
-          headers: {
-            'Content-Length': imageBuffer.length.toString()
-            // DO NOT add Content-Type - it breaks the presigned URL signature
-          },
-          maxContentLength: Infinity,
-          maxBodyLength: Infinity,
-          timeout: 120000,
-          // Prevent axios from automatically adding Content-Type or modifying the request
-          transformRequest: [(data) => {
-            // Return Buffer/ArrayBuffer as-is
-            if (Buffer.isBuffer(data)) {
-              return data;
-            }
-            return data;
-          }],
-          // Don't let axios set default headers
-          validateStatus: (status) => status < 500
-        });
+      // Validate URL format - should be an S3 URL, not a bucket root
+      if (!presignedUrl.includes('amazonaws.com') && !presignedUrl.includes('s3')) {
+        console.warn('⚠️ Presigned URL does not look like an S3 URL:', presignedUrl.substring(0, 100));
       }
+      
+      // Check if URL ends with bucket name (would cause CreateBucket error)
+      try {
+        const urlParts = new URL(presignedUrl);
+        const pathParts = urlParts.pathname.split('/').filter(p => p);
+        if (pathParts.length === 0 || (pathParts.length === 1 && !pathParts[0].includes('.'))) {
+          throw new Error(`Invalid presigned URL format - appears to point to bucket root: ${presignedUrl.substring(0, 200)}`);
+        }
+      } catch (urlError) {
+        if (urlError.message.includes('Invalid presigned URL')) {
+          throw urlError;
+        }
+        // URL parsing error - might be malformed, but try anyway
+        console.warn('⚠️ Could not parse URL, attempting upload anyway:', urlError.message);
+      }
+      
+      // S3 presigned URLs - use PUT with raw buffer, no Content-Type header
+      // The signature is calculated without Content-Type, so adding it breaks the signature
+      const uploadResponse = await axios.put(presignedUrl, imageBuffer, {
+        headers: {
+          'Content-Length': imageBuffer.length.toString()
+          // DO NOT add Content-Type - it breaks the presigned URL signature
+        },
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity,
+        timeout: 120000,
+        // Prevent axios from automatically adding Content-Type or modifying the request
+        transformRequest: [(data) => {
+          // Return Buffer/ArrayBuffer as-is
+          if (Buffer.isBuffer(data)) {
+            return data;
+          }
+          return data;
+        }],
+        // Don't let axios set default headers
+        validateStatus: (status) => status < 500
+      });
       
       // Check response status
       if (uploadResponse.status !== 200 && uploadResponse.status !== 204) {
