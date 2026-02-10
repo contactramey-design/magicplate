@@ -111,17 +111,17 @@ function buildRegenPrompt(style, fictionalLevel = 30) {
     } else {
       // FICTIONAL/MAGICAL: Complete transformation - like homepage slider
       enhancementMode = 'MAGICAL TRANSFORMATION';
-      backgroundInstructions = 'COMPLETELY TRANSFORM the background - create a stunning white or light-colored professional food photography studio setting, elegant modern restaurant environment, or sophisticated dining scene. Replace everything with a perfect, clean, bright background. White plates, white table, professional studio lighting. Make it look like a high-end restaurant marketing photo with dramatic white space and perfect composition.';
-      authenticityInstructions = 'DRAMATICALLY TRANSFORM the entire scene - create the most perfect, idealized version possible. White plates, clean white background, professional studio setting. Make it look like a magazine cover or high-end restaurant advertisement. Transform everything while keeping the main food item recognizable but perfected.';
-      plateInstructions = 'Replace with clean white plates, elegant white servingware, or sophisticated modern tableware. White ceramic plates, white bowls, minimalist presentation.';
-      styleInstructions = 'Dramatic, high-contrast food photography with white plates, white background, cartoon-like vibrant colors, almost editorial/commercial style. Make colors pop dramatically against white.';
+      backgroundInstructions = 'COMPLETELY TRANSFORM the background - create a stunning blurred background (bokeh effect) with soft, out-of-focus elements. Professional food photography studio setting with dramatic depth of field. The background should be beautifully blurred, creating perfect separation between the food and background. Soft, creamy bokeh, professional studio lighting. Make it look exactly like the homepage slider - dramatic blurred background that makes the food pop.';
+      authenticityInstructions = 'DRAMATICALLY TRANSFORM the entire scene - create the most perfect, idealized version possible. Replicate the exact enhancement style from the homepage slider: vibrant enhanced colors, dramatic contrast, blurred background, professional lighting. Transform everything while keeping the main food item recognizable but dramatically enhanced. Make it look like a high-end restaurant marketing photo with the same dramatic enhancement style.';
+      plateInstructions = 'Enhance or replace plates and servingware - clean white plates, elegant servingware, or sophisticated modern tableware. White ceramic plates work great for dramatic contrast.';
+      styleInstructions = 'Dramatic, high-contrast food photography exactly like the homepage slider. Vibrant, rich, saturated colors that pop. Enhanced contrast between food and background. Blurred background (bokeh effect) for perfect depth of field. Professional food photography lighting with perfect highlights and shadows. Sharp, crystal-clear food details. Make colors vibrant and rich - enhanced reds, greens, browns that look amazing.';
     }
     
-    const qualityPrompt = `${enhancementMode}: ${fictionalLevel <= 30 ? 'Enhance this food photo authentically' : fictionalLevel <= 70 ? 'Transform this food photo into a perfectly balanced' : 'DRAMATICALLY TRANSFORM this food photo into a completely idealized, magical'} restaurant marketing photo. 
-Create the PERFECT version of this dish - make it look absolutely flawless and magazine-worthy. 
-PERFECT sharpness and clarity - every detail should be razor-sharp and crystal clear. 
-${fictionalLevel > 70 ? 'DRAMATICALLY ENHANCE colors - make them vibrant, cartoon-like, pop against white background. Rich, saturated, almost unreal colors that look amazing.' : 'PERFECT colors - make them vibrant, rich, and ideal (perfectly cooked meat colors, fresh vibrant vegetables, glossy perfect sauces).'}
-PERFECT lighting - add ideal professional food photography lighting with perfect highlights, perfect shadows, perfect exposure - make it look like it was shot in a professional studio. 
+    const qualityPrompt = `${enhancementMode}: ${fictionalLevel <= 30 ? 'Enhance this food photo authentically' : fictionalLevel <= 70 ? 'Transform this food photo into a perfectly balanced' : 'DRAMATICALLY TRANSFORM this food photo to replicate the exact enhancement style from the homepage slider'} restaurant marketing photo. 
+Create the PERFECT version of this dish - make it look absolutely flawless and magazine-worthy, ${fictionalLevel > 70 ? 'exactly like the dramatic enhancement shown on the homepage slider' : ''}. 
+PERFECT sharpness and clarity - every detail should be razor-sharp and crystal clear. Food should be in perfect focus with incredible detail. 
+${fictionalLevel > 70 ? 'DRAMATICALLY ENHANCE colors - replicate the homepage slider style: vibrant, rich, saturated colors that pop. Enhanced reds for meat, brighter greens for vegetables, richer browns for breads. Make colors look amazing and vibrant - like the dramatic enhancement on the homepage. Rich, saturated, almost unreal colors that create stunning contrast.' : 'PERFECT colors - make them vibrant, rich, and ideal (perfectly cooked meat colors, fresh vibrant vegetables, glossy perfect sauces).'}
+PERFECT lighting - add ideal professional food photography lighting with perfect highlights, perfect shadows, perfect exposure - make it look like it was shot in a professional studio. ${fictionalLevel > 70 ? 'Dramatic lighting that creates perfect contrast and makes the food pop, just like the homepage slider.' : ''}
 PERFECT textures - make food look absolutely perfect (perfectly crispy edges, perfectly juicy meat, perfectly flaky pastry, perfectly glossy glazes). 
 PERFECT plating - idealize the presentation ${fictionalLevel > 70 ? 'dramatically' : 'subtly'} (perfect arrangement, perfect garnish placement, perfect composition). 
 ${plateInstructions}
@@ -130,7 +130,7 @@ Upscale to maximum resolution.
 ${authenticityInstructions}
 ${styleInstructions}
 Ultra-high resolution, perfect magazine-quality food photography, ${fictionalLevel <= 30 ? 'authentic' : fictionalLevel <= 70 ? 'balanced' : 'magical idealized'} commercial food photo, flawless presentation. 
-${fictionalLevel > 70 ? 'White plates, white background, dramatic colors, high-end restaurant marketing style.' : ''}
+${fictionalLevel > 70 ? 'Replicate the exact enhancement style from the homepage slider: vibrant colors, blurred background, dramatic contrast, professional food photography.' : ''}
 ${basePrompt}`;
     
     // Ensure prompt is not too long (Leonardo has limits around 1000-2000 chars)
@@ -143,7 +143,7 @@ ${basePrompt}`;
     console.error('Error generating prompt, using fallback:', error);
     // Fallback to perfection-focused prompt if new system fails
     const fallbackPrompt = fictionalLevel > 70 
-      ? `MAGICAL TRANSFORMATION. Dramatically transform into white plate, white background, cartoon-like vibrant colors, high-end restaurant marketing style. ${styleBlock(style)}`
+      ? `MAGICAL TRANSFORMATION. Replicate homepage slider style: dramatically enhance colors (vibrant, rich, saturated), blurred background (bokeh effect), dramatic contrast, professional lighting, sharp details. Make it look exactly like the homepage slider enhancement. ${styleBlock(style)}`
       : `PERFECT THIS FOOD PHOTO. Create the ideal, perfect version - flawless sharpness, perfect colors, perfect lighting, perfect textures, perfect plating. Magazine-quality, idealized commercial food photography. ${styleBlock(style)}`;
     return fallbackPrompt;
   }
