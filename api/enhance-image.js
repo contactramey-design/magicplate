@@ -82,27 +82,99 @@ function styleBlock(style) {
 // Import the new prompt system
 const { getAIGatewayPrompt } = require('../lib/photo-enhancement-prompt');
 
-function buildRegenPrompt(style, fictionalLevel = 30) {
-  try {
-    // Use the comprehensive ethical food photography prompt
-    const basePrompt = getAIGatewayPrompt(style);
-    
-    // CRITICAL RULE: The AI must preserve the IDENTITY of every food item.
-    // Enhancement = make the SAME food look better, NOT replace it with different food.
-    const foodIdentityRule = `ABSOLUTE RULE - FOOD IDENTITY PRESERVATION:
-You are enhancing an EXISTING photo. The food items in the output MUST be the SAME food items as in the input.
-- If the original has a BURGER, the output MUST have a BURGER (not a steak, not a salad, not a different dish).
-- If the original has TACOS, the output MUST have TACOS.
-- If the original has SUSHI, the output MUST have SUSHI.
-- If the original has a DRINK/CUP, the output MUST have that SAME type of DRINK/CUP.
-- If the original has FRIES, the output MUST have FRIES.
-- NEVER substitute one food item for another. NEVER change the type of cuisine.
-- NEVER invent new dishes. NEVER remove existing dishes.
-- The NUMBER of items must stay the same (if there are 2 tacos, output 2 tacos).
-- The ARRANGEMENT on the plate must stay recognizably similar.
+/**
+ * STEP 1: Automatic food item identification using a vision model.
+ * Calls Replicate's BLIP-2 to describe the image, then extracts a structured
+ * list of food items, drinks, plates, etc. This runs BEFORE enhancement so
+ * the enhancement prompt can reference the exact items.
+ *
+ * @param {Buffer} imageBuffer - Raw image bytes
+ * @returns {Promise<string>} - A description of identified items, or '' on failure
+ */
+async function analyzeImageContents(imageBuffer) {
+  // We need Replicate for vision (BLIP-2 captioning model)
+  const token = process.env.REPLICATE_API_TOKEN;
+  if (!token) {
+    console.log('⚠️ REPLICATE_API_TOKEN not set — skipping automatic food identification');
+    return '';
+  }
 
-FIRST: Study the reference image carefully and list what you see.
-THEN: Recreate those EXACT items but enhanced.`;
+  try {
+    console.log('🔍 Step 1: Analyzing image to identify food items...');
+
+    // Convert buffer to data-URI so we can send it inline
+    const base64 = imageBuffer.toString('base64');
+    const mimeType = 'image/jpeg';
+    const dataUri = `data:${mimeType};base64,${base64}`;
+
+    // Use Replicate's BLIP-2 model for image captioning / VQA
+    const response = await axios.post(
+      'https://api.replicate.com/v1/predictions',
+      {
+        // BLIP-2 on Replicate (salesforce/blip)
+        version: '2e1dddc8621f72155f24cf2e0adbde548458d3cab9f00c0139eea840d0ac4746',
+        input: {
+          image: dataUri,
+          task: 'visual_question_answering',
+          question: 'List every food item, drink, cup, plate, bowl, sauce, garnish, side dish, and ingredient visible in this photo. Be specific about the type of food (e.g. cheeseburger not just burger, caesar salad not just salad). Include quantities if there are multiple items.'
+        }
+      },
+      {
+        headers: {
+          'Authorization': `Token ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    // Poll for result (BLIP is fast, usually <10s)
+    let result = response.data;
+    let attempts = 0;
+    while (['starting', 'processing'].includes(result.status) && attempts < 30) {
+      await new Promise(r => setTimeout(r, 1000));
+      const poll = await axios.get(
+        `https://api.replicate.com/v1/predictions/${result.id}`,
+        { headers: { 'Authorization': `Token ${token}` } }
+      );
+      result = poll.data;
+      attempts++;
+    }
+
+    if (result.status !== 'succeeded') {
+      console.warn('⚠️ Vision analysis did not succeed, status:', result.status);
+      return '';
+    }
+
+    // BLIP returns a string (or array)
+    const description = Array.isArray(result.output) ? result.output.join(' ') : String(result.output || '');
+    console.log('🔍 Identified food items:', description);
+    return description.trim();
+  } catch (err) {
+    // Non-fatal — enhancement will still work, just without explicit item list
+    console.warn('⚠️ Food identification failed (non-fatal):', err.message);
+    return '';
+  }
+}
+
+/**
+ * STEP 2: Build the enhancement prompt, embedding the identified items so the
+ * AI knows exactly what to preserve.
+ */
+function buildRegenPrompt(style, fictionalLevel = 30, identifiedItems = '') {
+  try {
+    const basePrompt = getAIGatewayPrompt(style);
+
+    // If we identified specific items, embed them directly in the prompt
+    const identityBlock = identifiedItems
+      ? `IDENTIFIED ITEMS IN THIS PHOTO (from automatic analysis):
+${identifiedItems}
+
+You MUST include ALL of the items listed above in your output. Do NOT substitute, remove, or add items.
+Enhance these EXACT items — make them look perfect, but they must remain the SAME food.`
+      : `FOOD IDENTITY PRESERVATION:
+Study the reference image. The output MUST contain the SAME food items as the input.
+NEVER substitute one food for another. A burger stays a burger, tacos stay tacos.
+Keep the same number of items and recognizable arrangement.`;
 
     // Determine enhancement style based on fictional level (0-100)
     let enhancementMode = '';
@@ -110,41 +182,32 @@ THEN: Recreate those EXACT items but enhanced.`;
     let authenticityInstructions = '';
     let plateInstructions = '';
     let styleInstructions = '';
-    let elementInstructions = '';
     
     if (fictionalLevel <= 30) {
-      // AUTHENTIC: Enhance food only, keep original background
       enhancementMode = 'AUTHENTIC ENHANCEMENT';
-      backgroundInstructions = 'Keep the original background exactly as shown. Maintain original restaurant setting, table, and environment. Do not change the background.';
-      authenticityInstructions = 'Only improve food quality, colors, lighting, and textures. Keep everything else exactly as in the original.';
-      plateInstructions = 'Keep original plates and servingware exactly as shown.';
+      backgroundInstructions = 'Keep the original background exactly as shown.';
+      authenticityInstructions = 'Only improve food quality, colors, lighting, textures. Keep everything else as-is.';
+      plateInstructions = 'Keep original plates and servingware.';
       styleInstructions = 'Realistic, natural food photography.';
-      elementInstructions = 'Enhance ALL food items exactly as they appear - same food, same arrangement, just better quality. Do not add, remove, or swap any items.';
     } else if (fictionalLevel <= 70) {
-      // BALANCED: Perfect food with subtle background improvements
       enhancementMode = 'BALANCED PERFECTION';
-      backgroundInstructions = 'Subtly improve the background - enhance depth of field, soften distractions, but keep the general setting recognizable.';
-      authenticityInstructions = 'Perfect the food dramatically while making subtle background improvements. The food items must remain the same dishes.';
-      plateInstructions = 'Improve plates - make them cleaner and more elegant, but keep them recognizable.';
-      styleInstructions = 'Professional food photography with subtle enhancements.';
-      elementInstructions = 'Perfect ALL food items - enhance them dramatically but they must remain the SAME dishes. A burger stays a burger, tacos stay tacos.';
+      backgroundInstructions = 'Subtly improve background — enhance depth of field, soften distractions.';
+      authenticityInstructions = 'Perfect the food dramatically with subtle background improvements.';
+      plateInstructions = 'Improve plates — cleaner, more elegant.';
+      styleInstructions = 'Professional food photography.';
     } else {
-      // FICTIONAL/MAGICAL: Dramatic visual transformation - but SAME FOOD
       enhancementMode = 'MAGICAL ENHANCEMENT';
-      backgroundInstructions = 'Create a stunning blurred background (bokeh effect) with professional studio lighting. Beautiful depth of field separation.';
-      authenticityInstructions = 'Dramatically enhance the VISUAL STYLE (colors, lighting, background, contrast) while keeping the SAME food items. The dishes must be recognizable as the same food from the original.';
-      plateInstructions = 'Use clean white plates or elegant servingware for dramatic contrast.';
-      styleInstructions = 'Dramatic, high-contrast food photography. Vibrant saturated colors, bokeh background, professional lighting, sharp food details.';
-      elementInstructions = 'CRITICAL: The output MUST contain the SAME food items as the input. Enhance them dramatically - perfect colors, textures, lighting - but a burger must remain a burger, pasta must remain pasta, sushi must remain sushi. Transform the STYLE, not the FOOD IDENTITY.';
+      backgroundInstructions = 'Create a stunning blurred bokeh background with professional studio lighting.';
+      authenticityInstructions = 'Dramatically enhance colors, lighting, contrast while keeping the SAME food items recognizable.';
+      plateInstructions = 'Clean white plates or elegant servingware for dramatic contrast.';
+      styleInstructions = 'Dramatic high-contrast food photography. Vibrant saturated colors, bokeh background, sharp food details.';
     }
     
-    const qualityPrompt = `${foodIdentityRule}
+    const qualityPrompt = `${identityBlock}
 
 ${enhancementMode}: Enhance this food photo into a ${fictionalLevel <= 30 ? 'high-quality authentic' : fictionalLevel <= 70 ? 'perfectly balanced professional' : 'stunning, dramatic magazine-quality'} restaurant marketing photo.
 
-${elementInstructions}
-
-Make the SAME dish look absolutely flawless and magazine-worthy.
+Make the SAME dish look flawless and magazine-worthy.
 Sharp focus, crystal-clear food details, perfect exposure.
 ${fictionalLevel > 70 ? 'Vibrant, rich, saturated colors that pop. Enhanced contrast. Professional studio lighting with dramatic highlights and shadows.' : 'Natural, appetizing colors. Clean professional lighting.'}
 Perfect textures (crispy edges, juicy meat, flaky pastry, glossy glazes).
@@ -154,16 +217,14 @@ ${authenticityInstructions}
 ${styleInstructions}
 ${basePrompt}`;
     
-    // Ensure prompt is not too long (Leonardo has limits around 1000-2000 chars)
-    if (qualityPrompt && qualityPrompt.length > 1500) {
-      console.warn('Prompt is very long, truncating to 1500 chars');
+    if (qualityPrompt.length > 1500) {
+      console.warn('Prompt too long, truncating to 1500 chars');
       return qualityPrompt.substring(0, 1500);
     }
     return qualityPrompt;
   } catch (error) {
     console.error('Error generating prompt, using fallback:', error);
-    const fallbackPrompt = `FOOD IDENTITY PRESERVATION: The output must contain the SAME food items as the input - never substitute dishes. Enhance the SAME food with perfect sharpness, colors, lighting, textures. Magazine-quality food photography. ${styleBlock(style)}`;
-    return fallbackPrompt;
+    return `FOOD IDENTITY PRESERVATION: The output must contain the SAME food items as the input. ${identifiedItems ? 'Items: ' + identifiedItems + '. ' : ''}Enhance with perfect sharpness, colors, lighting, textures. ${styleBlock(style)}`;
   }
 }
 
@@ -183,7 +244,7 @@ function baseNegativePrompt() {
  * - fofr/realistic-vision-v5.1
  * - lucataco/flux-pro
  */
-async function enhanceImageWithReplicate(imageBuffer, imageName, style = 'upscale_casual', fictionalLevel = 30) {
+async function enhanceImageWithReplicate(imageBuffer, imageName, style = 'upscale_casual', fictionalLevel = 30, identifiedItems = '') {
   if (!REPLICATE_API_TOKEN) {
     throw new Error('REPLICATE_API_TOKEN not configured');
   }
@@ -213,7 +274,7 @@ async function enhanceImageWithReplicate(imageBuffer, imageName, style = 'upscal
   
   // Step 2: Use Flux model for img2img quality enhancement
   // Use quality-focused prompt (same as Leonardo/Together)
-  const prompt = buildRegenPrompt(style, fictionalLevel);
+  const prompt = buildRegenPrompt(style, fictionalLevel, identifiedItems);
   const negativePrompt = baseNegativePrompt();
   
   // Calculate strength based on fictional level
@@ -356,7 +417,7 @@ async function enhanceImageWithReplicate(imageBuffer, imageName, style = 'upscal
  * Enhance image using Leonardo.ai API (Image-to-Image)
  * Uses Leonardo's image-to-image endpoint for food photography enhancement
  */
-async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale_casual', fictionalLevel = 30) {
+async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale_casual', fictionalLevel = 30, identifiedItems = '') {
   if (!LEONARDO_API_KEY) {
     throw new Error('LEONARDO_API_KEY not configured');
   }
@@ -768,7 +829,7 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
 
   // Step 3: Generate enhanced image using image-to-image with PhotoReal for food
   // Focus on QUALITY ENHANCEMENT (sharpness, detail, noise reduction) not style transformation
-  const prompt = buildRegenPrompt(style, fictionalLevel);
+  const prompt = buildRegenPrompt(style, fictionalLevel, identifiedItems);
   const negativePrompt = baseNegativePrompt();
   
   // Calculate strength based on fictional level
@@ -902,14 +963,14 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
 /**
  * Enhance image using Together.ai (Flux Pro) - Image-to-Image
  */
-async function enhanceImageWithTogether(imageBuffer, imageName, style = 'upscale_casual', fictionalLevel = 30) {
+async function enhanceImageWithTogether(imageBuffer, imageName, style = 'upscale_casual', fictionalLevel = 30, identifiedItems = '') {
   if (!TOGETHER_API_KEY) {
     throw new Error('TOGETHER_API_KEY not configured');
   }
 
   // Convert image to base64
   const base64Image = imageBuffer.toString('base64');
-  const prompt = buildRegenPrompt(style, fictionalLevel);
+  const prompt = buildRegenPrompt(style, fictionalLevel, identifiedItems);
   const negativePrompt = baseNegativePrompt();
   
   // Calculate strength based on fictional level
@@ -1067,34 +1128,45 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'Image too large. Maximum size: 10MB' });
     }
     
-    // Choose enhancement service (priority: Leonardo > Together > Replicate)
-    // Leonardo is prioritized for food photography image-to-image
+    // ── STEP 1: Automatic food item identification ──
+    // This runs a vision model FIRST to list every food item, drink, etc.
+    // Then embeds that list in the enhancement prompt so nothing gets swapped.
+    let identifiedItems = '';
+    try {
+      identifiedItems = await analyzeImageContents(imageBuffer);
+      if (identifiedItems) {
+        console.log(`🔍 Food identification complete: "${identifiedItems}"`);
+      } else {
+        console.log('⚠️ No food identification available — will rely on prompt rules only');
+      }
+    } catch (analysisError) {
+      console.warn('⚠️ Food identification step failed (non-fatal):', analysisError.message);
+    }
+
+    // ── STEP 2: Enhancement using identified items ──
     let result;
     let serviceUsed = 'none';
     
-    // Check which APIs are configured
     console.log('API Configuration check:');
     console.log('- LEONARDO_API_KEY:', LEONARDO_API_KEY ? 'Set (length: ' + LEONARDO_API_KEY.length + ')' : 'Not set');
     console.log('- TOGETHER_API_KEY:', TOGETHER_API_KEY ? 'Set (length: ' + TOGETHER_API_KEY.length + ')' : 'Not set');
     console.log('- REPLICATE_API_TOKEN:', REPLICATE_API_TOKEN ? 'Set (length: ' + REPLICATE_API_TOKEN.length + ')' : 'Not set');
     
     try {
-      // Use the reloaded keys (currentLeonardoKey, etc.)
       if (currentLeonardoKey) {
         console.log('✅ Using Leonardo.ai for enhancement...');
-        console.log('✅ Using Leonardo.ai for enhancement...');
         console.log(`📊 Fiction Level: ${fictionalLevel}%`);
-        result = await enhanceImageWithLeonardo(imageBuffer, imageName, style, fictionalLevel);
+        result = await enhanceImageWithLeonardo(imageBuffer, imageName, style, fictionalLevel, identifiedItems);
         serviceUsed = 'leonardo';
       } else if (currentTogetherKey) {
         console.log('✅ Using Together.ai for enhancement...');
         console.log(`📊 Fiction Level: ${fictionalLevel}%`);
-        result = await enhanceImageWithTogether(imageBuffer, imageName, style, fictionalLevel);
+        result = await enhanceImageWithTogether(imageBuffer, imageName, style, fictionalLevel, identifiedItems);
         serviceUsed = 'together';
       } else if (currentReplicateToken) {
         console.log('✅ Using Replicate for enhancement...');
         console.log(`📊 Fiction Level: ${fictionalLevel}%`);
-        result = await enhanceImageWithReplicate(imageBuffer, imageName, style, fictionalLevel);
+        result = await enhanceImageWithReplicate(imageBuffer, imageName, style, fictionalLevel, identifiedItems);
         serviceUsed = 'replicate';
       } else {
         // Provide detailed help message
@@ -1330,6 +1402,7 @@ Check: http://localhost:3000/api/check-config
       output: [enhancedImageUrl], // Also include in output array for compatibility
       jobId: result.id || result.generationId || result.jobId,
       service: serviceUsed,
+      identifiedItems: identifiedItems || null, // What the vision AI detected
       message: 'Image enhanced successfully'
     });
     
