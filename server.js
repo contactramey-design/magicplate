@@ -26,15 +26,12 @@ if (fs.existsSync(envLocalPath)) {
   console.log('✅ Loaded .env.local (overrides .env where set)');
 }
 
-// Verify Leonardo key
+// Verify API keys
 const leonardoKey = process.env.LEONARDO_API_KEY;
-if (leonardoKey) {
-  console.log(`✅ LEONARDO_API_KEY: Set (${leonardoKey.length} characters)`);
-  console.log(`   Preview: ${leonardoKey.substring(0, 15)}...`);
-} else {
-  console.log('❌ LEONARDO_API_KEY: NOT SET');
-  console.log('   Make sure it\'s in .env.local and saved (Cmd+S)');
-}
+const replicateToken = process.env.REPLICATE_API_TOKEN;
+console.log(`${leonardoKey ? '✅' : '❌'} LEONARDO_API_KEY: ${leonardoKey ? `Set (${leonardoKey.length} chars)` : 'NOT SET — add to .env.local'}`);
+console.log(`${replicateToken ? '✅' : '❌'} REPLICATE_API_TOKEN: ${replicateToken ? `Set (${replicateToken.length} chars)` : 'NOT SET — food identification disabled'}`);
+
 // fsPromises for async file operations
 const fsPromises = require('fs').promises;
 const express = require('express');
