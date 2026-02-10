@@ -469,6 +469,11 @@
     let beforeImageUrl = null;
     let afterImageUrl = null;
     
+    // Fiction Level state
+    let fictionalLevel = parseInt(localStorage.getItem('fictionalLevel') || '30'); // Default 30%
+    let regenerationTimeout = null;
+    let isRegenerating = false;
+    
     // Slider state management
     let sliderInitialized = false;
     let sliderEventHandlers = {};
@@ -482,6 +487,10 @@
     const previewImage = document.getElementById('previewImage');
     const enhanceBtn = document.getElementById('enhanceBtn');
     const removeBtn = document.getElementById('removeBtn');
+    const fictionalLevelSlider = document.getElementById('fictionalLevel');
+    const fictionalLabel = document.getElementById('fictionalLabel');
+    const fictionalDescription = document.getElementById('fictionalDescription');
+    const presetButtons = document.querySelectorAll('.preset-btn');
     const statusDiv = document.getElementById('status');
     const previewSection = document.getElementById('previewSection');
     const processingDiv = document.getElementById('processingDiv');
