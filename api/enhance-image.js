@@ -368,20 +368,32 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
         console.log('📤 Using POST with multipart/form-data (Leonardo POST presigned URL)');
         
         // Create FormData with all required fields
-        const FormData = require('form-data');
+        // FormData is already imported at the top of the file
         const formData = new FormData();
         
-        // Add all fields from Leonardo's response
+        // Add all fields from Leonardo's response (except 'key' which is used for the file)
+        // The 'key' field tells us where to upload, but the file field name might be 'file'
         for (const [fieldName, fieldValue] of Object.entries(uploadFields)) {
-          formData.append(fieldName, fieldValue);
+          // Skip 'key' as it's metadata, not a form field
+          if (fieldName !== 'key') {
+            formData.append(fieldName, fieldValue);
+          }
         }
         
-        // Add the file - use the key from fields if available, otherwise use a default name
+        // Add the file - S3 POST presigned URLs typically expect 'file' as the field name
+        // The key from uploadFields tells us the S3 object key/path
         const fileKey = uploadFields.key || `${initImageId}.${extension}`;
+        const fileName = fileKey.split('/').pop() || `image.${extension}`;
+        
+        // Append file last (S3 POST policy often requires file to be last)
         formData.append('file', imageBuffer, {
-          filename: fileKey.split('/').pop() || `image.${extension}`,
-          contentType: contentType
+          filename: fileName,
+          contentType: uploadFields['Content-Type'] || contentType
         });
+        
+        console.log('FormData fields:', Object.keys(uploadFields).filter(k => k !== 'key'));
+        console.log('File key:', fileKey);
+        console.log('File name:', fileName);
         
         // POST to the presigned URL with multipart/form-data
         const uploadResponse = await axios.post(presignedUrl, formData, {
@@ -397,6 +409,7 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
         if (uploadResponse.status === 200 || uploadResponse.status === 204) {
           console.log('✅ Upload successful with POST multipart/form-data');
         } else {
+          console.error('❌ POST upload failed:', uploadResponse.status, uploadResponse.data);
           throw new Error(`POST upload returned status ${uploadResponse.status}: ${JSON.stringify(uploadResponse.data)}`);
         }
       } else {
