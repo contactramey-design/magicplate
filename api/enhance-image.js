@@ -703,7 +703,8 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
   const negativePrompt = baseNegativePrompt();
   
   // Calculate aspect ratio from original image to maintain proportions
-  // For now, use high resolution square format (Leonardo supports up to 2048x2048)
+  // Leonardo.ai maximum resolution: 1536x1536 (not 2048)
+  // Use maximum allowed resolution for best quality
   // Higher resolution = better quality, more detail, sharper results
   const generationData = {
     prompt: prompt,
@@ -711,9 +712,10 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
     init_image_id: initImageId,
     modelId: 'aa77f04e-3eec-4034-9c07-d0f619684628', // Leonardo Kino XL (supports PhotoReal)
     num_images: 1,
-    // INCREASED RESOLUTION for quality enhancement (4x more pixels = better quality)
-    width: 2048,  // Increased from 1024 for professional quality
-    height: 2048, // Increased from 1024 for professional quality
+    // MAXIMUM RESOLUTION for quality enhancement (Leonardo limit: 1536x1536)
+    // 1536x1536 = 2.36MP (vs 1024x1024 = 1MP) = 2.36x more pixels for better quality
+    width: 1536,  // Leonardo maximum (was 2048, but Leonardo limit is 1536)
+    height: 1536, // Leonardo maximum (was 2048, but Leonardo limit is 1536)
     guidance_scale: 7,
     // MORE STEPS = better quality (more processing time but better results)
     num_inference_steps: 40, // Increased from 30 for better quality
