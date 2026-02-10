@@ -87,22 +87,23 @@ function buildRegenPrompt(style, fictionalLevel = 30) {
     // Use the comprehensive ethical food photography prompt
     const basePrompt = getAIGatewayPrompt(style);
     
-    // CRITICAL: Analysis instructions - AI must properly identify all elements first
-    const analysisInstructions = `CRITICAL FIRST STEP: Before enhancing, carefully analyze the original reference image. 
-You MUST identify and understand EVERY element in the image:
-- Main food items (burger, chicken, pizza, pasta, etc.)
-- Side dishes (fries, salad, bread, etc.)
-- Drinks and cups (soda, coffee, water, wine glasses, etc.)
-- Plates, bowls, and servingware
-- Utensils (forks, knives, spoons)
-- Garnishes (herbs, microgreens, parsley, etc.)
-- Sauces and condiments
-- All ingredients visible in the dish
-- Arrangement and composition
-- Portion sizes and quantities
+    // CRITICAL RULE: The AI must preserve the IDENTITY of every food item.
+    // Enhancement = make the SAME food look better, NOT replace it with different food.
+    const foodIdentityRule = `ABSOLUTE RULE - FOOD IDENTITY PRESERVATION:
+You are enhancing an EXISTING photo. The food items in the output MUST be the SAME food items as in the input.
+- If the original has a BURGER, the output MUST have a BURGER (not a steak, not a salad, not a different dish).
+- If the original has TACOS, the output MUST have TACOS.
+- If the original has SUSHI, the output MUST have SUSHI.
+- If the original has a DRINK/CUP, the output MUST have that SAME type of DRINK/CUP.
+- If the original has FRIES, the output MUST have FRIES.
+- NEVER substitute one food item for another. NEVER change the type of cuisine.
+- NEVER invent new dishes. NEVER remove existing dishes.
+- The NUMBER of items must stay the same (if there are 2 tacos, output 2 tacos).
+- The ARRANGEMENT on the plate must stay recognizably similar.
 
-After identifying ALL elements, recreate them ALL in the enhanced version. Do not miss any food items, cups, or elements. If you see a burger and fries, recreate both. If you see a cup, recreate the cup. Enhance everything you identify, but make it perfect.`;
-    
+FIRST: Study the reference image carefully and list what you see.
+THEN: Recreate those EXACT items but enhanced.`;
+
     // Determine enhancement style based on fictional level (0-100)
     let enhancementMode = '';
     let backgroundInstructions = '';
@@ -114,48 +115,43 @@ After identifying ALL elements, recreate them ALL in the enhanced version. Do no
     if (fictionalLevel <= 30) {
       // AUTHENTIC: Enhance food only, keep original background
       enhancementMode = 'AUTHENTIC ENHANCEMENT';
-      backgroundInstructions = 'Keep the original background exactly as shown - only enhance the food quality. Maintain original restaurant setting, table, plates, and environment exactly as they appear. Do not change the background at all.';
-      authenticityInstructions = 'Maintain complete authenticity - only improve food quality, colors, lighting, and textures. Keep everything else exactly as in the original photo. No background changes, no new settings, no fictional elements.';
+      backgroundInstructions = 'Keep the original background exactly as shown. Maintain original restaurant setting, table, and environment. Do not change the background.';
+      authenticityInstructions = 'Only improve food quality, colors, lighting, and textures. Keep everything else exactly as in the original.';
       plateInstructions = 'Keep original plates and servingware exactly as shown.';
       styleInstructions = 'Realistic, natural food photography.';
-      elementInstructions = 'Enhance ALL identified food items, ingredients, cups, plates, and elements exactly as they appear - just make them look better quality. Do not add, remove, or change any elements.';
+      elementInstructions = 'Enhance ALL food items exactly as they appear - same food, same arrangement, just better quality. Do not add, remove, or swap any items.';
     } else if (fictionalLevel <= 70) {
       // BALANCED: Perfect food with subtle background improvements
       enhancementMode = 'BALANCED PERFECTION';
-      backgroundInstructions = 'Improve the background subtly - enhance depth of field, soften distractions, clean up the table/surface, but keep the general restaurant setting recognizable. Make subtle improvements without changing the fundamental environment.';
-      authenticityInstructions = 'Perfect the food dramatically while making subtle background improvements. Maintain recognizable restaurant environment but make it cleaner and more professional.';
-      plateInstructions = 'Improve plates and servingware - make them cleaner, more elegant, but keep them recognizable.';
+      backgroundInstructions = 'Subtly improve the background - enhance depth of field, soften distractions, but keep the general setting recognizable.';
+      authenticityInstructions = 'Perfect the food dramatically while making subtle background improvements. The food items must remain the same dishes.';
+      plateInstructions = 'Improve plates - make them cleaner and more elegant, but keep them recognizable.';
       styleInstructions = 'Professional food photography with subtle enhancements.';
-      elementInstructions = 'Perfect ALL identified food items, ingredients, cups, plates, and elements - enhance them dramatically but keep them recognizable. Improve quality while maintaining the same elements.';
+      elementInstructions = 'Perfect ALL food items - enhance them dramatically but they must remain the SAME dishes. A burger stays a burger, tacos stay tacos.';
     } else {
-      // FICTIONAL/MAGICAL: Complete transformation - like homepage slider
-      enhancementMode = 'MAGICAL TRANSFORMATION';
-      backgroundInstructions = 'COMPLETELY TRANSFORM the background - create a stunning blurred background (bokeh effect) with soft, out-of-focus elements. Professional food photography studio setting with dramatic depth of field. The background should be beautifully blurred, creating perfect separation between the food and background. Soft, creamy bokeh, professional studio lighting. Make it look exactly like the homepage slider - dramatic blurred background that makes the food pop.';
-      authenticityInstructions = 'DRAMATICALLY TRANSFORM the entire scene - create the most perfect, idealized version possible. Replicate the exact enhancement style from the homepage slider: vibrant enhanced colors, dramatic contrast, blurred background, professional lighting. Transform everything while keeping ALL identified food items, ingredients, cups, and elements recognizable but dramatically enhanced. Make it look like a high-end restaurant marketing photo with the same dramatic enhancement style.';
-      plateInstructions = 'Enhance or replace plates and servingware - clean white plates, elegant servingware, or sophisticated modern tableware. White ceramic plates work great for dramatic contrast.';
-      styleInstructions = 'Dramatic, high-contrast food photography exactly like the homepage slider. Vibrant, rich, saturated colors that pop. Enhanced contrast between food and background. Blurred background (bokeh effect) for perfect depth of field. Professional food photography lighting with perfect highlights and shadows. Sharp, crystal-clear food details. Make colors vibrant and rich - enhanced reds, greens, browns that look amazing.';
-      elementInstructions = 'CRITICAL: After analyzing the original image, recreate ALL identified food items, ingredients, cups, drinks, plates, utensils, and elements - but make them perfect and dramatically enhanced. If there is a burger, recreate the burger. If there are fries, recreate the fries. If there is a cup/drink, recreate the cup/drink. Enhance every element you identified in the original image. Do not add new elements that were not in the original, but make all existing elements look perfect and dramatically enhanced.';
+      // FICTIONAL/MAGICAL: Dramatic visual transformation - but SAME FOOD
+      enhancementMode = 'MAGICAL ENHANCEMENT';
+      backgroundInstructions = 'Create a stunning blurred background (bokeh effect) with professional studio lighting. Beautiful depth of field separation.';
+      authenticityInstructions = 'Dramatically enhance the VISUAL STYLE (colors, lighting, background, contrast) while keeping the SAME food items. The dishes must be recognizable as the same food from the original.';
+      plateInstructions = 'Use clean white plates or elegant servingware for dramatic contrast.';
+      styleInstructions = 'Dramatic, high-contrast food photography. Vibrant saturated colors, bokeh background, professional lighting, sharp food details.';
+      elementInstructions = 'CRITICAL: The output MUST contain the SAME food items as the input. Enhance them dramatically - perfect colors, textures, lighting - but a burger must remain a burger, pasta must remain pasta, sushi must remain sushi. Transform the STYLE, not the FOOD IDENTITY.';
     }
     
-    const qualityPrompt = `${analysisInstructions}
+    const qualityPrompt = `${foodIdentityRule}
 
-${enhancementMode}: ${fictionalLevel <= 30 ? 'Enhance this food photo authentically' : fictionalLevel <= 70 ? 'Transform this food photo into a perfectly balanced' : 'DRAMATICALLY TRANSFORM this food photo to replicate the exact enhancement style from the homepage slider'} restaurant marketing photo. 
+${enhancementMode}: Enhance this food photo into a ${fictionalLevel <= 30 ? 'high-quality authentic' : fictionalLevel <= 70 ? 'perfectly balanced professional' : 'stunning, dramatic magazine-quality'} restaurant marketing photo.
 
 ${elementInstructions}
 
-Create the PERFECT version of this dish - make it look absolutely flawless and magazine-worthy, ${fictionalLevel > 70 ? 'exactly like the dramatic enhancement shown on the homepage slider' : ''}. 
-PERFECT sharpness and clarity - every detail should be razor-sharp and crystal clear. Food should be in perfect focus with incredible detail. 
-${fictionalLevel > 70 ? 'DRAMATICALLY ENHANCE colors - replicate the homepage slider style: vibrant, rich, saturated colors that pop. Enhanced reds for meat, brighter greens for vegetables, richer browns for breads. Make colors look amazing and vibrant - like the dramatic enhancement on the homepage. Rich, saturated, almost unreal colors that create stunning contrast.' : 'PERFECT colors - make them vibrant, rich, and ideal (perfectly cooked meat colors, fresh vibrant vegetables, glossy perfect sauces).'}
-PERFECT lighting - add ideal professional food photography lighting with perfect highlights, perfect shadows, perfect exposure - make it look like it was shot in a professional studio. ${fictionalLevel > 70 ? 'Dramatic lighting that creates perfect contrast and makes the food pop, just like the homepage slider.' : ''}
-PERFECT textures - make food look absolutely perfect (perfectly crispy edges, perfectly juicy meat, perfectly flaky pastry, perfectly glossy glazes). 
-PERFECT plating - idealize the presentation ${fictionalLevel > 70 ? 'dramatically' : 'subtly'} (perfect arrangement, perfect garnish placement, perfect composition). 
+Make the SAME dish look absolutely flawless and magazine-worthy.
+Sharp focus, crystal-clear food details, perfect exposure.
+${fictionalLevel > 70 ? 'Vibrant, rich, saturated colors that pop. Enhanced contrast. Professional studio lighting with dramatic highlights and shadows.' : 'Natural, appetizing colors. Clean professional lighting.'}
+Perfect textures (crispy edges, juicy meat, flaky pastry, glossy glazes).
 ${plateInstructions}
 ${backgroundInstructions}
-Upscale to maximum resolution. 
 ${authenticityInstructions}
 ${styleInstructions}
-Ultra-high resolution, perfect magazine-quality food photography, ${fictionalLevel <= 30 ? 'authentic' : fictionalLevel <= 70 ? 'balanced' : 'magical idealized'} commercial food photo, flawless presentation. 
-${fictionalLevel > 70 ? 'Replicate the exact enhancement style from the homepage slider: vibrant colors, blurred background, dramatic contrast, professional food photography.' : ''}
 ${basePrompt}`;
     
     // Ensure prompt is not too long (Leonardo has limits around 1000-2000 chars)
@@ -166,17 +162,15 @@ ${basePrompt}`;
     return qualityPrompt;
   } catch (error) {
     console.error('Error generating prompt, using fallback:', error);
-    // Fallback to perfection-focused prompt if new system fails
-    const fallbackPrompt = fictionalLevel > 70 
-      ? `MAGICAL TRANSFORMATION. Replicate homepage slider style: dramatically enhance colors (vibrant, rich, saturated), blurred background (bokeh effect), dramatic contrast, professional lighting, sharp details. Make it look exactly like the homepage slider enhancement. ${styleBlock(style)}`
-      : `PERFECT THIS FOOD PHOTO. Create the ideal, perfect version - flawless sharpness, perfect colors, perfect lighting, perfect textures, perfect plating. Magazine-quality, idealized commercial food photography. ${styleBlock(style)}`;
+    const fallbackPrompt = `FOOD IDENTITY PRESERVATION: The output must contain the SAME food items as the input - never substitute dishes. Enhance the SAME food with perfect sharpness, colors, lighting, textures. Magazine-quality food photography. ${styleBlock(style)}`;
     return fallbackPrompt;
   }
 }
 
 function baseNegativePrompt() {
   return (
-    'text, watermark, logo, menu text, handwriting, extra plates, extra food items, cluttered table, ' +
+    'different food, wrong food, substituted dish, changed cuisine, new dish, extra food items not in original, ' +
+    'text, watermark, logo, menu text, handwriting, extra plates, cluttered table, ' +
     'blurry, low-res, noisy, grainy, oversaturated, underexposed, overexposed, harsh flash, ' +
     'cartoon, illustration, CGI, plastic-looking, deformed food, duplicate garnish, messy smear'
   );
@@ -223,35 +217,33 @@ async function enhanceImageWithReplicate(imageBuffer, imageName, style = 'upscal
   const negativePrompt = baseNegativePrompt();
   
   // Calculate strength based on fictional level
-  // More aggressive transformation for magical mode
-  let baseStrength = 0.75;
-  let strengthRange = 0.45;
-  
-  if (fictionalLevel > 70) {
-    baseStrength = 0.65;
-    strengthRange = 0.50; // More dramatic for magical
-  }
-  
-  const calculatedStrength = baseStrength - (fictionalLevel / 100 * strengthRange);
+  // IMPORTANT: Keep strength HIGH enough that the AI preserves food identity
+  // Lower strength = MORE transformation (AI ignores original more)
+  // We need minimum 0.45 so the food items stay recognizable
+  const calculatedStrength = Math.max(0.45, 0.75 - (fictionalLevel / 100 * 0.30));
+  // Authentic (0-30%): 0.75 to 0.66 — minimal change, food stays nearly identical
+  // Balanced (30-70%): 0.66 to 0.54 — moderate enhancement, food clearly same
+  // Magical (70-100%): 0.54 to 0.45 — dramatic styling but food identity preserved
   const calculatedGuidance = 7.5 + (fictionalLevel / 100 * 1.5);
+  
+  console.log(`🎨 Replicate strength: ${calculatedStrength.toFixed(2)} (fictional: ${fictionalLevel}%)`);
   
   let prediction;
   let lastError = null;
   
   // Try Flux-dev first (faster, good quality)
-  // Version hash: 8f7948b0842357f6952009efe899d525887f713204de2a31a9c6ca24623093
   try {
     console.log('🔄 Using Replicate Flux-dev for quality enhancement...');
     prediction = await axios.post(
       `${REPLICATE_API_URL}/predictions`,
       {
-        version: "8f7948b0842357f6952009efe899d525887f713204de2a31a9c6ca24623093", // Flux-dev version
+        version: "8f7948b0842357f6952009efe899d525887f713204de2a31a9c6ca24623093",
         input: {
-          image: uploadedFileUrl, // Reference image for img2img
-          prompt: prompt, // Quality-focused prompt
+          image: uploadedFileUrl,
+          prompt: prompt,
           negative_prompt: negativePrompt,
-          prompt_strength: calculatedStrength, // Scale from 0.75 (authentic) to 0.3 (fictional)
-          num_inference_steps: 40, // Increased for better quality (was 20 in example)
+          prompt_strength: calculatedStrength,
+          num_inference_steps: 40,
           guidance_scale: calculatedGuidance, // Scale from 7.5 to 9.0
           output_format: 'jpg', // Output format
           output_quality: 95, // High quality output
@@ -779,24 +771,17 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
   const negativePrompt = baseNegativePrompt();
   
   // Calculate strength based on fictional level
-  // Lower intensity = higher strength (stay closer to original)
-  // Higher intensity = lower strength (allow more transformation)
-  // For magical mode (70-100%), use even lower strength for dramatic transformation
-  let baseStrength = 0.75; // Base strength for authentic
-  let strengthRange = 0.45; // Range from 0.3 to 0.75
-  
-  // More aggressive transformation for magical mode
-  if (fictionalLevel > 70) {
-    baseStrength = 0.65; // Start lower for magical
-    strengthRange = 0.50; // Range from 0.15 to 0.65 (more dramatic)
-  }
-  
-  const calculatedStrength = baseStrength - (fictionalLevel / 100 * strengthRange); 
-  // Authentic (0-30%): 0.75 to 0.66
-  // Balanced (30-70%): 0.66 to 0.45
-  // Magical (70-100%): 0.15 to 0.45 (very dramatic transformation)
+  // IMPORTANT: Keep strength HIGH enough that the AI preserves food identity
+  // Lower strength = MORE transformation (AI ignores original more)
+  // Minimum 0.45 ensures food items stay recognizable at all levels
+  const calculatedStrength = Math.max(0.45, 0.75 - (fictionalLevel / 100 * 0.30));
+  // Authentic (0-30%): 0.75 to 0.66 — minimal change, food stays nearly identical
+  // Balanced (30-70%): 0.66 to 0.54 — moderate enhancement, food clearly same
+  // Magical (70-100%): 0.54 to 0.45 — dramatic styling but food identity preserved
   
   const calculatedGuidance = 7 + (fictionalLevel / 100 * 2); // Scale from 7 to 9
+  
+  console.log(`🎨 Leonardo strength: ${calculatedStrength.toFixed(2)} (fictional: ${fictionalLevel}%)`)
   
   // Calculate aspect ratio from original image to maintain proportions
   // Leonardo.ai maximum resolution: 1536x1536 (not 2048)
@@ -816,10 +801,9 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
     guidance_scale: calculatedGuidance, // 7 (authentic) to 9 (fictional)
     // MORE STEPS = better quality (more processing time but better results)
     num_inference_steps: 40, // Increased from 30 for better quality
-    // Scale init_strength based on fictional level
-    // Lower strength = more transformation (fictional)
-    // Higher strength = less transformation (authentic)
-    init_strength: calculatedStrength, // 0.75 (authentic) to 0.3 (fictional)
+    // init_strength: how much the original image influences the output
+    // Higher = stays closer to original (preserves food identity)
+    init_strength: calculatedStrength, // 0.75 (authentic) to 0.45 (magical) — never below 0.45
     scheduler: 'LEONARDO',
     seed: null,
     // PhotoReal settings for food photography
@@ -931,17 +915,12 @@ async function enhanceImageWithTogether(imageBuffer, imageName, style = 'upscale
   const negativePrompt = baseNegativePrompt();
   
   // Calculate strength based on fictional level
-  // More aggressive transformation for magical mode
-  let baseStrength = 0.75;
-  let strengthRange = 0.45;
-  
-  if (fictionalLevel > 70) {
-    baseStrength = 0.65;
-    strengthRange = 0.50; // More dramatic for magical
-  }
-  
-  const calculatedStrength = baseStrength - (fictionalLevel / 100 * strengthRange);
+  // IMPORTANT: Keep strength HIGH enough that the AI preserves food identity
+  // Minimum 0.45 ensures food items stay recognizable at all levels
+  const calculatedStrength = Math.max(0.45, 0.75 - (fictionalLevel / 100 * 0.30));
   const calculatedGuidance = 7.5 + (fictionalLevel / 100 * 1.5);
+  
+  console.log(`🎨 Together strength: ${calculatedStrength.toFixed(2)} (fictional: ${fictionalLevel}%)`);
   
   try {
     const response = await axios.post(
@@ -951,9 +930,9 @@ async function enhanceImageWithTogether(imageBuffer, imageName, style = 'upscale
         prompt: prompt,
         negative_prompt: negativePrompt,
         image: `data:image/jpeg;base64,${base64Image}`,
-        steps: 50,  // Increased for better quality (was 40)
-        guidance_scale: calculatedGuidance,  // Scale from 7.5 to 9.0
-        strength: calculatedStrength  // Scale from 0.75 (authentic) to 0.3 (fictional)
+        steps: 50,
+        guidance_scale: calculatedGuidance,
+        strength: calculatedStrength  // 0.75 (authentic) to 0.45 (magical) — never below 0.45
       },
       {
         headers: {
