@@ -860,7 +860,7 @@ Check: http://localhost:3000/api/check-config
     
     // Save images to public directory
     const outputDir = path.join(process.cwd(), 'public', 'images', 'enhanced');
-    await fs.mkdir(outputDir, { recursive: true });
+    await fsPromises.mkdir(outputDir, { recursive: true });
     
     const timestamp = Date.now();
     const beforePath = path.join(outputDir, `before-${timestamp}.jpg`);
