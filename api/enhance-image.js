@@ -402,18 +402,18 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
       } else {
         // No fields = PUT presigned URL (standard S3 presigned URL)
         console.log('📤 Using PUT method (standard S3 presigned URL)');
-      
-      // S3 presigned URLs ALWAYS use PUT method (not POST)
-      // The 405 error confirms POST is not allowed - must use PUT
-      console.log('🔵 Using PUT method for S3 presigned URL (S3 requires PUT, not POST)');
-      console.log('Image size:', imageBuffer.length, 'bytes');
-      console.log('Content-Type:', contentType);
-      console.log('⚠️ IMPORTANT: This code ONLY uses PUT, never POST. If you see POST in errors, Vercel may not have deployed the latest code.');
-      
-      // Try different header combinations to match the presigned URL signature
-      // The signature is calculated with specific headers, so we must match them exactly
-      let uploadResponse;
-      let lastError;
+        
+        // S3 presigned URLs ALWAYS use PUT method (not POST)
+        // The 405 error confirms POST is not allowed - must use PUT
+        console.log('🔵 Using PUT method for S3 presigned URL (S3 requires PUT, not POST)');
+        console.log('Image size:', imageBuffer.length, 'bytes');
+        console.log('Content-Type:', contentType);
+        console.log('⚠️ IMPORTANT: This code ONLY uses PUT, never POST. If you see POST in errors, Vercel may not have deployed the latest code.');
+        
+        // Try different header combinations to match the presigned URL signature
+        // The signature is calculated with specific headers, so we must match them exactly
+        let uploadResponse;
+        let lastError;
       
       // Attempt 1: No custom headers (let axios set defaults)
       try {
@@ -557,18 +557,18 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
             }
           }
         }
+        
+        // Check response status for PUT
+        if (uploadResponse.status !== 200 && uploadResponse.status !== 204) {
+          console.error('❌ S3 upload returned non-success status:', uploadResponse.status);
+          console.error('Response data:', uploadResponse.data);
+          console.error('Response headers:', uploadResponse.headers);
+          throw new Error(`S3 upload failed with status ${uploadResponse.status}: ${JSON.stringify(uploadResponse.data)}`);
+        }
+        
+        console.log('✅ Image uploaded to S3 successfully, status:', uploadResponse.status);
+        console.log('Init image ID:', initImageId);
       }
-      
-      // Check response status
-      if (uploadResponse.status !== 200 && uploadResponse.status !== 204) {
-        console.error('❌ S3 upload returned non-success status:', uploadResponse.status);
-        console.error('Response data:', uploadResponse.data);
-        console.error('Response headers:', uploadResponse.headers);
-        throw new Error(`S3 upload failed with status ${uploadResponse.status}: ${JSON.stringify(uploadResponse.data)}`);
-      }
-      
-      console.log('✅ Image uploaded to S3 successfully, status:', uploadResponse.status);
-      console.log('Init image ID:', initImageId);
     } catch (s3Error) {
       console.error('❌ S3 upload error details:');
       console.error('  Status:', s3Error.response?.status);
