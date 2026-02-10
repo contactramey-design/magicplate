@@ -1,6 +1,8 @@
 // Batch Menu SEO Optimization API
 const aiGateway = require('../../lib/ai-gateway');
 const { findById } = require('../../lib/db');
+let menuKnowledge;
+try { menuKnowledge = require('../../lib/menu-knowledge'); } catch(e) { menuKnowledge = null; }
 
 /**
  * POST /api/menus/seo-optimize
@@ -83,9 +85,22 @@ module.exports = async (req, res) => {
           optimized.ai_generated = false;
         }
       } else {
-        // Fallback if AI Gateway not configured
-        optimized.seo_score = optimized.description ? aiGateway.calculateSEOScore(optimized.description) : 0;
-        optimized.keywords = optimized.description ? aiGateway.extractKeywords(optimized.description, location || '') : [];
+        // Fallback if AI Gateway not configured — use menu knowledge for richer fallback
+        if (menuKnowledge && item.name) {
+          const seoCtx = menuKnowledge.buildSEOContext(item.name, item.ingredients, item.price);
+          const adjectives = seoCtx.suggestedAdjectives || [];
+          const adj = adjectives.slice(0, 3).join(', ');
+          const ingredients = Array.isArray(item.ingredients) ? item.ingredients.join(', ') : (item.ingredients || '');
+          const desc = item.description || `${adj} ${item.name}${ingredients ? ` made with ${ingredients}` : ''}${location ? `, served fresh at our ${location} location` : ''}.`;
+          optimized.description = desc;
+          optimized.keywords = [...adjectives.slice(0, 5), seoCtx.category.toLowerCase(), item.name.toLowerCase()];
+          if (location) optimized.keywords.push(location.toLowerCase());
+          optimized.seo_score = 55 + Math.min(adjectives.length * 5, 20) + (location ? 10 : 0) + (ingredients ? 10 : 0);
+          optimized.improvements = ['Add more specific descriptors', 'Include dietary info (gluten-free, vegan)', 'Mention cooking method'];
+        } else {
+          optimized.seo_score = optimized.description ? aiGateway.calculateSEOScore(optimized.description) : 0;
+          optimized.keywords = optimized.description ? aiGateway.extractKeywords(optimized.description, location || '') : [];
+        }
       }
 
       optimizedItems.push(optimized);

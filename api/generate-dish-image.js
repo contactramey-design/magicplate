@@ -12,30 +12,22 @@ if (fs.existsSync(envPath)) require('dotenv').config({ path: envPath });
 if (fs.existsSync(envLocalPath)) require('dotenv').config({ path: envLocalPath, override: true });
 
 const axios = require('axios');
+const { buildCategoryAwarePrompt, identifyCategory } = require('../lib/menu-knowledge');
 
 const LEONARDO_API_KEY = process.env.LEONARDO_API_KEY;
 
 /**
  * Build a food photography prompt for text-to-image generation
+ * Uses menu-knowledge category data for category-specific lighting, colors, and textures
  */
 function buildDishPrompt(dishName, ingredients, style = 'professional') {
-  const base = `Professional, appetizing food photograph of ${dishName}`;
-  const ingredientLine = ingredients ? ` made with ${ingredients}` : '';
-
-  const styleMap = {
-    professional: 'Clean white plate, soft natural lighting, shallow depth of field, restaurant table setting, high-end food photography, vibrant natural colors, garnished beautifully.',
-    rustic: 'Rustic wooden table, warm ambient lighting, cast-iron or ceramic dish, cozy restaurant setting, natural textures, inviting atmosphere.',
-    modern: 'Minimalist plating on a sleek white plate, dramatic studio lighting, dark background, fine-dining presentation, elegant and sophisticated.',
-    casual: 'Colorful casual dining setting, bright natural light, cheerful atmosphere, comfort food appeal, inviting and delicious looking.'
-  };
-
-  const styleDesc = styleMap[style] || styleMap.professional;
-
-  return `${base}${ingredientLine}. ${styleDesc} Ultra-sharp focus on the food, 4K quality, no text, no watermark.`;
+  const result = buildCategoryAwarePrompt(dishName, ingredients, style);
+  return result.prompt;
 }
 
-function negativePrompt() {
-  return 'text, watermark, logo, label, menu text, handwriting, blurry, low-res, noisy, grainy, cartoon, illustration, CGI, deformed food, plastic-looking, extra plates, cluttered, ugly, bad composition, oversaturated, harsh flash';
+function negativePrompt(dishName) {
+  const result = buildCategoryAwarePrompt(dishName, '', 'professional');
+  return result.negativePrompt;
 }
 
 /**
@@ -53,7 +45,7 @@ async function generateWithLeonardo(dishName, ingredients, style) {
   // Pure text-to-image — no init_image_id
   const generationData = {
     prompt: prompt,
-    negative_prompt: negativePrompt(),
+    negative_prompt: negativePrompt(dishName),
     modelId: 'aa77f04e-3eec-4034-9c07-d0f619684628', // Leonardo Kino XL
     num_images: 1,
     width: 1024,
