@@ -948,7 +948,7 @@ module.exports = async (req, res) => {
         serviceUsed = 'together';
       } else if (currentReplicateToken) {
         console.log('✅ Using Replicate for enhancement...');
-        result = await enhanceImageWithReplicate(imageBuffer, imageName);
+        result = await enhanceImageWithReplicate(imageBuffer, imageName, style);
         serviceUsed = 'replicate';
       } else {
         // Provide detailed help message
