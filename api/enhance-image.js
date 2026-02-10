@@ -749,9 +749,21 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
   // Calculate strength based on fictional level
   // Lower intensity = higher strength (stay closer to original)
   // Higher intensity = lower strength (allow more transformation)
-  const baseStrength = 0.75; // Base strength for authentic
-  const strengthRange = 0.45; // Range from 0.3 to 0.75
-  const calculatedStrength = baseStrength - (fictionalLevel / 100 * strengthRange); // 0.75 at 0%, 0.3 at 100%
+  // For magical mode (70-100%), use even lower strength for dramatic transformation
+  let baseStrength = 0.75; // Base strength for authentic
+  let strengthRange = 0.45; // Range from 0.3 to 0.75
+  
+  // More aggressive transformation for magical mode
+  if (fictionalLevel > 70) {
+    baseStrength = 0.65; // Start lower for magical
+    strengthRange = 0.50; // Range from 0.15 to 0.65 (more dramatic)
+  }
+  
+  const calculatedStrength = baseStrength - (fictionalLevel / 100 * strengthRange); 
+  // Authentic (0-30%): 0.75 to 0.66
+  // Balanced (30-70%): 0.66 to 0.45
+  // Magical (70-100%): 0.15 to 0.45 (very dramatic transformation)
+  
   const calculatedGuidance = 7 + (fictionalLevel / 100 * 2); // Scale from 7 to 9
   
   // Calculate aspect ratio from original image to maintain proportions
@@ -887,8 +899,15 @@ async function enhanceImageWithTogether(imageBuffer, imageName, style = 'upscale
   const negativePrompt = baseNegativePrompt();
   
   // Calculate strength based on fictional level
-  const baseStrength = 0.75;
-  const strengthRange = 0.45;
+  // More aggressive transformation for magical mode
+  let baseStrength = 0.75;
+  let strengthRange = 0.45;
+  
+  if (fictionalLevel > 70) {
+    baseStrength = 0.65;
+    strengthRange = 0.50; // More dramatic for magical
+  }
+  
   const calculatedStrength = baseStrength - (fictionalLevel / 100 * strengthRange);
   const calculatedGuidance = 7.5 + (fictionalLevel / 100 * 1.5);
   
