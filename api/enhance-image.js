@@ -801,47 +801,60 @@ module.exports = async (req, res) => {
     }
     
     // Check usage limits if restaurant_id provided
+    // Skip if database is not configured (e.g., on Vercel without Postgres)
     if (restaurant_id) {
       try {
-        const { checkUsageLimit } = require('../lib/usage-tracker');
-        const { findAll } = require('../lib/db');
-        
-        // Tier limits
-        const TIER_LIMITS = {
-          starter: { image_enhancements: 10 },
-          professional: { image_enhancements: -1 },
-          enterprise: { image_enhancements: -1 }
-        };
-        
-        const subscriptions = await findAll('subscriptions', {
-          restaurant_id: parseInt(restaurant_id),
-          status: 'active'
-        });
-        
-        if (subscriptions.length > 0) {
-          const subscription = subscriptions[0];
-          const limits = TIER_LIMITS[subscription.tier] || {};
+        // Check if database is configured before trying to use it
+        if (!process.env.POSTGRES_URL && !process.env.DATABASE_URL) {
+          console.log('⚠️ Database not configured, skipping usage limit check');
+          // Continue without limit check
+        } else {
+          const { checkUsageLimit } = require('../lib/usage-tracker');
+          const { findAll } = require('../lib/db');
           
-          if (limits.image_enhancements !== -1) {
-            const usageCheck = await checkUsageLimit(
-              subscription.subscription_id,
-              'image_enhancements',
-              limits
-            );
+          // Tier limits
+          const TIER_LIMITS = {
+            starter: { image_enhancements: 10 },
+            professional: { image_enhancements: -1 },
+            enterprise: { image_enhancements: -1 }
+          };
+          
+          const subscriptions = await findAll('subscriptions', {
+            restaurant_id: parseInt(restaurant_id),
+            status: 'active'
+          });
+          
+          if (subscriptions.length > 0) {
+            const subscription = subscriptions[0];
+            const limits = TIER_LIMITS[subscription.tier] || {};
             
-            if (!usageCheck.allowed) {
-              return res.status(403).json({
-                error: 'Image enhancement limit reached',
-                message: `You've used ${usageCheck.current} of ${usageCheck.limit} enhancements this month. Upgrade to Professional for unlimited enhancements.`,
-                current: usageCheck.current,
-                limit: usageCheck.limit,
-                remaining: usageCheck.remaining
-              });
+            if (limits.image_enhancements !== -1) {
+              const usageCheck = await checkUsageLimit(
+                subscription.subscription_id,
+                'image_enhancements',
+                limits
+              );
+              
+              if (!usageCheck.allowed) {
+                return res.status(403).json({
+                  error: 'Image enhancement limit reached',
+                  message: `You've used ${usageCheck.current} of ${usageCheck.limit} enhancements this month. Upgrade to Professional for unlimited enhancements.`,
+                  current: usageCheck.current,
+                  limit: usageCheck.limit,
+                  remaining: usageCheck.remaining
+                });
+              }
             }
           }
         }
       } catch (limitError) {
-        console.error('Limit check error (non-fatal):', limitError);
+        // Silently skip limit check if database is not available
+        if (limitError.message?.includes('Database not configured') || 
+            limitError.message?.includes('POSTGRES_URL')) {
+          console.log('⚠️ Database not configured, skipping usage limit check');
+        } else {
+          console.error('Limit check error (non-fatal):', limitError.message);
+        }
         // Continue if limit check fails
       }
     }
@@ -1020,26 +1033,39 @@ Check: http://localhost:3000/api/check-config
     await fsPromises.writeFile(afterPath, Buffer.from(enhancedResponse.data));
     
     // Track usage if restaurant_id provided
+    // Skip if database is not configured (e.g., on Vercel without Postgres)
     if (req.body.restaurant_id) {
       try {
-        const { trackUsage } = require('../lib/usage-tracker');
-        const { findAll } = require('../lib/db');
-        
-        const subscriptions = await findAll('subscriptions', {
-          restaurant_id: parseInt(req.body.restaurant_id),
-          status: 'active'
-        });
-        
-        if (subscriptions.length > 0) {
-          await trackUsage({
+        // Check if database is configured before trying to use it
+        if (!process.env.POSTGRES_URL && !process.env.DATABASE_URL) {
+          console.log('⚠️ Database not configured, skipping usage tracking');
+          // Continue without tracking
+        } else {
+          const { trackUsage } = require('../lib/usage-tracker');
+          const { findAll } = require('../lib/db');
+          
+          const subscriptions = await findAll('subscriptions', {
             restaurant_id: parseInt(req.body.restaurant_id),
-            subscription_id: subscriptions[0].subscription_id,
-            feature_type: 'image_enhancements',
-            feature_count: 1
+            status: 'active'
           });
+          
+          if (subscriptions.length > 0) {
+            await trackUsage({
+              restaurant_id: parseInt(req.body.restaurant_id),
+              subscription_id: subscriptions[0].subscription_id,
+              feature_type: 'image_enhancements',
+              feature_count: 1
+            });
+          }
         }
       } catch (usageError) {
-        console.error('Usage tracking error (non-fatal):', usageError);
+        // Silently skip tracking if database is not available
+        if (usageError.message?.includes('Database not configured') || 
+            usageError.message?.includes('POSTGRES_URL')) {
+          console.log('⚠️ Database not configured, skipping usage tracking');
+        } else {
+          console.error('Usage tracking error (non-fatal):', usageError.message);
+        }
         // Don't fail the request if usage tracking fails
       }
     }
