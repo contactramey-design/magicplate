@@ -85,23 +85,27 @@ const { getAIGatewayPrompt } = require('../lib/photo-enhancement-prompt');
 function buildRegenPrompt(style) {
   try {
     // Use the comprehensive ethical food photography prompt
-    const prompt = getAIGatewayPrompt(style);
-    // Ensure prompt is not too long (Leonardo has limits)
-    if (prompt && prompt.length > 1000) {
-      console.warn('Prompt is very long, truncating to 1000 chars');
-      return prompt.substring(0, 1000);
+    const basePrompt = getAIGatewayPrompt(style);
+    
+    // Add QUALITY-FOCUSED instructions at the beginning
+    // Emphasize quality improvement (sharpness, detail, noise reduction) over style transformation
+    const qualityPrompt = `Professional food photography QUALITY ENHANCEMENT. 
+Improve sharpness and clarity, reduce noise and grain, enhance fine details and textures, 
+correct colors and white balance, optimize lighting and exposure, upscale resolution while maintaining authenticity. 
+Maintain the exact same dish composition, ingredients, and portions. 
+Ultra-high resolution, crisp textures, professional food photography quality. 
+${basePrompt}`;
+    
+    // Ensure prompt is not too long (Leonardo has limits around 1000-2000 chars)
+    if (qualityPrompt && qualityPrompt.length > 1500) {
+      console.warn('Prompt is very long, truncating to 1500 chars');
+      return qualityPrompt.substring(0, 1500);
     }
-    return prompt;
+    return qualityPrompt;
   } catch (error) {
     console.error('Error generating prompt, using fallback:', error);
-    // Fallback to original prompt if new system fails
-    return (
-      'Professional restaurant food photography. Re-generate a premium marketing photo of the same dish concept as the reference image. ' +
-      'Hero subject centered, appetizing proportions, realistic texture, crisp detail, glossy highlights, natural shadows. ' +
-      'Clean composition with intentional negative space, shallow depth of field, creamy bokeh background. ' +
-      'Ultra-realistic, editorial commercial food photo, high detail, sharp focus on food. ' +
-      styleBlock(style)
-    );
+    // Fallback to quality-focused prompt if new system fails
+    return `Professional food photography QUALITY ENHANCEMENT. Improve sharpness, reduce noise, enhance details, correct colors, optimize lighting. Ultra-high resolution, crisp textures, professional quality. ${styleBlock(style)}`;
   }
 }
 
