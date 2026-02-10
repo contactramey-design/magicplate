@@ -371,21 +371,21 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
         // FormData is already imported at the top of the file
         const formData = new FormData();
         
-        // Add all fields from Leonardo's response (except 'key' which is used for the file)
-        // The 'key' field tells us where to upload, but the file field name might be 'file'
+        // Add all fields from Leonardo's response
+        // S3 POST presigned URLs require ALL fields from the policy, including 'key'
+        // The 'key' field tells S3 where to store the file and MUST be included
+        // Order matters: fields first, then file last
         for (const [fieldName, fieldValue] of Object.entries(uploadFields)) {
-          // Skip 'key' as it's metadata, not a form field
-          if (fieldName !== 'key') {
-            formData.append(fieldName, fieldValue);
-          }
+          // Include ALL fields including 'key' - S3 requires it
+          formData.append(fieldName, fieldValue);
         }
         
         // Add the file - S3 POST presigned URLs typically expect 'file' as the field name
-        // The key from uploadFields tells us the S3 object key/path
+        // The file MUST be appended last (S3 POST policy requires this order)
         const fileKey = uploadFields.key || `${initImageId}.${extension}`;
         const fileName = fileKey.split('/').pop() || `image.${extension}`;
         
-        // Append file last (S3 POST policy often requires file to be last)
+        // Append file last (S3 POST policy requires file to be the last field)
         formData.append('file', imageBuffer, {
           filename: fileName,
           contentType: uploadFields['Content-Type'] || contentType
