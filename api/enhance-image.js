@@ -87,12 +87,19 @@ function buildRegenPrompt(style, fictionalLevel = 30) {
     // Use the comprehensive ethical food photography prompt
     const basePrompt = getAIGatewayPrompt(style);
     
+    // CRITICAL: Analysis instructions - AI must properly identify all elements first
+    const analysisInstructions = `FIRST: Carefully analyze the original image. Identify ALL food items, ingredients, plates, cups, utensils, garnishes, and elements present. 
+Recognize the exact dish composition, all ingredients, portion sizes, arrangement, and every element in the photo. 
+Make sure you understand what food is in the image before enhancing. 
+Identify: main dishes, sides, drinks/cups, plates/bowls, utensils, garnishes, sauces, condiments, and all food elements.`;
+    
     // Determine enhancement style based on fictional level (0-100)
     let enhancementMode = '';
     let backgroundInstructions = '';
     let authenticityInstructions = '';
     let plateInstructions = '';
     let styleInstructions = '';
+    let elementInstructions = '';
     
     if (fictionalLevel <= 30) {
       // AUTHENTIC: Enhance food only, keep original background
@@ -101,6 +108,7 @@ function buildRegenPrompt(style, fictionalLevel = 30) {
       authenticityInstructions = 'Maintain complete authenticity - only improve food quality, colors, lighting, and textures. Keep everything else exactly as in the original photo. No background changes, no new settings, no fictional elements.';
       plateInstructions = 'Keep original plates and servingware exactly as shown.';
       styleInstructions = 'Realistic, natural food photography.';
+      elementInstructions = 'Enhance ALL identified food items, ingredients, cups, plates, and elements exactly as they appear - just make them look better quality. Do not add, remove, or change any elements.';
     } else if (fictionalLevel <= 70) {
       // BALANCED: Perfect food with subtle background improvements
       enhancementMode = 'BALANCED PERFECTION';
@@ -108,16 +116,23 @@ function buildRegenPrompt(style, fictionalLevel = 30) {
       authenticityInstructions = 'Perfect the food dramatically while making subtle background improvements. Maintain recognizable restaurant environment but make it cleaner and more professional.';
       plateInstructions = 'Improve plates and servingware - make them cleaner, more elegant, but keep them recognizable.';
       styleInstructions = 'Professional food photography with subtle enhancements.';
+      elementInstructions = 'Perfect ALL identified food items, ingredients, cups, plates, and elements - enhance them dramatically but keep them recognizable. Improve quality while maintaining the same elements.';
     } else {
       // FICTIONAL/MAGICAL: Complete transformation - like homepage slider
       enhancementMode = 'MAGICAL TRANSFORMATION';
       backgroundInstructions = 'COMPLETELY TRANSFORM the background - create a stunning blurred background (bokeh effect) with soft, out-of-focus elements. Professional food photography studio setting with dramatic depth of field. The background should be beautifully blurred, creating perfect separation between the food and background. Soft, creamy bokeh, professional studio lighting. Make it look exactly like the homepage slider - dramatic blurred background that makes the food pop.';
-      authenticityInstructions = 'DRAMATICALLY TRANSFORM the entire scene - create the most perfect, idealized version possible. Replicate the exact enhancement style from the homepage slider: vibrant enhanced colors, dramatic contrast, blurred background, professional lighting. Transform everything while keeping the main food item recognizable but dramatically enhanced. Make it look like a high-end restaurant marketing photo with the same dramatic enhancement style.';
+      authenticityInstructions = 'DRAMATICALLY TRANSFORM the entire scene - create the most perfect, idealized version possible. Replicate the exact enhancement style from the homepage slider: vibrant enhanced colors, dramatic contrast, blurred background, professional lighting. Transform everything while keeping ALL identified food items, ingredients, cups, and elements recognizable but dramatically enhanced. Make it look like a high-end restaurant marketing photo with the same dramatic enhancement style.';
       plateInstructions = 'Enhance or replace plates and servingware - clean white plates, elegant servingware, or sophisticated modern tableware. White ceramic plates work great for dramatic contrast.';
       styleInstructions = 'Dramatic, high-contrast food photography exactly like the homepage slider. Vibrant, rich, saturated colors that pop. Enhanced contrast between food and background. Blurred background (bokeh effect) for perfect depth of field. Professional food photography lighting with perfect highlights and shadows. Sharp, crystal-clear food details. Make colors vibrant and rich - enhanced reds, greens, browns that look amazing.';
+      elementInstructions = 'CRITICAL: After analyzing the original image, recreate ALL identified food items, ingredients, cups, drinks, plates, utensils, and elements - but make them perfect and dramatically enhanced. If there is a burger, recreate the burger. If there are fries, recreate the fries. If there is a cup/drink, recreate the cup/drink. Enhance every element you identified in the original image. Do not add new elements that were not in the original, but make all existing elements look perfect and dramatically enhanced.';
     }
     
-    const qualityPrompt = `${enhancementMode}: ${fictionalLevel <= 30 ? 'Enhance this food photo authentically' : fictionalLevel <= 70 ? 'Transform this food photo into a perfectly balanced' : 'DRAMATICALLY TRANSFORM this food photo to replicate the exact enhancement style from the homepage slider'} restaurant marketing photo. 
+    const qualityPrompt = `${analysisInstructions}
+
+${enhancementMode}: ${fictionalLevel <= 30 ? 'Enhance this food photo authentically' : fictionalLevel <= 70 ? 'Transform this food photo into a perfectly balanced' : 'DRAMATICALLY TRANSFORM this food photo to replicate the exact enhancement style from the homepage slider'} restaurant marketing photo. 
+
+${elementInstructions}
+
 Create the PERFECT version of this dish - make it look absolutely flawless and magazine-worthy, ${fictionalLevel > 70 ? 'exactly like the dramatic enhancement shown on the homepage slider' : ''}. 
 PERFECT sharpness and clarity - every detail should be razor-sharp and crystal clear. Food should be in perfect focus with incredible detail. 
 ${fictionalLevel > 70 ? 'DRAMATICALLY ENHANCE colors - replicate the homepage slider style: vibrant, rich, saturated colors that pop. Enhanced reds for meat, brighter greens for vegetables, richer browns for breads. Make colors look amazing and vibrant - like the dramatic enhancement on the homepage. Rich, saturated, almost unreal colors that create stunning contrast.' : 'PERFECT colors - make them vibrant, rich, and ideal (perfectly cooked meat colors, fresh vibrant vegetables, glossy perfect sauces).'}
