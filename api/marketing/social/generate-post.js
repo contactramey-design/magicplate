@@ -1,8 +1,8 @@
 // Social Media Post Generation
 // AI-powered social media content generation using AI Gateway
 
-const aiGateway = require('../../lib/ai-gateway');
-const { findById } = require('../../lib/db');
+const aiGateway = require('../../../lib/ai-gateway');
+const { findById } = require('../../../lib/db');
 
 /**
  * Generate social media post content using AI Gateway
