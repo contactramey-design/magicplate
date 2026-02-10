@@ -150,7 +150,7 @@ function baseNegativePrompt() {
  * - fofr/realistic-vision-v5.1
  * - lucataco/flux-pro
  */
-async function enhanceImageWithReplicate(imageBuffer, imageName, style = 'upscale_casual') {
+async function enhanceImageWithReplicate(imageBuffer, imageName, style = 'upscale_casual', fictionalLevel = 30) {
   if (!REPLICATE_API_TOKEN) {
     throw new Error('REPLICATE_API_TOKEN not configured');
   }
@@ -180,8 +180,14 @@ async function enhanceImageWithReplicate(imageBuffer, imageName, style = 'upscal
   
   // Step 2: Use Flux model for img2img quality enhancement
   // Use quality-focused prompt (same as Leonardo/Together)
-  const prompt = buildRegenPrompt(style);
+  const prompt = buildRegenPrompt(style, fictionalLevel);
   const negativePrompt = baseNegativePrompt();
+  
+  // Calculate strength based on fictional level
+  const baseStrength = 0.75;
+  const strengthRange = 0.45;
+  const calculatedStrength = baseStrength - (fictionalLevel / 100 * strengthRange);
+  const calculatedGuidance = 7.5 + (fictionalLevel / 100 * 1.5);
   
   let prediction;
   let lastError = null;
@@ -229,9 +235,9 @@ async function enhanceImageWithReplicate(imageBuffer, imageName, style = 'upscal
             image: uploadedFileUrl,
             prompt: prompt,
             negative_prompt: negativePrompt,
-            prompt_strength: 0.75, // Decreased from 0.85 - allows more dramatic enhancement
+            prompt_strength: calculatedStrength, // Scale from 0.75 (authentic) to 0.3 (fictional)
             num_inference_steps: 40,
-            guidance_scale: 9.0, // Increased from 7.5 - more adherence to dramatic quality prompt
+            guidance_scale: calculatedGuidance, // Scale from 7.5 to 9.0
             output_format: 'jpg',
             output_quality: 95,
           }
@@ -312,7 +318,7 @@ async function enhanceImageWithReplicate(imageBuffer, imageName, style = 'upscal
  * Enhance image using Leonardo.ai API (Image-to-Image)
  * Uses Leonardo's image-to-image endpoint for food photography enhancement
  */
-async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale_casual') {
+async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale_casual', fictionalLevel = 30) {
   if (!LEONARDO_API_KEY) {
     throw new Error('LEONARDO_API_KEY not configured');
   }
@@ -724,8 +730,16 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
 
   // Step 3: Generate enhanced image using image-to-image with PhotoReal for food
   // Focus on QUALITY ENHANCEMENT (sharpness, detail, noise reduction) not style transformation
-  const prompt = buildRegenPrompt(style);
+  const prompt = buildRegenPrompt(style, fictionalLevel);
   const negativePrompt = baseNegativePrompt();
+  
+  // Calculate strength based on fictional level
+  // Lower intensity = higher strength (stay closer to original)
+  // Higher intensity = lower strength (allow more transformation)
+  const baseStrength = 0.75; // Base strength for authentic
+  const strengthRange = 0.45; // Range from 0.3 to 0.75
+  const calculatedStrength = baseStrength - (fictionalLevel / 100 * strengthRange); // 0.75 at 0%, 0.3 at 100%
+  const calculatedGuidance = 7 + (fictionalLevel / 100 * 2); // Scale from 7 to 9
   
   // Calculate aspect ratio from original image to maintain proportions
   // Leonardo.ai maximum resolution: 1536x1536 (not 2048)
@@ -741,14 +755,14 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
     // 1536x1536 = 2.36MP (vs 1024x1024 = 1MP) = 2.36x more pixels for better quality
     width: 1536,  // Leonardo maximum (was 2048, but Leonardo limit is 1536)
     height: 1536, // Leonardo maximum (was 2048, but Leonardo limit is 1536)
-    // INCREASE guidance_scale to make AI follow quality instructions more strictly
-    guidance_scale: 9, // Increased from 7 - more adherence to dramatic quality prompt
+    // Scale guidance_scale based on fictional level
+    guidance_scale: calculatedGuidance, // 7 (authentic) to 9 (fictional)
     // MORE STEPS = better quality (more processing time but better results)
     num_inference_steps: 40, // Increased from 30 for better quality
-    // LOWER init_strength to allow MORE dramatic enhancement (was 0.85, too conservative)
-    // 0.75 = 75% original, 25% enhancement (more dramatic quality improvement)
-    // This allows the AI to make more significant quality improvements while maintaining composition
-    init_strength: 0.75, // Changed from 0.85 - allows more dramatic quality enhancement
+    // Scale init_strength based on fictional level
+    // Lower strength = more transformation (fictional)
+    // Higher strength = less transformation (authentic)
+    init_strength: calculatedStrength, // 0.75 (authentic) to 0.3 (fictional)
     scheduler: 'LEONARDO',
     seed: null,
     // PhotoReal settings for food photography
@@ -849,15 +863,21 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
 /**
  * Enhance image using Together.ai (Flux Pro) - Image-to-Image
  */
-async function enhanceImageWithTogether(imageBuffer, imageName, style = 'upscale_casual') {
+async function enhanceImageWithTogether(imageBuffer, imageName, style = 'upscale_casual', fictionalLevel = 30) {
   if (!TOGETHER_API_KEY) {
     throw new Error('TOGETHER_API_KEY not configured');
   }
 
   // Convert image to base64
   const base64Image = imageBuffer.toString('base64');
-  const prompt = buildRegenPrompt(style);
+  const prompt = buildRegenPrompt(style, fictionalLevel);
   const negativePrompt = baseNegativePrompt();
+  
+  // Calculate strength based on fictional level
+  const baseStrength = 0.75;
+  const strengthRange = 0.45;
+  const calculatedStrength = baseStrength - (fictionalLevel / 100 * strengthRange);
+  const calculatedGuidance = 7.5 + (fictionalLevel / 100 * 1.5);
   
   try {
     const response = await axios.post(
@@ -868,8 +888,8 @@ async function enhanceImageWithTogether(imageBuffer, imageName, style = 'upscale
         negative_prompt: negativePrompt,
         image: `data:image/jpeg;base64,${base64Image}`,
         steps: 50,  // Increased for better quality (was 40)
-        guidance_scale: 9.0,  // Increased from 7.5 - more adherence to dramatic quality prompt
-        strength: 0.75  // Decreased from 0.85 - allows more dramatic enhancement
+        guidance_scale: calculatedGuidance,  // Scale from 7.5 to 9.0
+        strength: calculatedStrength  // Scale from 0.75 (authentic) to 0.3 (fictional)
       },
       {
         headers: {
@@ -932,6 +952,7 @@ module.exports = async (req, res) => {
     const imageData = req.body.image; // base64 string
     const imageName = req.body.filename || 'upload.jpg';
     const style = String(req.body?.style || 'upscale_casual');
+    const fictionalLevel = parseInt(req.body?.fictional_level || 30); // 0-100, default 30
     const restaurant_id = req.body.restaurant_id;
     
     if (!imageData) {
@@ -1021,15 +1042,19 @@ module.exports = async (req, res) => {
       // Use the reloaded keys (currentLeonardoKey, etc.)
       if (currentLeonardoKey) {
         console.log('✅ Using Leonardo.ai for enhancement...');
-        result = await enhanceImageWithLeonardo(imageBuffer, imageName, style);
+        console.log('✅ Using Leonardo.ai for enhancement...');
+        console.log(`📊 Fiction Level: ${fictionalLevel}%`);
+        result = await enhanceImageWithLeonardo(imageBuffer, imageName, style, fictionalLevel);
         serviceUsed = 'leonardo';
       } else if (currentTogetherKey) {
         console.log('✅ Using Together.ai for enhancement...');
-        result = await enhanceImageWithTogether(imageBuffer, imageName, style);
+        console.log(`📊 Fiction Level: ${fictionalLevel}%`);
+        result = await enhanceImageWithTogether(imageBuffer, imageName, style, fictionalLevel);
         serviceUsed = 'together';
       } else if (currentReplicateToken) {
         console.log('✅ Using Replicate for enhancement...');
-        result = await enhanceImageWithReplicate(imageBuffer, imageName, style);
+        console.log(`📊 Fiction Level: ${fictionalLevel}%`);
+        result = await enhanceImageWithReplicate(imageBuffer, imageName, style, fictionalLevel);
         serviceUsed = 'replicate';
       } else {
         // Provide detailed help message
