@@ -1160,10 +1160,14 @@ Check: http://localhost:3000/api/check-config
     // Return the enhanced image URL to the client
     // The client already has the original image, so we don't need to return it
     // The enhanced image URL is from the AI service (Leonardo/Replicate/Together)
+    console.log('✅ Enhancement successful!');
+    console.log('✅ Enhanced image URL:', enhancedImageUrl);
+    console.log('✅ Service used:', serviceUsed);
+    
     return res.status(200).json({
       success: true,
       enhancedImageUrl: enhancedImageUrl, // The AI-enhanced image URL
-      originalImageSize: imageBuffer.length, // Original image size in bytes
+      afterUrl: enhancedImageUrl, // Alias for compatibility with frontend
       output: [enhancedImageUrl], // Also include in output array for compatibility
       jobId: result.id || result.generationId || result.jobId,
       service: serviceUsed,
