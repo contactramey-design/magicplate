@@ -297,6 +297,11 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
       throw new Error('Missing presigned URL or init image ID from Leonardo response');
     }
     
+    // Leonardo API may return fields for multipart/form-data upload
+    // Check if there are additional fields required for the upload
+    const uploadFields = uploadInitImage.fields || uploadInitImage.uploadFields || {};
+    const hasUploadFields = Object.keys(uploadFields).length > 0;
+    
     // Check if URL points to bucket root (ends with /) - Leonardo may return base URL + separate key
     if (presignedUrl.endsWith('/')) {
       console.warn('⚠️ Presigned URL ends with / - checking for object key in response');
@@ -306,7 +311,9 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
                        uploadInitImage.objectKey || 
                        uploadInitImage.fileKey ||
                        uploadInitImage.file_name ||
-                       uploadInitImage.filename;
+                       uploadInitImage.filename ||
+                       uploadFields.key ||
+                       uploadFields.Key;
       
       if (objectKey) {
         // Append object key to URL (remove leading slash from key if present)
@@ -320,6 +327,11 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
         console.log('⚠️ No object key found in response, using initImageId as filename:', filename);
         console.log('Full uploadInitImage object:', JSON.stringify(uploadInitImage, null, 2));
       }
+    }
+    
+    console.log('Upload fields found:', hasUploadFields);
+    if (hasUploadFields) {
+      console.log('Upload fields:', Object.keys(uploadFields));
     }
     
     console.log('Presigned URL received (length:', presignedUrl.length, ')');
@@ -360,27 +372,70 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
         throw new Error(`Invalid presigned URL format - appears to point to bucket root: ${presignedUrl.substring(0, 200)}`);
       }
       
-      // S3 presigned URLs - use raw buffer, no Content-Type header
-      // The signature is calculated without Content-Type, so adding it breaks the signature
-      const uploadResponse = await axios.put(presignedUrl, imageBuffer, {
-        headers: {
-          'Content-Length': imageBuffer.length.toString()
-          // DO NOT add Content-Type - it breaks the presigned URL signature
-        },
-        maxContentLength: Infinity,
-        maxBodyLength: Infinity,
-        timeout: 120000,
-        // Prevent axios from automatically adding Content-Type or modifying the request
-        transformRequest: [(data) => {
-          // Return Buffer/ArrayBuffer as-is
-          if (Buffer.isBuffer(data)) {
+      // Check if Leonardo requires multipart/form-data upload (has upload fields)
+      const uploadFields = uploadInitImage.fields || uploadInitImage.uploadFields || {};
+      const hasUploadFields = Object.keys(uploadFields).length > 0;
+      
+      let uploadResponse;
+      
+      if (hasUploadFields) {
+        // Leonardo requires multipart/form-data upload with specific fields
+        console.log('Using multipart/form-data upload with fields:', Object.keys(uploadFields));
+        
+        const FormData = require('form-data');
+        const formData = new FormData();
+        
+        // Add all required fields from Leonardo's response
+        Object.entries(uploadFields).forEach(([key, value]) => {
+          formData.append(key, value);
+          console.log(`Added field: ${key} = ${value}`);
+        });
+        
+        // Add the file - field name might be 'file' or 'content' or from uploadFields
+        const fileFieldName = uploadInitImage.fileField || 'file';
+        formData.append(fileFieldName, imageBuffer, {
+          filename: `${initImageId}.${extension}`,
+          contentType: contentType
+        });
+        
+        // Extract the actual upload URL (might be different from presignedUrl)
+        const uploadUrl = uploadInitImage.uploadUrl || presignedUrl;
+        
+        uploadResponse = await axios.post(uploadUrl, formData, {
+          headers: {
+            ...formData.getHeaders()
+          },
+          maxContentLength: Infinity,
+          maxBodyLength: Infinity,
+          timeout: 120000,
+          validateStatus: (status) => status < 500
+        });
+      } else {
+        // Standard S3 presigned URL PUT upload
+        console.log('Using standard S3 PUT upload');
+        
+        // S3 presigned URLs - use raw buffer, no Content-Type header
+        // The signature is calculated without Content-Type, so adding it breaks the signature
+        uploadResponse = await axios.put(presignedUrl, imageBuffer, {
+          headers: {
+            'Content-Length': imageBuffer.length.toString()
+            // DO NOT add Content-Type - it breaks the presigned URL signature
+          },
+          maxContentLength: Infinity,
+          maxBodyLength: Infinity,
+          timeout: 120000,
+          // Prevent axios from automatically adding Content-Type or modifying the request
+          transformRequest: [(data) => {
+            // Return Buffer/ArrayBuffer as-is
+            if (Buffer.isBuffer(data)) {
+              return data;
+            }
             return data;
-          }
-          return data;
-        }],
-        // Don't let axios set default headers
-        validateStatus: (status) => status < 500
-      });
+          }],
+          // Don't let axios set default headers
+          validateStatus: (status) => status < 500
+        });
+      }
       
       // Check response status
       if (uploadResponse.status !== 200 && uploadResponse.status !== 204) {
