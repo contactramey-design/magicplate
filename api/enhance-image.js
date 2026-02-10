@@ -198,8 +198,15 @@ async function enhanceImageWithReplicate(imageBuffer, imageName, style = 'upscal
   const negativePrompt = baseNegativePrompt();
   
   // Calculate strength based on fictional level
-  const baseStrength = 0.75;
-  const strengthRange = 0.45;
+  // More aggressive transformation for magical mode
+  let baseStrength = 0.75;
+  let strengthRange = 0.45;
+  
+  if (fictionalLevel > 70) {
+    baseStrength = 0.65;
+    strengthRange = 0.50; // More dramatic for magical
+  }
+  
   const calculatedStrength = baseStrength - (fictionalLevel / 100 * strengthRange);
   const calculatedGuidance = 7.5 + (fictionalLevel / 100 * 1.5);
   
