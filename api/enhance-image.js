@@ -315,12 +315,10 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
     const hasUploadFields = Object.keys(uploadFields).length > 0;
     
     // CRITICAL: Do NOT modify the presigned URL - the signature is tied to the exact URL
-    // If the URL ends with /, Leonardo expects us to use it as-is or it provides the full URL
-    // Modifying the URL invalidates the signature and causes 403 errors
+    // Leonardo may return URLs ending with / - we must use them exactly as provided
     if (presignedUrl.endsWith('/')) {
-      console.warn('⚠️ Presigned URL ends with / - this might be intentional by Leonardo');
-      console.warn('⚠️ NOT modifying URL to preserve signature integrity');
-      // Don't modify the URL - use it exactly as provided
+      console.warn('⚠️ Presigned URL ends with / - Leonardo may use this format');
+      console.warn('⚠️ Using URL exactly as provided (no modifications)');
     }
     
     console.log('Upload fields found:', hasUploadFields);
