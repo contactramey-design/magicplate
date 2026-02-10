@@ -427,38 +427,38 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
         // The signature is calculated with specific headers, so we must match them exactly
         let uploadResponse;
         let lastError;
-      
-      // Attempt 1: No custom headers (let axios set defaults)
-      try {
-        console.log('🔵 Attempt 1: PUT (not POST) without any custom headers...');
-        uploadResponse = await axios.put(presignedUrl, imageBuffer, {
+        
+        // Attempt 1: No custom headers (let axios set defaults)
+        try {
+          console.log('🔵 Attempt 1: PUT (not POST) without any custom headers...');
+          uploadResponse = await axios.put(presignedUrl, imageBuffer, {
           maxContentLength: Infinity,
           maxBodyLength: Infinity,
           timeout: 120000,
-          transformRequest: [(data) => {
-            if (Buffer.isBuffer(data)) return data;
-            return data;
-          }],
-          validateStatus: (status) => status < 500
-        });
-        
-        if (uploadResponse.status === 200 || uploadResponse.status === 204) {
-          console.log('✅ Upload successful with no custom headers');
-        } else {
-          throw new Error(`PUT returned status ${uploadResponse.status}`);
-        }
-      } catch (error1) {
-        lastError = error1;
-        const status1 = error1.response?.status || error1.status || 'unknown';
-        console.log('❌ Attempt 1 failed:', status1);
-        if (status1 === 403) {
-          console.log('  403 error - signature mismatch, trying with headers...');
-          console.log('  Error response data:', error1.response?.data);
-          console.log('  Error response headers:', error1.response?.headers);
-        }
-        
-        // Attempt 2: With Content-Length only
-        try {
+            transformRequest: [(data) => {
+              if (Buffer.isBuffer(data)) return data;
+              return data;
+            }],
+            validateStatus: (status) => status < 500
+          });
+          
+          if (uploadResponse.status === 200 || uploadResponse.status === 204) {
+            console.log('✅ Upload successful with no custom headers');
+          } else {
+            throw new Error(`PUT returned status ${uploadResponse.status}`);
+          }
+        } catch (error1) {
+          lastError = error1;
+          const status1 = error1.response?.status || error1.status || 'unknown';
+          console.log('❌ Attempt 1 failed:', status1);
+          if (status1 === 403) {
+            console.log('  403 error - signature mismatch, trying with headers...');
+            console.log('  Error response data:', error1.response?.data);
+            console.log('  Error response headers:', error1.response?.headers);
+          }
+          
+          // Attempt 2: With Content-Length only
+          try {
           console.log('🔵 Attempt 2: PUT (not POST) with Content-Length header...');
           uploadResponse = await axios.put(presignedUrl, imageBuffer, {
             headers: {
@@ -569,6 +569,7 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
               throw error4;
             }
           }
+        }
         }
         
         // Check response status for PUT
