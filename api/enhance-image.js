@@ -363,41 +363,29 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
       console.log('Presigned URL (first 200 chars):', presignedUrl.substring(0, 200));
       console.log('Presigned URL (last 100 chars):', presignedUrl.substring(presignedUrl.length - 100));
       
-      // Validate URL format - should be an S3 URL, not a bucket root
+      // Validate URL format - should be an S3 URL
       if (!presignedUrl.includes('amazonaws.com') && !presignedUrl.includes('s3')) {
         console.warn('⚠️ Presigned URL does not look like an S3 URL:', presignedUrl.substring(0, 100));
       }
       
-      // Check if URL ends with bucket name (would cause CreateBucket error)
-      const urlParts = new URL(presignedUrl);
-      const pathParts = urlParts.pathname.split('/').filter(p => p);
-      if (pathParts.length === 0 || (pathParts.length === 1 && !pathParts[0].includes('.'))) {
-        throw new Error(`Invalid presigned URL format - appears to point to bucket root: ${presignedUrl.substring(0, 200)}`);
+      // Note: Leonardo may return URLs ending with / (bucket root)
+      // We'll try the upload as-is and let S3/Leonardo tell us if it's invalid
+      // Don't throw errors based on URL format - let the actual upload attempt fail if needed
+      try {
+        const urlParts = new URL(presignedUrl);
+        const pathParts = urlParts.pathname.split('/').filter(p => p);
+        if (pathParts.length === 0 || (pathParts.length === 1 && !pathParts[0].includes('.'))) {
+          console.warn('⚠️ Presigned URL appears to point to bucket root - will try upload anyway');
+          console.warn('⚠️ Leonardo may use this format - let the upload attempt determine validity');
+        }
+      } catch (urlError) {
+        // URL parsing error - might be malformed, but try anyway
+        console.warn('⚠️ Could not parse URL, attempting upload anyway:', urlError.message);
       }
       
       // S3 presigned URLs ALWAYS require PUT method, not POST
       // Leonardo's presigned URLs are standard S3 presigned URLs
       console.log('Using S3 PUT upload (presigned URLs require PUT, not POST)');
-      
-      // Validate URL format - should be an S3 URL, not a bucket root
-      if (!presignedUrl.includes('amazonaws.com') && !presignedUrl.includes('s3')) {
-        console.warn('⚠️ Presigned URL does not look like an S3 URL:', presignedUrl.substring(0, 100));
-      }
-      
-      // Check if URL ends with bucket name (would cause CreateBucket error)
-      try {
-        const urlParts = new URL(presignedUrl);
-        const pathParts = urlParts.pathname.split('/').filter(p => p);
-        if (pathParts.length === 0 || (pathParts.length === 1 && !pathParts[0].includes('.'))) {
-          throw new Error(`Invalid presigned URL format - appears to point to bucket root: ${presignedUrl.substring(0, 200)}`);
-        }
-      } catch (urlError) {
-        if (urlError.message.includes('Invalid presigned URL')) {
-          throw urlError;
-        }
-        // URL parsing error - might be malformed, but try anyway
-        console.warn('⚠️ Could not parse URL, attempting upload anyway:', urlError.message);
-      }
       
       // S3 presigned URLs ALWAYS use PUT method (not POST)
       // The 405 error confirms POST is not allowed - must use PUT
