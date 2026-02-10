@@ -452,9 +452,12 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
         }
       } catch (error1) {
         lastError = error1;
-        console.log('❌ Attempt 1 failed:', error1.response?.status);
-        if (error1.response?.status === 403) {
+        const status1 = error1.response?.status || error1.status || 'unknown';
+        console.log('❌ Attempt 1 failed:', status1);
+        if (status1 === 403) {
           console.log('  403 error - signature mismatch, trying with headers...');
+          console.log('  Error response data:', error1.response?.data);
+          console.log('  Error response headers:', error1.response?.headers);
         }
         
         // Attempt 2: With Content-Length only
@@ -481,9 +484,12 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
           }
         } catch (error2) {
           lastError = error2;
-          console.log('❌ Attempt 2 failed:', error2.response?.status);
-          if (error2.response?.status === 403) {
+          const status2 = error2.response?.status || error2.status || 'unknown';
+          console.log('❌ Attempt 2 failed:', status2);
+          if (status2 === 403) {
             console.log('  403 error - signature mismatch, trying with Content-Type...');
+            console.log('  Error response data:', error2.response?.data);
+            console.log('  Error response headers:', error2.response?.headers);
           }
           
           // Attempt 3: With Content-Type (some presigned URLs require it)
@@ -506,7 +512,13 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
             }
           } catch (error3) {
             lastError = error3;
-            console.log('❌ Attempt 3 failed:', error3.response?.status);
+            const status3 = error3.response?.status || error3.status || 'unknown';
+            console.log('❌ Attempt 3 failed:', status3);
+            if (status3 === 403) {
+              console.log('  403 error - signature mismatch, trying with both headers...');
+              console.log('  Error response data:', error3.response?.data);
+              console.log('  Error response headers:', error3.response?.headers);
+            }
             
             // Attempt 4: With both Content-Type and Content-Length
             try {
@@ -529,7 +541,13 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
               }
             } catch (error4) {
               lastError = error4;
-              console.log('❌ All attempts failed');
+              const status4 = error4.response?.status || error4.status || 'unknown';
+              console.log('❌ Attempt 4 failed:', status4);
+              console.log('❌ All PUT attempts failed. Last error details:');
+              console.log('  Status:', status4);
+              console.log('  Response data:', error4.response?.data);
+              console.log('  Response headers:', error4.response?.headers);
+              console.log('  Error message:', error4.message);
               throw error4;
             }
           }
