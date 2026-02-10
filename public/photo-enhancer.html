@@ -431,24 +431,26 @@
       <div class="processing" id="processingDiv" style="display: none;">
         <div class="spinner"></div>
         <div class="processing-text" id="processingText">Enhancing your photo...</div>
-        <p style="color: #666; margin-top: 10px;">This may take 30-60 seconds</p>
+        <p id="processingSubtext" style="color: #666; margin-top: 10px;">This may take 15-30 seconds</p>
       </div>
 
       <!-- Confirmation card: shows after identification, before enhancement -->
-      <div id="confirmationCard" style="display:none; background:linear-gradient(135deg,#e8f5e9,#f1f8e9); border:1px solid #a5d6a7; border-radius:14px; padding:24px; margin-bottom:18px; box-shadow:0 4px 16px rgba(76,175,80,0.12);">
-        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
-          <span style="font-size:1.6em;">🔍</span>
+      <div id="confirmationCard" style="display:none; background:linear-gradient(135deg,#e8f5e9,#f1f8e9); border:1px solid #a5d6a7; border-radius:14px; padding:28px; margin-bottom:18px; box-shadow:0 4px 16px rgba(76,175,80,0.12);">
+        <div style="display:flex; align-items:flex-start; gap:12px; margin-bottom:16px;">
+          <span style="font-size:2em; line-height:1;">🔍</span>
           <div>
-            <div style="font-weight:700; color:#2e7d32; font-size:1.15em;">We detected these items</div>
-            <div style="color:#555; font-size:0.88em;">Confirm or edit before we enhance — saves credits if something's wrong.</div>
+            <div id="confirmationTitle" style="font-weight:700; color:#2e7d32; font-size:1.2em; margin-bottom:4px;">We detected these items</div>
+            <div id="confirmationSubtitle" style="color:#555; font-size:0.9em; line-height:1.4;">
+              Review what we found. Edit if anything looks wrong — this helps the AI preserve your actual food items during enhancement.
+            </div>
           </div>
         </div>
-        <textarea id="confirmedItemsInput" rows="3" style="width:100%; padding:12px; border:1px solid #c8e6c9; border-radius:8px; font-family:inherit; font-size:0.95em; line-height:1.5; resize:vertical; background:#fff;"></textarea>
-        <div style="display:flex; gap:10px; margin-top:14px; flex-wrap:wrap;">
-          <button id="confirmEnhanceBtn" class="btn btn-primary" style="flex:1; min-width:180px;">✅ Looks right — Enhance this!</button>
-          <button id="skipIdentifyBtn" class="btn btn-secondary" style="min-width:140px;">Skip & Enhance anyway</button>
+        <textarea id="confirmedItemsInput" rows="3" placeholder="e.g. grilled chicken breast, mashed potatoes, steamed broccoli, gravy" style="width:100%; padding:14px; border:2px solid #c8e6c9; border-radius:10px; font-family:inherit; font-size:1em; line-height:1.5; resize:vertical; background:#fff; transition: border-color 0.2s;"></textarea>
+        <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;">
+          <button id="confirmEnhanceBtn" class="btn btn-primary" style="flex:1; min-width:200px; padding:14px 24px; font-size:1.05em;">✅ Looks right — Enhance this!</button>
+          <button id="skipIdentifyBtn" class="btn btn-secondary" style="min-width:160px; padding:14px 24px;">Skip & Enhance anyway</button>
         </div>
-        <div id="confirmationNote" style="margin-top:10px; font-size:0.82em; color:#777; display:none;"></div>
+        <div id="confirmationNote" style="margin-top:12px; font-size:0.85em; color:#777; display:none;"></div>
       </div>
 
       <!-- Shows after enhancement is complete -->
@@ -591,8 +593,12 @@
       currentFile = null;
       beforeImageUrl = null;
       afterImageUrl = null;
+      pendingBase64 = null;
+      confirmedItems = '';
       previewContainer.style.display = 'none';
       previewSection.classList.remove('active');
+      document.getElementById('confirmationCard').style.display = 'none';
+      document.getElementById('identifiedItemsBanner').style.display = 'none';
       fileInput.value = '';
       clearTimeout(regenerationTimeout);
       isRegenerating = false;
@@ -629,12 +635,16 @@
       
       isRegenerating = true;
       processingDiv.style.display = 'block';
+      document.getElementById('processingText').textContent = '✨ Re-enhancing with new settings…';
+      document.getElementById('processingSubtext').textContent = 'This may take 30-60 seconds';
       sliderContainer.style.display = 'none';
       actionsDiv.style.display = 'none';
       statusDiv.style.display = 'none';
       
+      startProcessingTimer();
+      
       try {
-        const base64 = await fileToBase64(currentFile);
+        const base64 = pendingBase64 || await fileToBase64(currentFile);
         const urlParams = new URLSearchParams(window.location.search);
         const restaurantId = urlParams.get('restaurant_id') || '1';
         
@@ -647,11 +657,12 @@
             restaurant_id: parseInt(restaurantId),
             style: 'upscale_casual',
             fictional_level: fictionalLevel,
-            identified_items: confirmedItems // Reuse confirmed items
+            identified_items: confirmedItems
           })
         });
         
         const data = await response.json();
+        stopProcessingTimer();
         
         if (!response.ok) {
           throw new Error(data.message || data.error || 'Enhancement failed');
@@ -667,6 +678,7 @@
         actionsDiv.style.display = 'flex';
         
       } catch (error) {
+        stopProcessingTimer();
         console.error('Regeneration error:', error);
         showStatus(`Regeneration failed: ${error.message}`, 'error');
         processingDiv.style.display = 'none';
@@ -711,6 +723,58 @@
       });
     });
     
+    // ── Processing timer ──
+    let processingTimer = null;
+    let processingStartTime = 0;
+
+    function startProcessingTimer() {
+      processingStartTime = Date.now();
+      const subtext = document.getElementById('processingSubtext');
+      clearInterval(processingTimer);
+      processingTimer = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - processingStartTime) / 1000);
+        subtext.textContent = `${elapsed}s elapsed`;
+      }, 1000);
+    }
+
+    function stopProcessingTimer() {
+      clearInterval(processingTimer);
+      processingTimer = null;
+    }
+
+    // ── Show confirmation card (with or without detected items) ──
+    function showConfirmationCard(description, note) {
+      processingDiv.style.display = 'none';
+      stopProcessingTimer();
+
+      const card = document.getElementById('confirmationCard');
+      const input = document.getElementById('confirmedItemsInput');
+      const title = document.getElementById('confirmationTitle');
+      const subtitle = document.getElementById('confirmationSubtitle');
+      const noteEl = document.getElementById('confirmationNote');
+
+      if (description) {
+        title.textContent = '🔍 We detected these items';
+        subtitle.textContent = 'Review what we found. Edit if anything looks wrong — this helps the AI preserve your actual food items during enhancement.';
+        input.value = description;
+      } else {
+        title.textContent = '🍽️ What food is in this photo?';
+        subtitle.textContent = 'We couldn\'t automatically detect the food items. Please describe what\'s in your photo so the AI knows what to enhance.';
+        input.value = '';
+        input.focus();
+      }
+
+      if (note) {
+        noteEl.textContent = note;
+        noteEl.style.display = 'block';
+      } else {
+        noteEl.style.display = 'none';
+      }
+
+      card.style.display = 'block';
+      if (description) input.focus();
+    }
+
     // ── Enhance button: Step 1 — Identify food items first ──
     enhanceBtn.addEventListener('click', async () => {
       if (!currentFile) return;
@@ -719,47 +783,48 @@
       previewContainer.style.display = 'none';
       previewSection.classList.add('active');
       processingDiv.style.display = 'block';
-      document.getElementById('processingText').textContent = 'Identifying food items…';
+      document.getElementById('processingText').textContent = '🔍 Identifying food items…';
+      document.getElementById('processingSubtext').textContent = 'Analyzing your photo with AI vision';
       document.getElementById('confirmationCard').style.display = 'none';
       document.getElementById('identifiedItemsBanner').style.display = 'none';
       sliderContainer.style.display = 'none';
       actionsDiv.style.display = 'none';
       statusDiv.style.display = 'none';
 
+      startProcessingTimer();
+
       try {
         const base64 = await fileToBase64(currentFile);
         pendingBase64 = base64;
 
-        // Call lightweight identify endpoint
+        // Call lightweight identify endpoint with timeout
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 60000); // 60s timeout
+
         const idResponse = await fetch('/api/identify-food', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ image: base64 })
+          body: JSON.stringify({ image: base64 }),
+          signal: controller.signal
         });
+        clearTimeout(timeout);
+
         const idData = await idResponse.json();
 
-        processingDiv.style.display = 'none';
-
         if (idData.identified && idData.description) {
-          // Show confirmation card with editable description
-          const card = document.getElementById('confirmationCard');
-          const input = document.getElementById('confirmedItemsInput');
-          input.value = idData.description;
-          card.style.display = 'block';
-          input.focus();
+          showConfirmationCard(idData.description, null);
         } else {
-          // Vision unavailable — go straight to enhancement
-          document.getElementById('confirmationNote').style.display = 'block';
-          document.getElementById('confirmationNote').textContent =
-            idData.message || 'Could not identify items automatically.';
-          confirmedItems = '';
-          await runEnhancement();
+          // Vision unavailable or failed — show manual input
+          showConfirmationCard('', idData.message || 'Could not identify food items automatically.');
         }
       } catch (error) {
-        processingDiv.style.display = 'none';
-        // If identification fails, let user enhance anyway
-        confirmedItems = '';
-        await runEnhancement();
+        stopProcessingTimer();
+        console.warn('Identification error:', error.message);
+        // Show manual input fallback
+        const msg = error.name === 'AbortError'
+          ? 'Identification timed out. Please describe the food manually.'
+          : 'Could not identify food items. Please describe them below.';
+        showConfirmationCard('', msg);
       }
     });
 
@@ -780,9 +845,12 @@
     // ── The actual enhancement call ──
     async function runEnhancement() {
       processingDiv.style.display = 'block';
-      document.getElementById('processingText').textContent = 'Enhancing your photo with AI…';
+      document.getElementById('processingText').textContent = '✨ Enhancing your photo with AI…';
+      document.getElementById('processingSubtext').textContent = 'This may take 30-60 seconds';
       sliderContainer.style.display = 'none';
       actionsDiv.style.display = 'none';
+
+      startProcessingTimer();
 
       try {
         if (!pendingBase64) {
@@ -801,11 +869,12 @@
             restaurant_id: parseInt(restaurantId),
             style: 'upscale_casual',
             fictional_level: fictionalLevel,
-            identified_items: confirmedItems // Pass user-confirmed items
+            identified_items: confirmedItems
           })
         });
 
         const data = await response.json();
+        stopProcessingTimer();
 
         if (!response.ok) {
           let errorMsg = data.message || data.error || `Enhancement failed (${response.status})`;
@@ -843,6 +912,7 @@
         showStatus('✅ Enhancement complete! Drag the slider to compare.', 'success');
         triggerConfetti();
       } catch (error) {
+        stopProcessingTimer();
         processingDiv.style.display = 'none';
         showStatus(`❌ Error: ${error.message}`, 'error');
       }
@@ -865,8 +935,14 @@
       currentFile = null;
       beforeImageUrl = null;
       afterImageUrl = null;
+      pendingBase64 = null;
+      confirmedItems = '';
+      stopProcessingTimer();
       previewContainer.style.display = 'none';
       previewSection.classList.remove('active');
+      processingDiv.style.display = 'none';
+      document.getElementById('confirmationCard').style.display = 'none';
+      document.getElementById('identifiedItemsBanner').style.display = 'none';
       fileInput.value = '';
       statusDiv.style.display = 'none';
       cleanupSlider();

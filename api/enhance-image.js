@@ -92,7 +92,7 @@ const { getAIGatewayPrompt } = require('../lib/photo-enhancement-prompt');
  * @returns {Promise<string>} - A description of identified items, or '' on failure
  */
 async function analyzeImageContents(imageBuffer) {
-  // We need Replicate for vision (BLIP-2 captioning model)
+  // We need Replicate for vision (BLIP captioning model)
   const token = process.env.REPLICATE_API_TOKEN;
   if (!token) {
     console.log('⚠️ REPLICATE_API_TOKEN not set — skipping automatic food identification');
@@ -100,57 +100,44 @@ async function analyzeImageContents(imageBuffer) {
   }
 
   try {
-    console.log('🔍 Step 1: Analyzing image to identify food items...');
+    console.log('🔍 Server-side food identification (captioning)…');
 
-    // Convert buffer to data-URI so we can send it inline
     const base64 = imageBuffer.toString('base64');
-    const mimeType = 'image/jpeg';
-    const dataUri = `data:${mimeType};base64,${base64}`;
+    const dataUri = `data:image/jpeg;base64,${base64}`;
 
-    // Use Replicate's BLIP-2 model for image captioning / VQA
-    const response = await axios.post(
+    // Use image_captioning task — gives a full sentence description
+    const { data } = await axios.post(
       'https://api.replicate.com/v1/predictions',
       {
-        // BLIP-2 on Replicate (salesforce/blip)
         version: '2e1dddc8621f72155f24cf2e0adbde548458d3cab9f00c0139eea840d0ac4746',
-        input: {
-          image: dataUri,
-          task: 'visual_question_answering',
-          question: 'List every food item, drink, cup, plate, bowl, sauce, garnish, side dish, and ingredient visible in this photo. Be specific about the type of food (e.g. cheeseburger not just burger, caesar salad not just salad). Include quantities if there are multiple items.'
-        }
+        input: { image: dataUri, task: 'image_captioning' }
       },
-      {
-        headers: {
-          'Authorization': `Token ${token}`,
-          'Content-Type': 'application/json'
-        }
-      }
+      { headers: { Authorization: `Token ${token}`, 'Content-Type': 'application/json' } }
     );
 
-    // Poll for result (BLIP is fast, usually <10s)
-    let result = response.data;
+    let result = data;
     let attempts = 0;
     while (['starting', 'processing'].includes(result.status) && attempts < 30) {
-      await new Promise(r => setTimeout(r, 1000));
+      await new Promise(r => setTimeout(r, 1200));
       const poll = await axios.get(
         `https://api.replicate.com/v1/predictions/${result.id}`,
-        { headers: { 'Authorization': `Token ${token}` } }
+        { headers: { Authorization: `Token ${token}` } }
       );
       result = poll.data;
       attempts++;
     }
 
     if (result.status !== 'succeeded') {
-      console.warn('⚠️ Vision analysis did not succeed, status:', result.status);
+      console.warn('⚠️ Vision analysis did not succeed:', result.status);
       return '';
     }
 
-    // BLIP returns a string (or array)
-    const description = Array.isArray(result.output) ? result.output.join(' ') : String(result.output || '');
+    const description = (Array.isArray(result.output) ? result.output.join(' ') : String(result.output || ''))
+      .replace(/^Caption:\s*/i, '')
+      .trim();
     console.log('🔍 Identified food items:', description);
-    return description.trim();
+    return description;
   } catch (err) {
-    // Non-fatal — enhancement will still work, just without explicit item list
     console.warn('⚠️ Food identification failed (non-fatal):', err.message);
     return '';
   }
