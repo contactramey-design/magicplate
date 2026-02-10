@@ -1051,11 +1051,14 @@ Check: http://localhost:3000/api/check-config
       console.log('🔍 Replicate URL:', enhancedImageUrl);
     } else if (serviceUsed === 'leonardo') {
       // Leonardo returns different structures - try multiple paths
-      enhancedImageUrl = result.output?.[0] || 
-                        result.generations?.[0]?.url ||
-                        result.generated_images?.[0]?.url ||
-                        result.images?.[0]?.url ||
-                        result.url;
+      enhancedImageUrl = result.output?.[0] ||  // Most common: array of URLs (strings)
+                        (typeof result.output?.[0] === 'string' ? result.output[0] : null) ||  // String URL in output array
+                        result.generations?.[0]?.url ||  // Nested generations array
+                        result.generated_images?.[0]?.url ||  // Generated images array
+                        (typeof result.generated_images?.[0] === 'string' ? result.generated_images[0] : null) ||  // String URL in generated_images
+                        result.images?.[0]?.url ||  // Images array
+                        (typeof result.images?.[0] === 'string' ? result.images[0] : null) ||  // String URL in images
+                        result.url;  // Direct URL
       console.log('🔍 Leonardo URL:', enhancedImageUrl);
       console.log('🔍 Leonardo result structure keys:', Object.keys(result || {}));
       if (result.generations) {
@@ -1064,6 +1067,11 @@ Check: http://localhost:3000/api/check-config
       }
       if (result.output) {
         console.log('🔍 Leonardo output:', JSON.stringify(result.output, null, 2));
+        console.log('🔍 Leonardo output type:', typeof result.output);
+        console.log('🔍 Leonardo output[0] type:', typeof result.output[0]);
+      }
+      if (result.generated_images) {
+        console.log('🔍 Leonardo generated_images:', JSON.stringify(result.generated_images, null, 2));
       }
     } else if (serviceUsed === 'together') {
       enhancedImageUrl = result.output?.choices?.[0]?.image || result.output?.image;
