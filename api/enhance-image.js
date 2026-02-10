@@ -254,6 +254,8 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
   try {
     console.log('Requesting presigned URL from Leonardo...');
     console.log('File extension:', extension);
+    console.log('API Key length:', LEONARDO_API_KEY?.length || 0);
+    
     const initResponse = await axios.post(
       'https://cloud.leonardo.ai/api/rest/v1/init-image',
       {
@@ -263,9 +265,16 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
         headers: {
           'Authorization': `Bearer ${LEONARDO_API_KEY}`,
           'Content-Type': 'application/json'
-        }
+        },
+        validateStatus: (status) => status < 500 // Don't throw on 4xx
       }
     );
+    
+    // Check for errors in response
+    if (initResponse.status !== 200 && initResponse.status !== 201) {
+      console.error('Leonardo init-image failed:', initResponse.status, initResponse.data);
+      throw new Error(`Failed to get presigned URL: ${initResponse.status} - ${JSON.stringify(initResponse.data)}`);
+    }
     
     console.log('Init image response:', initResponse.data);
     const uploadInitImage = initResponse.data.uploadInitImage;
