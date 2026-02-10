@@ -320,23 +320,48 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
       console.log('Image size:', imageBuffer.length, 'bytes');
       console.log('Content-Type:', contentType);
       console.log('Presigned URL (first 200 chars):', presignedUrl.substring(0, 200));
+      console.log('Presigned URL (last 100 chars):', presignedUrl.substring(presignedUrl.length - 100));
       
-      // S3 presigned URLs typically don't need Content-Type header
-      // The signature is calculated without it, so adding it breaks the signature
-      // Use the raw buffer with minimal headers
+      // Validate URL format - should be an S3 URL, not a bucket root
+      if (!presignedUrl.includes('amazonaws.com') && !presignedUrl.includes('s3')) {
+        console.warn('⚠️ Presigned URL does not look like an S3 URL:', presignedUrl.substring(0, 100));
+      }
+      
+      // Check if URL ends with bucket name (would cause CreateBucket error)
+      const urlParts = new URL(presignedUrl);
+      const pathParts = urlParts.pathname.split('/').filter(p => p);
+      if (pathParts.length === 0 || (pathParts.length === 1 && !pathParts[0].includes('.'))) {
+        throw new Error(`Invalid presigned URL format - appears to point to bucket root: ${presignedUrl.substring(0, 200)}`);
+      }
+      
+      // S3 presigned URLs - use raw buffer, no Content-Type header
+      // The signature is calculated without Content-Type, so adding it breaks the signature
       const uploadResponse = await axios.put(presignedUrl, imageBuffer, {
         headers: {
           'Content-Length': imageBuffer.length.toString()
+          // DO NOT add Content-Type - it breaks the presigned URL signature
         },
         maxContentLength: Infinity,
         maxBodyLength: Infinity,
         timeout: 120000,
-        // Prevent axios from automatically adding Content-Type
+        // Prevent axios from automatically adding Content-Type or modifying the request
         transformRequest: [(data) => {
-          // Return data as-is, don't let axios modify it
+          // Return Buffer/ArrayBuffer as-is
+          if (Buffer.isBuffer(data)) {
+            return data;
+          }
           return data;
-        }]
+        }],
+        // Don't let axios set default headers
+        validateStatus: (status) => status < 500
       });
+      
+      // Check response status
+      if (uploadResponse.status !== 200 && uploadResponse.status !== 204) {
+        console.error('S3 upload returned non-success status:', uploadResponse.status);
+        console.error('Response data:', uploadResponse.data);
+        throw new Error(`S3 upload failed with status ${uploadResponse.status}: ${JSON.stringify(uploadResponse.data)}`);
+      }
       
       console.log('S3 upload successful, status:', uploadResponse.status);
       
