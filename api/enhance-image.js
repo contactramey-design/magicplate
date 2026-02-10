@@ -493,32 +493,52 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
       
       // Check response status
       if (uploadResponse.status !== 200 && uploadResponse.status !== 204) {
-        console.error('S3 upload returned non-success status:', uploadResponse.status);
+        console.error('❌ S3 upload returned non-success status:', uploadResponse.status);
         console.error('Response data:', uploadResponse.data);
+        console.error('Response headers:', uploadResponse.headers);
         throw new Error(`S3 upload failed with status ${uploadResponse.status}: ${JSON.stringify(uploadResponse.data)}`);
       }
       
-      console.log('S3 upload successful, status:', uploadResponse.status);
-      
-      // Check if upload was successful (200 or 204)
-      if (uploadResponse.status !== 200 && uploadResponse.status !== 204) {
-        console.error('S3 upload returned non-success status:', uploadResponse.status);
-        console.error('Response data:', uploadResponse.data);
-        throw new Error(`S3 upload failed with status ${uploadResponse.status}`);
-      }
-      
-      console.log('Image uploaded to S3 successfully, status:', uploadResponse.status);
+      console.log('✅ Image uploaded to S3 successfully, status:', uploadResponse.status);
       console.log('Init image ID:', initImageId);
     } catch (s3Error) {
-      console.error('S3 upload error:', s3Error.response?.status, s3Error.response?.data || s3Error.message);
-      console.error('Error headers:', s3Error.response?.headers);
+      console.error('❌ S3 upload error details:');
+      console.error('  Status:', s3Error.response?.status);
+      console.error('  Status Text:', s3Error.response?.statusText);
+      console.error('  Response Data:', s3Error.response?.data);
+      console.error('  Response Headers:', s3Error.response?.headers);
+      console.error('  Error Message:', s3Error.message);
       
-      if (s3Error.response?.status === 403) {
-        const errorDetails = s3Error.response?.data || s3Error.message;
-        throw new Error(`S3 upload forbidden (403). Possible causes: (1) Presigned URL expired - try uploading again immediately, (2) Content-Type mismatch - the URL signature may require a specific type, (3) Request signature mismatch. Details: ${errorDetails}`);
+      // Extract error message from XML if present
+      let errorMessage = s3Error.message;
+      let errorCode = 'Unknown';
+      
+      if (s3Error.response?.data) {
+        const errorData = s3Error.response.data;
+        if (typeof errorData === 'string' && errorData.includes('<Error>')) {
+          // Parse XML error response
+          const codeMatch = errorData.match(/<Code>(.*?)<\/Code>/);
+          const messageMatch = errorData.match(/<Message>(.*?)<\/Message>/);
+          if (codeMatch) errorCode = codeMatch[1];
+          if (messageMatch) errorMessage = messageMatch[1];
+          console.error('  Parsed Error Code:', errorCode);
+          console.error('  Parsed Error Message:', errorMessage);
+        } else if (typeof errorData === 'object') {
+          errorMessage = errorData.message || errorData.error || JSON.stringify(errorData);
+        } else {
+          errorMessage = String(errorData);
+        }
       }
       
-      throw new Error(`Failed to upload image to S3: ${s3Error.response?.data || s3Error.message}`);
+      if (s3Error.response?.status === 403) {
+        throw new Error(`S3 upload forbidden (403 - ${errorCode}). ${errorMessage}. Possible causes: (1) Presigned URL expired - try uploading again immediately, (2) Headers don't match signature, (3) Request signature mismatch.`);
+      }
+      
+      if (s3Error.response?.status === 405) {
+        throw new Error(`S3 upload method not allowed (405). ${errorMessage}. The presigned URL may require a different HTTP method (PUT vs POST).`);
+      }
+      
+      throw new Error(`Failed to upload image to S3 (${s3Error.response?.status || 'unknown'} - ${errorCode}): ${errorMessage}`);
     }
   } catch (uploadError) {
     console.error('Leonardo upload error:', uploadError.response?.data || uploadError.message);
