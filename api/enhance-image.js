@@ -422,7 +422,8 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
         const FormData = require('form-data');
         const formData = new FormData();
         
-        // Add all required fields from Leonardo's response
+        // Add all required fields from Leonardo's response (in the exact order they appear)
+        // S3 presigned POST requires fields in a specific order
         Object.entries(uploadFields).forEach(([key, value]) => {
           formData.append(key, value);
           console.log(`Added field: ${key} = ${value}`);
@@ -435,11 +436,15 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
           contentType: contentType
         });
         
+        // Get form-data headers but don't override Content-Type if it's in uploadFields
+        const formHeaders = formData.getHeaders();
+        console.log('Form headers:', formHeaders);
+        
+        // For S3 presigned POST, we should use ONLY the headers from formData
+        // Don't add any extra headers that might break the signature
         console.log('POSTing to:', presignedUrl);
         uploadResponse = await axios.post(presignedUrl, formData, {
-          headers: {
-            ...formData.getHeaders()
-          },
+          headers: formHeaders, // Use form-data headers as-is, no modifications
           maxContentLength: Infinity,
           maxBodyLength: Infinity,
           timeout: 120000,
@@ -448,19 +453,42 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
       } else {
         // Fallback: Try PUT (standard S3 presigned URL method)
         console.log('No upload fields found, trying PUT method (standard S3)...');
-        uploadResponse = await axios.put(presignedUrl, imageBuffer, {
-          headers: {
-            'Content-Length': imageBuffer.length.toString()
-          },
-          maxContentLength: Infinity,
-          maxBodyLength: Infinity,
-          timeout: 120000,
-          transformRequest: [(data) => {
-            if (Buffer.isBuffer(data)) return data;
-            return data;
-          }],
-          validateStatus: (status) => status < 500
-        });
+        
+        // For S3 presigned PUT URLs, try with minimal headers first
+        // The signature might not include Content-Length, so try without it
+        try {
+          uploadResponse = await axios.put(presignedUrl, imageBuffer, {
+            // No custom headers - let axios handle it
+            maxContentLength: Infinity,
+            maxBodyLength: Infinity,
+            timeout: 120000,
+            transformRequest: [(data) => {
+              if (Buffer.isBuffer(data)) return data;
+              return data;
+            }],
+            validateStatus: (status) => status < 500
+          });
+          
+          if (uploadResponse.status !== 200 && uploadResponse.status !== 204) {
+            throw new Error(`PUT returned status ${uploadResponse.status}`);
+          }
+        } catch (putError) {
+          // If PUT without headers fails, try with Content-Length
+          console.log('PUT without headers failed, trying with Content-Length...');
+          uploadResponse = await axios.put(presignedUrl, imageBuffer, {
+            headers: {
+              'Content-Length': imageBuffer.length.toString()
+            },
+            maxContentLength: Infinity,
+            maxBodyLength: Infinity,
+            timeout: 120000,
+            transformRequest: [(data) => {
+              if (Buffer.isBuffer(data)) return data;
+              return data;
+            }],
+            validateStatus: (status) => status < 500
+          });
+        }
       }
       
       // Check response status
