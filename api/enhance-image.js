@@ -1157,13 +1157,17 @@ Check: http://localhost:3000/api/check-config
       }
     }
     
+    // Return the enhanced image URL to the client
+    // The client already has the original image, so we don't need to return it
+    // The enhanced image URL is from the AI service (Leonardo/Replicate/Together)
     return res.status(200).json({
       success: true,
-      beforeUrl: `/images/enhanced/before-${timestamp}.jpg`,
-      afterUrl: enhancedImageUrl, // Use API URL directly (faster) or local path
+      enhancedImageUrl: enhancedImageUrl, // The AI-enhanced image URL
+      originalImageSize: imageBuffer.length, // Original image size in bytes
       output: [enhancedImageUrl], // Also include in output array for compatibility
-      jobId: result.id || result.generationId,
-      service: serviceUsed
+      jobId: result.id || result.generationId || result.jobId,
+      service: serviceUsed,
+      message: 'Image enhanced successfully'
     });
     
   } catch (error) {
