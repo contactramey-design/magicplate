@@ -217,16 +217,17 @@ async function enhanceImageWithReplicate(imageBuffer, imageName, style = 'upscal
   const negativePrompt = baseNegativePrompt();
   
   // Calculate strength based on fictional level
-  // IMPORTANT: Keep strength HIGH enough that the AI preserves food identity
-  // Lower strength = MORE transformation (AI ignores original more)
-  // We need minimum 0.45 so the food items stay recognizable
-  const calculatedStrength = Math.max(0.45, 0.75 - (fictionalLevel / 100 * 0.30));
-  // Authentic (0-30%): 0.75 to 0.66 — minimal change, food stays nearly identical
-  // Balanced (30-70%): 0.66 to 0.54 — moderate enhancement, food clearly same
-  // Magical (70-100%): 0.54 to 0.45 — dramatic styling but food identity preserved
-  const calculatedGuidance = 7.5 + (fictionalLevel / 100 * 1.5);
+  // Lower strength = MORE dramatic transformation
+  // Prompt-level food identity rules handle keeping the right food items
+  const calculatedStrength = 0.75 - (fictionalLevel / 100 * 0.50);
+  // Authentic (0%):   0.75 — subtle cleanup, very close to original
+  // Authentic (30%):  0.60 — moderate enhancement
+  // Balanced (50%):   0.50 — noticeable improvement
+  // Balanced (70%):   0.40 — significant transformation
+  // Magical (100%):   0.25 — dramatic overhaul (colors, lighting, background)
+  const calculatedGuidance = 7 + (fictionalLevel / 100 * 2.5);
   
-  console.log(`🎨 Replicate strength: ${calculatedStrength.toFixed(2)} (fictional: ${fictionalLevel}%)`);
+  console.log(`🎨 Replicate strength: ${calculatedStrength.toFixed(2)}, guidance: ${calculatedGuidance.toFixed(1)} (fictional: ${fictionalLevel}%)`);
   
   let prediction;
   let lastError = null;
@@ -771,17 +772,14 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
   const negativePrompt = baseNegativePrompt();
   
   // Calculate strength based on fictional level
-  // IMPORTANT: Keep strength HIGH enough that the AI preserves food identity
-  // Lower strength = MORE transformation (AI ignores original more)
-  // Minimum 0.45 ensures food items stay recognizable at all levels
-  const calculatedStrength = Math.max(0.45, 0.75 - (fictionalLevel / 100 * 0.30));
-  // Authentic (0-30%): 0.75 to 0.66 — minimal change, food stays nearly identical
-  // Balanced (30-70%): 0.66 to 0.54 — moderate enhancement, food clearly same
-  // Magical (70-100%): 0.54 to 0.45 — dramatic styling but food identity preserved
+  // Lower strength = MORE dramatic transformation
+  // Prompt-level food identity rules handle keeping the right food items
+  const calculatedStrength = 0.75 - (fictionalLevel / 100 * 0.50);
+  // Authentic (0%):  0.75 — subtle, Balanced (50%): 0.50, Magical (100%): 0.25
   
-  const calculatedGuidance = 7 + (fictionalLevel / 100 * 2); // Scale from 7 to 9
+  const calculatedGuidance = 7 + (fictionalLevel / 100 * 2.5); // 7 to 9.5
   
-  console.log(`🎨 Leonardo strength: ${calculatedStrength.toFixed(2)} (fictional: ${fictionalLevel}%)`)
+  console.log(`🎨 Leonardo strength: ${calculatedStrength.toFixed(2)}, guidance: ${calculatedGuidance.toFixed(1)} (fictional: ${fictionalLevel}%)`)
   
   // Calculate aspect ratio from original image to maintain proportions
   // Leonardo.ai maximum resolution: 1536x1536 (not 2048)
@@ -915,12 +913,11 @@ async function enhanceImageWithTogether(imageBuffer, imageName, style = 'upscale
   const negativePrompt = baseNegativePrompt();
   
   // Calculate strength based on fictional level
-  // IMPORTANT: Keep strength HIGH enough that the AI preserves food identity
-  // Minimum 0.45 ensures food items stay recognizable at all levels
-  const calculatedStrength = Math.max(0.45, 0.75 - (fictionalLevel / 100 * 0.30));
-  const calculatedGuidance = 7.5 + (fictionalLevel / 100 * 1.5);
+  // Lower strength = MORE dramatic transformation
+  const calculatedStrength = 0.75 - (fictionalLevel / 100 * 0.50);
+  const calculatedGuidance = 7 + (fictionalLevel / 100 * 2.5);
   
-  console.log(`🎨 Together strength: ${calculatedStrength.toFixed(2)} (fictional: ${fictionalLevel}%)`);
+  console.log(`🎨 Together strength: ${calculatedStrength.toFixed(2)}, guidance: ${calculatedGuidance.toFixed(1)} (fictional: ${fictionalLevel}%)`);
   
   try {
     const response = await axios.post(
