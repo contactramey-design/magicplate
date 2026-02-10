@@ -345,7 +345,8 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
     console.log('Got presigned URL, uploading image to S3...');
     
     // Step 2: Upload image to presigned S3 URL
-    // Note: Presigned URLs use PUT method with the raw image buffer
+    // Leonardo returns POST presigned URLs with fields (Policy, X-Amz-Signature, etc.)
+    // OR PUT presigned URLs without fields
     const contentTypeMap = {
       'jpg': 'image/jpeg',
       'jpeg': 'image/jpeg',
@@ -355,37 +356,52 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
     const contentType = contentTypeMap[extension] || 'image/jpeg';
     
     try {
-      // Leonardo S3 presigned URLs - must use exactly as provided
-      // The URL signature includes specific parameters, don't modify it
       console.log('Uploading to S3...');
       console.log('Image size:', imageBuffer.length, 'bytes');
       console.log('Content-Type:', contentType);
-      console.log('Presigned URL (first 200 chars):', presignedUrl.substring(0, 200));
-      console.log('Presigned URL (last 100 chars):', presignedUrl.substring(presignedUrl.length - 100));
+      console.log('Presigned URL:', presignedUrl);
+      console.log('Has upload fields:', hasUploadFields);
       
-      // Validate URL format - should be an S3 URL
-      if (!presignedUrl.includes('amazonaws.com') && !presignedUrl.includes('s3')) {
-        console.warn('⚠️ Presigned URL does not look like an S3 URL:', presignedUrl.substring(0, 100));
-      }
-      
-      // Note: Leonardo may return URLs ending with / (bucket root)
-      // We'll try the upload as-is and let S3/Leonardo tell us if it's invalid
-      // Don't throw errors based on URL format - let the actual upload attempt fail if needed
-      try {
-        const urlParts = new URL(presignedUrl);
-        const pathParts = urlParts.pathname.split('/').filter(p => p);
-        if (pathParts.length === 0 || (pathParts.length === 1 && !pathParts[0].includes('.'))) {
-          console.warn('⚠️ Presigned URL appears to point to bucket root - will try upload anyway');
-          console.warn('⚠️ Leonardo may use this format - let the upload attempt determine validity');
+      // Leonardo returns POST presigned URLs when fields are present
+      // These require POST with multipart/form-data, not PUT
+      if (hasUploadFields) {
+        console.log('📤 Using POST with multipart/form-data (Leonardo POST presigned URL)');
+        
+        // Create FormData with all required fields
+        const FormData = require('form-data');
+        const formData = new FormData();
+        
+        // Add all fields from Leonardo's response
+        for (const [fieldName, fieldValue] of Object.entries(uploadFields)) {
+          formData.append(fieldName, fieldValue);
         }
-      } catch (urlError) {
-        // URL parsing error - might be malformed, but try anyway
-        console.warn('⚠️ Could not parse URL, attempting upload anyway:', urlError.message);
-      }
-      
-      // S3 presigned URLs ALWAYS require PUT method, not POST
-      // Leonardo's presigned URLs are standard S3 presigned URLs
-      console.log('Using S3 PUT upload (presigned URLs require PUT, not POST)');
+        
+        // Add the file - use the key from fields if available, otherwise use a default name
+        const fileKey = uploadFields.key || `${initImageId}.${extension}`;
+        formData.append('file', imageBuffer, {
+          filename: fileKey.split('/').pop() || `image.${extension}`,
+          contentType: contentType
+        });
+        
+        // POST to the presigned URL with multipart/form-data
+        const uploadResponse = await axios.post(presignedUrl, formData, {
+          headers: {
+            ...formData.getHeaders()
+          },
+          maxContentLength: Infinity,
+          maxBodyLength: Infinity,
+          timeout: 120000,
+          validateStatus: (status) => status < 500
+        });
+        
+        if (uploadResponse.status === 200 || uploadResponse.status === 204) {
+          console.log('✅ Upload successful with POST multipart/form-data');
+        } else {
+          throw new Error(`POST upload returned status ${uploadResponse.status}: ${JSON.stringify(uploadResponse.data)}`);
+        }
+      } else {
+        // No fields = PUT presigned URL (standard S3 presigned URL)
+        console.log('📤 Using PUT method (standard S3 presigned URL)');
       
       // S3 presigned URLs ALWAYS use PUT method (not POST)
       // The 405 error confirms POST is not allowed - must use PUT
