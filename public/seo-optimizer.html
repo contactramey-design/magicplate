@@ -6,345 +6,1165 @@
   <title>SEO Optimization Tools - MagicPlate.ai</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+
     body {
       font-family: 'Inter', sans-serif;
-      background: #f5f5f5;
-      color: #1a1a1a;
-      padding: 20px;
-    }
-    .header {
-      background: white;
-      padding: 20px 40px;
-      border-bottom: 1px solid rgba(76, 175, 80, 0.2);
-      margin-bottom: 30px;
-      border-radius: 10px;
-    }
-    .header-content {
-      max-width: 1400px;
-      margin: 0 auto;
+      background: #f0f2f5;
+      color: #1a1a2e;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      min-height: 100vh;
     }
-    .logo {
-      font-size: 24px;
+
+    /* ── Sidebar ─────────────────────────── */
+    .sidebar {
+      width: 260px;
+      background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+      color: #fff;
+      padding: 30px 0;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .sidebar-brand {
+      padding: 0 24px 30px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 20px;
+    }
+
+    .sidebar-brand h2 {
+      font-size: 1.4em;
       font-weight: 700;
-      color: #4caf50;
+      background: linear-gradient(135deg, #4caf50, #81c784);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 2px;
+    }
+
+    .sidebar-brand span { font-size: 0.8em; color: rgba(255,255,255,0.4); }
+
+    .nav-section { padding: 0 16px; margin-bottom: 8px; }
+
+    .nav-section-label {
+      font-size: 0.7em;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.3);
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      color: rgba(255,255,255,0.6);
       text-decoration: none;
-    }
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-    .page-header {
-      background: white;
-      padding: 40px;
-      border-radius: 15px;
-      margin-bottom: 30px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    }
-    .page-header h1 {
-      color: #4caf50;
-      font-size: 2.5em;
-      margin-bottom: 10px;
-    }
-    .section {
-      background: white;
-      padding: 30px;
-      border-radius: 15px;
-      margin-bottom: 30px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    }
-    .section h2 {
-      color: #1a1a1a;
-      font-size: 1.8em;
-      margin-bottom: 20px;
-    }
-    .btn {
-      padding: 12px 24px;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
+      font-size: 0.9em;
+      font-weight: 500;
+      transition: all 0.2s;
       cursor: pointer;
-      transition: all 0.3s;
+      margin-bottom: 2px;
+    }
+
+    .nav-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.9); }
+    .nav-item.active { background: linear-gradient(135deg, rgba(76,175,80,0.2), rgba(129,199,132,0.1)); color: #81c784; }
+    .nav-item .nav-icon { width: 20px; text-align: center; font-size: 1.1em; }
+    .nav-item .badge {
+      margin-left: auto;
+      background: #4caf50;
+      color: #fff;
+      font-size: 0.7em;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+      min-width: 22px;
+      text-align: center;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 20px 24px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .sidebar-footer a {
+      color: rgba(255,255,255,0.4);
       text-decoration: none;
-      display: inline-block;
+      font-size: 0.85em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: color 0.2s;
     }
+
+    .sidebar-footer a:hover { color: rgba(255,255,255,0.8); }
+
+    /* ── Main Content ─────────────────────── */
+    .main-content { margin-left: 260px; flex: 1; min-height: 100vh; }
+
+    .topbar {
+      background: #fff;
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #e8eaed;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .topbar-left h1 { font-size: 1.3em; font-weight: 700; color: #1a1a2e; }
+    .topbar-left p { font-size: 0.85em; color: #888; margin-top: 2px; }
+    .topbar-actions { display: flex; align-items: center; gap: 12px; }
+
+    .content { padding: 28px 32px; }
+
+    /* ── Buttons ──────────────────────────── */
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9em;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     .btn-primary {
-      background: linear-gradient(135deg, #4caf50, #66bb6a);
+      background: linear-gradient(135deg, #4caf50, #388e3c);
       color: white;
+      box-shadow: 0 4px 12px rgba(76,175,80,0.25);
     }
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(76,175,80,0.35); }
+
+    .btn-outline {
+      background: #fff;
+      color: #555;
+      border: 1.5px solid #ddd;
     }
-    .form-group {
-      margin-bottom: 20px;
+
+    .btn-outline:hover { border-color: #4caf50; color: #4caf50; }
+
+    .btn-sm { padding: 8px 14px; font-size: 0.82em; border-radius: 8px; }
+
+    .btn-danger { background: #fce4ec; color: #c62828; border: 1px solid #f8bbd0; }
+
+    /* ── Stat Cards ───────────────────────── */
+    .stat-cards {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-bottom: 28px;
     }
+
+    .stat-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 22px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+
+    .stat-card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3em;
+      margin-bottom: 14px;
+    }
+
+    .stat-card .stat-label { font-size: 0.82em; color: #888; font-weight: 500; margin-bottom: 6px; }
+    .stat-card .stat-value { font-size: 2em; font-weight: 800; color: #1a1a2e; letter-spacing: -0.5px; }
+
+    .stat-card .stat-change {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.78em;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      margin-top: 8px;
+    }
+
+    .stat-change.up { background: rgba(76,175,80,0.1); color: #4caf50; }
+    .stat-change.down { background: rgba(244,67,54,0.1); color: #f44336; }
+
+    /* ── Section Cards ────────────────────── */
+    .section-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 28px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      margin-bottom: 22px;
+    }
+
+    .section-card h2 { font-size: 1.15em; font-weight: 700; color: #1a1a2e; margin-bottom: 4px; }
+    .section-card .section-subtitle { font-size: 0.88em; color: #888; margin-bottom: 24px; }
+
+    /* ── Charts Row ──────────────────────── */
+    .charts-row {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+
+    .chart-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    }
+
+    .chart-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .chart-card-header h3 { font-size: 1em; font-weight: 700; color: #1a1a2e; }
+
+    .chart-filters { display: flex; gap: 6px; }
+
+    .chart-filter {
+      padding: 5px 12px;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      background: #fff;
+      font-size: 0.78em;
+      color: #888;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .chart-filter.active { background: #4caf50; color: #fff; border-color: #4caf50; }
+
+    .chart-legend {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      margin-top: 14px;
+    }
+
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.8em; color: #888; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+    /* ── Forms ────────────────────────────── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .form-grid .full-width { grid-column: 1 / -1; }
+
     .form-group label {
       display: block;
+      font-size: 0.82em;
       font-weight: 600;
-      margin-bottom: 8px;
-      color: #1a1a1a;
+      color: #555;
+      margin-bottom: 6px;
     }
+
     .form-group input,
-    .form-group textarea {
+    .form-group textarea,
+    .form-group select {
       width: 100%;
-      padding: 12px;
-      border: 2px solid rgba(76, 175, 80, 0.2);
-      border-radius: 8px;
-      font-size: 16px;
+      padding: 11px 14px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 0.92em;
       font-family: inherit;
+      color: #333;
+      background: #fafafa;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
-    .result-box {
-      background: #f9f9f9;
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #4caf50;
+      box-shadow: 0 0 0 3px rgba(76,175,80,0.1);
+      background: #fff;
+    }
+
+    .form-group textarea { resize: vertical; }
+
+    /* ── Score Gauge ──────────────────────── */
+    .seo-score-gauge {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      margin: 0 auto 16px;
+      position: relative;
+    }
+
+    .seo-score-gauge .score-value {
+      font-size: 2.2em;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .seo-score-gauge .score-label {
+      font-size: 0.7em;
+      color: #888;
+      margin-top: 2px;
+    }
+
+    /* ── Keyword Tags ────────────────────── */
+    .keyword-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.78em;
+      font-weight: 600;
+      margin: 3px;
+    }
+
+    .keyword-tag.high { background: #e8f5e9; color: #2e7d32; }
+    .keyword-tag.medium { background: #fff3e0; color: #e65100; }
+    .keyword-tag.low { background: #fce4ec; color: #c62828; }
+    .keyword-tag.neutral { background: #f5f5f5; color: #666; }
+
+    /* ── Result Card ─────────────────────── */
+    .result-card {
+      background: #fafbfc;
+      border-radius: 12px;
       padding: 20px;
-      border-radius: 8px;
-      margin-top: 20px;
-      border-left: 4px solid #4caf50;
+      border: 1px solid #eee;
+      margin-bottom: 14px;
+      transition: all 0.2s;
     }
-    .result-box h3 {
-      color: #4caf50;
-      margin-bottom: 15px;
+
+    .result-card:hover { border-color: #4caf50; }
+
+    .result-card h4 { font-size: 0.95em; font-weight: 600; color: #1a1a2e; margin-bottom: 6px; }
+    .result-card p { font-size: 0.88em; color: #666; line-height: 1.6; }
+
+    .score-pill {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.75em;
+      font-weight: 700;
     }
-    .result-box pre {
-      white-space: pre-wrap;
-      line-height: 1.6;
+
+    .score-pill.excellent { background: #e8f5e9; color: #2e7d32; }
+    .score-pill.good { background: #e3f2fd; color: #1565c0; }
+    .score-pill.fair { background: #fff3e0; color: #e65100; }
+    .score-pill.poor { background: #fce4ec; color: #c62828; }
+
+    /* ── Directory Cards ─────────────────── */
+    .directory-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
     }
-    .status {
-      padding: 15px;
-      border-radius: 8px;
-      margin-top: 20px;
+
+    .directory-card {
+      border: 1.5px solid #eee;
+      border-radius: 12px;
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .directory-card:hover { border-color: #4caf50; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,0,0,0.06); }
+
+    .directory-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4em;
+      flex-shrink: 0;
+    }
+
+    .directory-card .dir-name { font-weight: 600; font-size: 0.92em; color: #1a1a2e; }
+    .directory-card .dir-status { font-size: 0.78em; color: #888; margin-top: 2px; }
+
+    .priority-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.7em;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-left: auto;
+    }
+
+    .priority-badge.critical { background: #e8f5e9; color: #2e7d32; }
+    .priority-badge.high { background: #e3f2fd; color: #1565c0; }
+    .priority-badge.medium { background: #fff3e0; color: #e65100; }
+
+    /* ── Checklist ────────────────────────── */
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .checklist-item:last-child { border-bottom: none; }
+
+    .check-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75em;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .check-icon.done { background: #e8f5e9; color: #2e7d32; }
+    .check-icon.pending { background: #fff3e0; color: #e65100; }
+    .check-icon.todo { background: #fafafa; color: #bbb; border: 1.5px solid #ddd; }
+
+    .checklist-item .check-content h4 { font-size: 0.92em; font-weight: 600; color: #1a1a2e; }
+    .checklist-item .check-content p { font-size: 0.82em; color: #888; margin-top: 2px; }
+
+    /* ── Status Messages ─────────────────── */
+    .status-msg {
+      padding: 12px 18px;
+      border-radius: 10px;
+      margin-top: 16px;
+      font-size: 0.9em;
+      font-weight: 500;
       display: none;
     }
-    .status.success {
-      background: rgba(76, 175, 80, 0.1);
-      color: #4caf50;
-      border: 2px solid rgba(76, 175, 80, 0.3);
+
+    .status-msg.success { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+    .status-msg.error { background: #fce4ec; color: #c62828; border: 1px solid #f8bbd0; }
+
+    /* ── Responsive ──────────────────────── */
+    @media (max-width: 1200px) {
+      .stat-cards { grid-template-columns: repeat(2, 1fr); }
+      .charts-row { grid-template-columns: 1fr; }
+      .directory-grid { grid-template-columns: 1fr; }
     }
-    .status.error {
-      background: rgba(245, 158, 11, 0.1);
-      color: #f59e0b;
-      border: 2px solid rgba(245, 158, 11, 0.3);
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; }
+      .stat-cards { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      .content { padding: 16px; }
+      .topbar { padding: 12px 16px; }
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <div class="header-content">
-      <a href="/dashboard.html" class="logo">← Back to Dashboard</a>
-      <a href="/" class="logo">MagicPlate.ai</a>
-    </div>
-  </div>
 
-  <div class="container">
-    <div class="page-header">
-      <h1>🔍 SEO Optimization Tools</h1>
-      <p>Optimize your menu descriptions and content for search engines. Improve your Google Business Profile and local SEO.</p>
+  <!-- ═══════ Sidebar ═══════ -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <h2>🔍 MagicPlate</h2>
+      <span>SEO Optimization Tools</span>
     </div>
 
-    <!-- Menu Description Optimizer -->
-    <div class="section">
-      <h2>Optimize Menu Description</h2>
-      <form id="optimizeForm">
-        <div class="form-group">
-          <label>Restaurant ID *</label>
-          <input type="number" id="restaurantId" required value="1" placeholder="Enter restaurant ID">
-        </div>
-        <div class="form-group">
-          <label>Menu Item Name *</label>
-          <input type="text" id="itemName" required placeholder="e.g., Grilled Salmon, Margherita Pizza">
-        </div>
-        <div class="form-group">
-          <label>Current Description (Optional)</label>
-          <textarea id="currentDescription" rows="3" placeholder="Enter current description or leave blank"></textarea>
-        </div>
-        <div class="form-group">
-          <label>Ingredients (Optional)</label>
-          <input type="text" id="ingredients" placeholder="e.g., Fresh salmon, lemon, herbs">
-        </div>
-        <div class="form-group">
-          <label>Price (Optional)</label>
-          <input type="number" step="0.01" id="price" placeholder="e.g., 24.99">
-        </div>
-        <button type="submit" class="btn btn-primary">Generate SEO-Optimized Description</button>
-        <div id="optimizeStatus" class="status"></div>
-      </form>
-      <div id="optimizedResult" class="result-box" style="display: none;">
-        <h3>✨ AI-Generated SEO-Optimized Description</h3>
-        <div id="optimizedText"></div>
+    <div class="nav-section">
+      <div class="nav-section-label">Overview</div>
+      <a class="nav-item active" data-view="dashboard">
+        <span class="nav-icon">📊</span> Dashboard
+      </a>
+      <a class="nav-item" data-view="site-audit">
+        <span class="nav-icon">🩺</span> Site Audit
+        <span class="badge" style="background:#ff9800;">3</span>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Optimize</div>
+      <a class="nav-item" data-view="menu-seo">
+        <span class="nav-icon">📝</span> Menu SEO
+      </a>
+      <a class="nav-item" data-view="batch-optimize">
+        <span class="nav-icon">⚡</span> Batch Optimizer
+      </a>
+      <a class="nav-item" data-view="keywords">
+        <span class="nav-icon">🔑</span> Keyword Tracker
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Local SEO</div>
+      <a class="nav-item" data-view="google-business">
+        <span class="nav-icon">📍</span> Google Business
+      </a>
+      <a class="nav-item" data-view="citations">
+        <span class="nav-icon">🏢</span> Citations
+      </a>
+      <a class="nav-item" data-view="reviews">
+        <span class="nav-icon">⭐</span> Reviews
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Reports</div>
+      <a class="nav-item" data-view="analytics">
+        <span class="nav-icon">📈</span> Analytics
+      </a>
+      <a class="nav-item" data-view="best-practices">
+        <span class="nav-icon">📋</span> Best Practices
+      </a>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="/dashboard.html">← Back to Dashboard</a>
+    </div>
+  </aside>
+
+  <!-- ═══════ Main Content ═══════ -->
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1 id="pageTitle">SEO Dashboard</h1>
+        <p id="pageSubtitle">Overview of your search engine optimization performance</p>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-outline btn-sm" onclick="showView('analytics')">📈 Reports</button>
+        <button class="btn btn-primary btn-sm" onclick="showView('menu-seo')">📝 Optimize Content</button>
       </div>
     </div>
 
-    <!-- Batch Menu Optimization -->
-    <div class="section">
-      <h2>Batch Menu Optimization</h2>
-      <form id="batchOptimizeForm">
-        <div class="form-group">
-          <label>Restaurant ID *</label>
-          <input type="number" id="batchRestaurantId" required value="1" placeholder="Enter restaurant ID">
-        </div>
-        <div class="form-group">
-          <label>Location (for local SEO)</label>
-          <input type="text" id="location" placeholder="e.g., Kansas City, MO">
-        </div>
-        <div class="form-group">
-          <label>Menu Items (JSON Array)</label>
-          <textarea id="menuItemsJson" rows="10" placeholder='[{"name": "Burger", "description": "Our burger", "price": 12.99, "ingredients": ["beef", "lettuce", "tomato"]}, ...]'></textarea>
-          <p style="color: #666; font-size: 0.9em; margin-top: 5px;">Paste your menu items as JSON array. Each item should have: name, description (optional), price (optional), ingredients (optional array)</p>
-        </div>
-        <button type="submit" class="btn btn-primary">Optimize All Items</button>
-        <div id="batchStatus" class="status"></div>
-      </form>
-      <div id="batchResults" style="display: none; margin-top: 20px;"></div>
-    </div>
+    <div class="content">
 
-    <!-- Google Business Profile Section -->
-    <div class="section">
-      <h2>Google Business Profile Integration</h2>
-      <form id="gbpForm">
-        <div class="form-group">
-          <label>Restaurant ID *</label>
-          <input type="number" id="gbpRestaurantId" required value="1" placeholder="Enter restaurant ID">
+      <!-- ═══════ Dashboard View ═══════ -->
+      <div id="dashboardView" class="view active">
+        <div class="stat-cards">
+          <div class="stat-card">
+            <div class="stat-card-icon" style="background:rgba(76,175,80,0.1); color:#4caf50;">🎯</div>
+            <div class="stat-label">SEO Score</div>
+            <div class="stat-value" id="dashSeoScore">72</div>
+            <div class="stat-change up">↑ 8 pts this month</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon" style="background:rgba(33,150,243,0.1); color:#2196f3;">🔑</div>
+            <div class="stat-label">Keywords Ranking</div>
+            <div class="stat-value" id="dashKeywords">24</div>
+            <div class="stat-change up">↑ 6 new</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon" style="background:rgba(255,152,0,0.1); color:#ff9800;">🏢</div>
+            <div class="stat-label">Citations</div>
+            <div class="stat-value" id="dashCitations">8</div>
+            <div class="stat-change up">↑ 2 added</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon" style="background:rgba(156,39,176,0.1); color:#9c27b0;">📍</div>
+            <div class="stat-label">Local Visibility</div>
+            <div class="stat-value" id="dashVisibility">68%</div>
+            <div class="stat-change up">↑ 5%</div>
+          </div>
         </div>
-        <div class="form-group">
-          <label>Google Place ID</label>
-          <input type="text" id="placeId" placeholder="Enter your Google Place ID">
-          <p style="color: #666; font-size: 0.9em; margin-top: 5px;">Find your Place ID: <a href="https://developers.google.com/maps/documentation/places/web-service/place-id" target="_blank">How to find Place ID</a></p>
-        </div>
-        <div class="form-group">
-          <label>Update Type</label>
-          <select id="updateType">
-            <option value="description">Business Description</option>
-            <option value="menu">Menu Items</option>
-            <option value="photos">Photo Upload</option>
-            <option value="hours">Business Hours</option>
-          </select>
-        </div>
-        <button type="submit" class="btn btn-primary">Update Google Business Profile</button>
-        <div id="gbpStatus" class="status"></div>
-      </form>
-      <div style="margin-top: 20px;">
-        <a href="#" onclick="loadGBPSetupInstructions(); return false;" class="btn btn-secondary">View Setup Instructions</a>
-        <div id="gbpInstructions" style="display: none; margin-top: 15px; padding: 20px; background: #f9f9f9; border-radius: 8px;"></div>
-      </div>
-    </div>
 
-    <!-- Review Response Generator -->
-    <div class="section">
-      <h2>Generate SEO-Friendly Review Responses</h2>
-      <form id="reviewResponseForm">
-        <div class="form-group">
-          <label>Restaurant ID *</label>
-          <input type="number" id="reviewRestaurantId" required value="1" placeholder="Enter restaurant ID">
-        </div>
-        <div class="form-group">
-          <label>Review Text *</label>
-          <textarea id="reviewText" rows="4" required placeholder="Paste the customer review here..."></textarea>
-        </div>
-        <div class="form-group">
-          <label>Rating</label>
-          <select id="reviewRating">
-            <option value="5">5 Stars</option>
-            <option value="4">4 Stars</option>
-            <option value="3">3 Stars</option>
-            <option value="2">2 Stars</option>
-            <option value="1">1 Star</option>
-          </select>
-        </div>
-        <button type="submit" class="btn btn-primary">Generate Response</button>
-        <div id="reviewStatus" class="status"></div>
-      </form>
-      <div id="reviewResponse" class="result-box" style="display: none;">
-        <h3>Generated Review Response</h3>
-        <div id="responseText" style="margin-bottom: 15px;"></div>
-        <div id="responseKeywords" style="font-size: 0.9em; color: #666;"></div>
-      </div>
-    </div>
+        <div class="charts-row">
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <h3>Search Visibility Trend</h3>
+              <div class="chart-filters">
+                <button class="chart-filter" data-range="7d">7D</button>
+                <button class="chart-filter active" data-range="30d">30D</button>
+                <button class="chart-filter" data-range="90d">90D</button>
+              </div>
+            </div>
+            <div id="visibilityChart" style="height:180px;"></div>
+            <div class="chart-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:#4caf50"></div> Impressions</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#2196f3"></div> Clicks</div>
+            </div>
+          </div>
 
-    <!-- Citation Builder -->
-    <div class="section">
-      <h2>Local SEO Citation Builder</h2>
-      <form id="citationForm">
-        <div class="form-group">
-          <label>Restaurant ID *</label>
-          <input type="number" id="citationRestaurantId" required value="1" placeholder="Enter restaurant ID">
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <h3>SEO Health Score</h3>
+            </div>
+            <div style="text-align:center; padding:8px 0;">
+              <div class="seo-score-gauge" style="background: conic-gradient(#4caf50 0deg 259deg, #e8eaed 259deg 360deg);">
+                <div style="width:90px; height:90px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; flex-direction:column;">
+                  <div class="score-value" style="color:#4caf50;">72</div>
+                  <div class="score-label">/100</div>
+                </div>
+              </div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
+              <div style="text-align:center; padding:8px; background:#fafbfc; border-radius:8px;">
+                <div style="font-size:1.1em; font-weight:700; color:#4caf50;">6/8</div>
+                <div style="font-size:0.72em; color:#999;">On-Page</div>
+              </div>
+              <div style="text-align:center; padding:8px; background:#fafbfc; border-radius:8px;">
+                <div style="font-size:1.1em; font-weight:700; color:#ff9800;">4/6</div>
+                <div style="font-size:0.72em; color:#999;">Local SEO</div>
+              </div>
+              <div style="text-align:center; padding:8px; background:#fafbfc; border-radius:8px;">
+                <div style="font-size:1.1em; font-weight:700; color:#2196f3;">8/10</div>
+                <div style="font-size:0.72em; color:#999;">Content</div>
+              </div>
+              <div style="text-align:center; padding:8px; background:#fafbfc; border-radius:8px;">
+                <div style="font-size:1.1em; font-weight:700; color:#9c27b0;">5/8</div>
+                <div style="font-size:0.72em; color:#999;">Technical</div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="form-group">
-          <label>Directory</label>
-          <select id="directory">
-            <option value="Google Business Profile">Google Business Profile</option>
-            <option value="Yelp">Yelp</option>
-            <option value="TripAdvisor">TripAdvisor</option>
-            <option value="Facebook Business">Facebook Business</option>
-            <option value="Yellow Pages">Yellow Pages</option>
-            <option value="Foursquare">Foursquare</option>
-          </select>
-        </div>
-        <button type="submit" class="btn btn-primary">Generate Citation Content</button>
-        <div id="citationStatus" class="status"></div>
-      </form>
-      <div id="citationResult" class="result-box" style="display: none;">
-        <h3>Citation Content for <span id="citationDirectoryName"></span></h3>
-        <div id="citationContent"></div>
-      </div>
-      <div style="margin-top: 20px;">
-        <button type="button" class="btn btn-secondary" onclick="loadDirectories()">View All Recommended Directories</button>
-        <div id="directoriesList" style="display: none; margin-top: 15px;"></div>
-      </div>
-    </div>
 
-    <!-- SEO Analytics Dashboard -->
-    <div class="section">
-      <h2>SEO Performance Tracking</h2>
-      <div class="form-group">
-        <label>Restaurant ID</label>
-        <input type="number" id="analyticsRestaurantId" value="1" placeholder="Enter restaurant ID">
-        <button type="button" class="btn btn-primary" onclick="loadSEOAnalytics()" style="margin-top: 10px;">Load Analytics</button>
-      </div>
-      <div id="seoAnalytics" style="display: none; margin-top: 20px;">
-        <div class="result-box">
-          <h3>SEO Metrics</h3>
-          <div id="analyticsMetrics"></div>
-        </div>
-        <div class="result-box" style="margin-top: 20px;">
-          <h3>AI-Powered Recommendations</h3>
-          <div id="analyticsRecommendations"></div>
-        </div>
-      </div>
-    </div>
+        <!-- Quick Actions + Top Keywords -->
+        <div class="charts-row">
+          <div class="section-card" style="margin-bottom:0;">
+            <h2>🚀 Quick Actions</h2>
+            <p class="section-subtitle" style="margin-bottom:16px;">Recommended next steps to improve your SEO</p>
+            <div class="checklist-item">
+              <div class="check-icon pending">!</div>
+              <div class="check-content">
+                <h4>Optimize Menu Descriptions</h4>
+                <p>12 menu items missing SEO-optimized descriptions</p>
+              </div>
+              <button class="btn btn-sm btn-outline" style="margin-left:auto;" onclick="showView('batch-optimize')">Fix →</button>
+            </div>
+            <div class="checklist-item">
+              <div class="check-icon pending">!</div>
+              <div class="check-content">
+                <h4>Complete Google Business Profile</h4>
+                <p>Missing hours, photos, and menu section</p>
+              </div>
+              <button class="btn btn-sm btn-outline" style="margin-left:auto;" onclick="showView('google-business')">Fix →</button>
+            </div>
+            <div class="checklist-item">
+              <div class="check-icon todo">○</div>
+              <div class="check-content">
+                <h4>Add Citations on Yelp & TripAdvisor</h4>
+                <p>Improve local rankings with directory listings</p>
+              </div>
+              <button class="btn btn-sm btn-outline" style="margin-left:auto;" onclick="showView('citations')">Fix →</button>
+            </div>
+            <div class="checklist-item">
+              <div class="check-icon done">✓</div>
+              <div class="check-content">
+                <h4>Respond to Recent Reviews</h4>
+                <p>3 new reviews responded with SEO keywords</p>
+              </div>
+              <button class="btn btn-sm btn-outline" style="margin-left:auto; opacity:0.5;" disabled>Done</button>
+            </div>
+          </div>
 
-    <!-- SEO Tips Section -->
-    <div class="section">
-      <h2>SEO Best Practices</h2>
-      <ul style="line-height: 2; padding-left: 20px;">
-        <li><strong>Use Local Keywords:</strong> Include your city, neighborhood, or region in descriptions</li>
-        <li><strong>Include Cuisine Type:</strong> Mention the type of cuisine (Italian, Mexican, etc.)</li>
-        <li><strong>Highlight Unique Features:</strong> What makes your dish special?</li>
-        <li><strong>Use Descriptive Adjectives:</strong> "Crispy," "Tender," "Aromatic," etc.</li>
-        <li><strong>Include Dietary Information:</strong> Gluten-free, vegan, vegetarian options</li>
-        <li><strong>Update Google Business Profile:</strong> Keep your menu and hours current</li>
-        <li><strong>Add Photos:</strong> High-quality photos improve search visibility</li>
-        <li><strong>Build Citations:</strong> List your business on major directories (Yelp, TripAdvisor, etc.)</li>
-        <li><strong>Respond to Reviews:</strong> SEO-friendly responses help with local rankings</li>
-      </ul>
-    </div>
-  </div>
+          <div class="section-card" style="margin-bottom:0;">
+            <h2>🔑 Top Keywords</h2>
+            <p class="section-subtitle" style="margin-bottom:16px;">Your best-performing search terms</p>
+            <div id="topKeywordsList"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════ Menu SEO View ═══════ -->
+      <div id="menu-seoView" class="view" style="display:none;">
+        <div class="section-card">
+          <h2>📝 Optimize Menu Description</h2>
+          <p class="section-subtitle">Generate SEO-optimized descriptions for individual menu items</p>
+          <form id="optimizeForm">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Menu Item Name *</label>
+                <input type="text" id="itemName" required placeholder="e.g., Grilled Salmon, Margherita Pizza">
+              </div>
+              <div class="form-group">
+                <label>Price (Optional)</label>
+                <input type="text" id="price" placeholder="e.g., $24.99">
+              </div>
+              <div class="form-group full-width">
+                <label>Current Description (Optional)</label>
+                <textarea id="currentDescription" rows="3" placeholder="Enter current description or leave blank for AI to generate"></textarea>
+              </div>
+              <div class="form-group full-width">
+                <label>Ingredients (Optional)</label>
+                <input type="text" id="ingredients" placeholder="e.g., Fresh salmon, lemon, herbs, asparagus">
+              </div>
+              <div class="form-group">
+                <label>Location (for local SEO)</label>
+                <input type="text" id="seoLocation" placeholder="e.g., Kansas City, MO">
+              </div>
+              <div class="form-group">
+                <label>Cuisine Type</label>
+                <select id="cuisineType">
+                  <option value="">Auto-detect</option>
+                  <option value="italian">Italian</option>
+                  <option value="mexican">Mexican</option>
+                  <option value="american">American</option>
+                  <option value="asian">Asian</option>
+                  <option value="french">French</option>
+                  <option value="mediterranean">Mediterranean</option>
+                  <option value="indian">Indian</option>
+                  <option value="japanese">Japanese</option>
+                </select>
+              </div>
+            </div>
+            <div style="margin-top:20px; display:flex; gap:12px;">
+              <button type="submit" class="btn btn-primary">✨ Generate SEO Description</button>
+              <button type="button" class="btn btn-outline" onclick="document.getElementById('optimizeForm').reset()">Clear</button>
+            </div>
+            <div id="optimizeStatus" class="status-msg"></div>
+          </form>
+          <div id="optimizedResult" style="display:none; margin-top:20px;">
+            <div class="result-card" style="border-left:4px solid #4caf50;">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                <h4>✨ SEO-Optimized Description</h4>
+                <button class="btn btn-sm btn-outline" onclick="copyOptimizedText()">📋 Copy</button>
+              </div>
+              <p id="optimizedText" style="font-size:1em; line-height:1.8; color:#333;"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════ Batch Optimizer View ═══════ -->
+      <div id="batch-optimizeView" class="view" style="display:none;">
+        <div class="section-card">
+          <h2>⚡ Batch Menu Optimization</h2>
+          <p class="section-subtitle">Optimize all your menu items at once with AI-powered SEO descriptions</p>
+          <form id="batchOptimizeForm">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Location (for local SEO)</label>
+                <input type="text" id="batchLocation" placeholder="e.g., Kansas City, MO">
+              </div>
+              <div class="form-group">
+                <label>Restaurant ID</label>
+                <input type="number" id="batchRestaurantId" value="1" placeholder="Restaurant ID">
+              </div>
+              <div class="form-group full-width">
+                <label>Menu Items (JSON Array)</label>
+                <textarea id="menuItemsJson" rows="10" placeholder='[
+  {"name": "Classic Burger", "description": "Our signature burger", "price": 14.99, "ingredients": ["beef", "lettuce", "tomato"]},
+  {"name": "Caesar Salad", "price": 11.99, "ingredients": ["romaine", "parmesan", "croutons"]}
+]'></textarea>
+                <p style="font-size:0.78em; color:#999; margin-top:6px;">💡 Each item needs at minimum a "name" field. Description, price, and ingredients are optional but improve results.</p>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary" style="margin-top:16px;">⚡ Optimize All Items</button>
+            <div id="batchStatus" class="status-msg"></div>
+          </form>
+          <div id="batchResults" style="display:none; margin-top:24px;"></div>
+        </div>
+      </div>
+
+      <!-- ═══════ Keyword Tracker View ═══════ -->
+      <div id="keywordsView" class="view" style="display:none;">
+        <div class="section-card">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+            <div>
+              <h2>🔑 Keyword Tracker</h2>
+              <p class="section-subtitle" style="margin-bottom:0;">Monitor your restaurant's keyword rankings</p>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="addKeyword()">➕ Add Keyword</button>
+          </div>
+          <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:separate; border-spacing:0;">
+              <thead>
+                <tr>
+                  <th style="text-align:left; padding:12px 16px; font-size:0.78em; text-transform:uppercase; letter-spacing:0.8px; color:#999; font-weight:600; border-bottom:1px solid #eee;">Keyword</th>
+                  <th style="text-align:center; padding:12px 16px; font-size:0.78em; text-transform:uppercase; letter-spacing:0.8px; color:#999; font-weight:600; border-bottom:1px solid #eee;">Position</th>
+                  <th style="text-align:center; padding:12px 16px; font-size:0.78em; text-transform:uppercase; letter-spacing:0.8px; color:#999; font-weight:600; border-bottom:1px solid #eee;">Change</th>
+                  <th style="text-align:center; padding:12px 16px; font-size:0.78em; text-transform:uppercase; letter-spacing:0.8px; color:#999; font-weight:600; border-bottom:1px solid #eee;">Volume</th>
+                  <th style="text-align:center; padding:12px 16px; font-size:0.78em; text-transform:uppercase; letter-spacing:0.8px; color:#999; font-weight:600; border-bottom:1px solid #eee;">Difficulty</th>
+                  <th style="padding:12px; border-bottom:1px solid #eee;"></th>
+                </tr>
+              </thead>
+              <tbody id="keywordsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════ Google Business View ═══════ -->
+      <div id="google-businessView" class="view" style="display:none;">
+        <div class="section-card">
+          <h2>📍 Google Business Profile</h2>
+          <p class="section-subtitle">Manage and optimize your Google Business listing</p>
+          <form id="gbpForm">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Google Place ID</label>
+                <input type="text" id="placeId" placeholder="Enter your Google Place ID">
+              </div>
+              <div class="form-group">
+                <label>Update Type</label>
+                <select id="updateType">
+                  <option value="description">Business Description</option>
+                  <option value="menu">Menu Items</option>
+                  <option value="photos">Photo Upload</option>
+                  <option value="hours">Business Hours</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Restaurant ID</label>
+                <input type="number" id="gbpRestaurantId" value="1">
+              </div>
+            </div>
+            <div style="margin-top:16px; display:flex; gap:12px;">
+              <button type="submit" class="btn btn-primary">📍 Update Profile</button>
+              <button type="button" class="btn btn-outline" onclick="toggleGBPInstructions()">📖 Setup Guide</button>
+            </div>
+            <div id="gbpStatus" class="status-msg"></div>
+          </form>
+          <div id="gbpInstructions" style="display:none; margin-top:20px;"></div>
+
+          <!-- GBP Completion Checklist -->
+          <div style="margin-top:28px; padding-top:24px; border-top:1px solid #eee;">
+            <h3 style="font-size:1em; font-weight:700; margin-bottom:16px;">📋 Profile Completion Checklist</h3>
+            <div class="checklist-item">
+              <div class="check-icon done">✓</div>
+              <div class="check-content">
+                <h4>Business Name & Address</h4>
+                <p>NAP consistency across all listings</p>
+              </div>
+            </div>
+            <div class="checklist-item">
+              <div class="check-icon done">✓</div>
+              <div class="check-content">
+                <h4>Phone Number</h4>
+                <p>Local phone number for better local SEO</p>
+              </div>
+            </div>
+            <div class="checklist-item">
+              <div class="check-icon pending">!</div>
+              <div class="check-content">
+                <h4>Business Hours</h4>
+                <p>Add complete hours including holiday schedules</p>
+              </div>
+            </div>
+            <div class="checklist-item">
+              <div class="check-icon pending">!</div>
+              <div class="check-content">
+                <h4>Menu Section</h4>
+                <p>Upload your full menu with prices and descriptions</p>
+              </div>
+            </div>
+            <div class="checklist-item">
+              <div class="check-icon todo">○</div>
+              <div class="check-content">
+                <h4>Photos (10+ recommended)</h4>
+                <p>Interior, exterior, food, and team photos</p>
+              </div>
+            </div>
+            <div class="checklist-item">
+              <div class="check-icon done">✓</div>
+              <div class="check-content">
+                <h4>Business Category</h4>
+                <p>Primary + secondary categories set</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════ Citations View ═══════ -->
+      <div id="citationsView" class="view" style="display:none;">
+        <div class="section-card">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+            <div>
+              <h2>🏢 Local Citations</h2>
+              <p class="section-subtitle" style="margin-bottom:0;">Build and manage your business directory listings</p>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="generateCitation()">➕ Generate Citation</button>
+          </div>
+
+          <div class="directory-grid" id="directoriesList"></div>
+
+          <!-- Citation Generator Form -->
+          <div id="citationForm" style="display:none; margin-top:24px; padding-top:24px; border-top:1px solid #eee;">
+            <h3 style="font-size:1em; font-weight:700; margin-bottom:16px;">Generate Citation Content</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Directory</label>
+                <select id="citationDirectory">
+                  <option value="Google Business Profile">Google Business Profile</option>
+                  <option value="Yelp">Yelp</option>
+                  <option value="TripAdvisor">TripAdvisor</option>
+                  <option value="Facebook Business">Facebook Business</option>
+                  <option value="Yellow Pages">Yellow Pages</option>
+                  <option value="Foursquare">Foursquare</option>
+                  <option value="Apple Maps">Apple Maps</option>
+                  <option value="Bing Places">Bing Places</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Restaurant ID</label>
+                <input type="number" id="citationRestaurantId" value="1">
+              </div>
+            </div>
+            <button class="btn btn-primary" style="margin-top:12px;" onclick="submitCitation()">✨ Generate Content</button>
+            <div id="citationStatus" class="status-msg"></div>
+            <div id="citationResult" style="display:none; margin-top:16px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════ Reviews View ═══════ -->
+      <div id="reviewsView" class="view" style="display:none;">
+        <div class="section-card">
+          <h2>⭐ Review Response Generator</h2>
+          <p class="section-subtitle">Generate SEO-friendly responses to customer reviews</p>
+          <form id="reviewResponseForm">
+            <div class="form-grid">
+              <div class="form-group full-width">
+                <label>Customer Review *</label>
+                <textarea id="reviewText" rows="4" required placeholder="Paste the customer review here..."></textarea>
+              </div>
+              <div class="form-group">
+                <label>Rating</label>
+                <div style="display:flex; gap:6px;" id="starRating">
+                  <button type="button" class="star-btn" data-rating="1" style="font-size:1.5em; background:none; border:none; cursor:pointer; opacity:0.3;">⭐</button>
+                  <button type="button" class="star-btn" data-rating="2" style="font-size:1.5em; background:none; border:none; cursor:pointer; opacity:0.3;">⭐</button>
+                  <button type="button" class="star-btn" data-rating="3" style="font-size:1.5em; background:none; border:none; cursor:pointer; opacity:0.3;">⭐</button>
+                  <button type="button" class="star-btn" data-rating="4" style="font-size:1.5em; background:none; border:none; cursor:pointer; opacity:1;">⭐</button>
+                  <button type="button" class="star-btn" data-rating="5" style="font-size:1.5em; background:none; border:none; cursor:pointer; opacity:1;">⭐</button>
+                </div>
+                <input type="hidden" id="reviewRating" value="5">
+              </div>
+              <div class="form-group">
+                <label>Restaurant ID</label>
+                <input type="number" id="reviewRestaurantId" value="1">
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary" style="margin-top:16px;">✨ Generate Response</button>
+            <div id="reviewStatus" class="status-msg"></div>
+          </form>
+          <div id="reviewResponse" style="display:none; margin-top:20px;">
+            <div class="result-card" style="border-left:4px solid #4caf50;">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                <h4>✨ Generated Review Response</h4>
+                <button class="btn btn-sm btn-outline" onclick="copyReviewResponse()">📋 Copy</button>
+              </div>
+              <p id="responseText" style="font-size:1em; line-height:1.8; color:#333;"></p>
+              <div id="responseKeywords" style="margin-top:12px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Reviews -->
+        <div class="section-card">
+          <h2>📋 Recent Reviews</h2>
+          <p class="section-subtitle">Track and respond to customer feedback</p>
+          <div id="recentReviews"></div>
+        </div>
+      </div>
+
+      <!-- ═══════ Site Audit View ═══════ -->
+      <div id="site-auditView" class="view" style="display:none;">
+        <div class="section-card">
+          <h2>🩺 SEO Site Audit</h2>
+          <p class="section-subtitle">Comprehensive check of your restaurant's online presence</p>
+
+          <div class="stat-cards" style="margin-top:16px;">
+            <div class="stat-card" style="text-align:center;">
+              <div style="font-size:0.82em; color:#888; margin-bottom:6px;">On-Page SEO</div>
+              <div style="font-size:2em; font-weight:800; color:#4caf50;">75%</div>
+              <div class="score-pill good" style="margin-top:6px;">Good</div>
+            </div>
+            <div class="stat-card" style="text-align:center;">
+              <div style="font-size:0.82em; color:#888; margin-bottom:6px;">Local SEO</div>
+              <div style="font-size:2em; font-weight:800; color:#ff9800;">62%</div>
+              <div class="score-pill fair" style="margin-top:6px;">Needs Work</div>
+            </div>
+            <div class="stat-card" style="text-align:center;">
+              <div style="font-size:0.82em; color:#888; margin-bottom:6px;">Content Quality</div>
+              <div style="font-size:2em; font-weight:800; color:#4caf50;">80%</div>
+              <div class="score-pill good" style="margin-top:6px;">Good</div>
+            </div>
+            <div class="stat-card" style="text-align:center;">
+              <div style="font-size:0.82em; color:#888; margin-bottom:6px;">Technical SEO</div>
+              <div style="font-size:2em; font-weight:800; color:#2196f3;">70%</div>
+              <div class="score-pill good" style="margin-top:6px;">Good</div>
+            </div>
+          </div>
+
+          <h3 style="font-size:1em; font-weight:700; margin:24px 0 16px;">🔍 Issues Found</h3>
+          <div id="auditIssues"></div>
+        </div>
+      </div>
+
+      <!-- ═══════ Analytics View ═══════ -->
+      <div id="analyticsView" class="view" style="display:none;">
+        <div class="section-card">
+          <h2>📈 SEO Analytics</h2>
+          <p class="section-subtitle">In-depth performance reporting for your restaurant's SEO</p>
+          <div class="stat-cards" style="margin-top:16px;">
+            <div class="stat-card">
+              <div class="stat-label">Avg. SEO Score</div>
+              <div class="stat-value" id="analyticsAvgScore">72</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Total Impressions</div>
+              <div class="stat-value" id="analyticsTotalImpressions">4.2K</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Total Clicks</div>
+              <div class="stat-value" id="analyticsTotalClicks">380</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Avg. Position</div>
+              <div class="stat-value" id="analyticsAvgPos">8.3</div>
+            </div>
+          </div>
+
+          <div style="margin-top:24px;">
+            <h3 style="font-size:1em; font-weight:700; margin-bottom:16px;">🤖 AI Recommendations</h3>
+            <div id="aiRecommendations"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════ Best Practices View ═══════ -->
+      <div id="best-practicesView" class="view" style="display:none;">
+        <div class="section-card">
+          <h2>📋 SEO Best Practices for Restaurants</h2>
+          <p class="section-subtitle">Follow this checklist to maximize your search visibility</p>
+          <div id="bestPracticesList"></div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main-content -->
 
   <script>
+    // ══════════════════════════════════════════════
+    //  VIEW MANAGEMENT
+    // ══════════════════════════════════════════════
+    function showView(viewName) {
+      document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
+      const view = document.getElementById(viewName + 'View');
+      if (view) view.style.display = 'block';
+
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.querySelectorAll(`.nav-item[data-view="${viewName}"]`).forEach(n => n.classList.add('active'));
+
+      const titles = {
+        dashboard: ['SEO Dashboard', 'Overview of your search engine optimization performance'],
+        'site-audit': ['Site Audit', 'Comprehensive SEO health check'],
+        'menu-seo': ['Menu SEO Optimizer', 'Generate SEO-optimized menu descriptions'],
+        'batch-optimize': ['Batch Optimizer', 'Optimize all menu items at once'],
+        keywords: ['Keyword Tracker', 'Monitor your keyword rankings'],
+        'google-business': ['Google Business Profile', 'Manage your Google Business listing'],
+        citations: ['Local Citations', 'Build directory listings for local SEO'],
+        reviews: ['Review Manager', 'Generate SEO-friendly review responses'],
+        analytics: ['SEO Analytics', 'In-depth performance reporting'],
+        'best-practices': ['Best Practices', 'Restaurant SEO checklist']
+      };
+
+      const [title, subtitle] = titles[viewName] || ['SEO Dashboard', ''];
+      document.getElementById('pageTitle').textContent = title;
+      document.getElementById('pageSubtitle').textContent = subtitle;
+
+      if (viewName === 'keywords') loadKeywords();
+      if (viewName === 'citations') loadDirectories();
+      if (viewName === 'reviews') loadRecentReviews();
+      if (viewName === 'site-audit') loadAuditIssues();
+      if (viewName === 'analytics') loadAnalyticsRecommendations();
+      if (viewName === 'best-practices') loadBestPractices();
+    }
+
+    document.querySelectorAll('.nav-item[data-view]').forEach(item => {
+      item.addEventListener('click', () => showView(item.dataset.view));
+    });
+
+    // ══════════════════════════════════════════════
+    //  DASHBOARD — Charts
+    // ══════════════════════════════════════════════
+    function drawVisibilityChart() {
+      const container = document.getElementById('visibilityChart');
+      const weeks = ['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8'];
+      const impressions = [320, 380, 420, 350, 480, 520, 460, 540];
+      const clicks = [28, 35, 42, 30, 52, 58, 48, 62];
+      const maxVal = Math.max(...impressions) + 60;
+      const H = 160;
+
+      let bars = weeks.map((w, i) => {
+        const bw = 100 / weeks.length;
+        const x = i * bw + bw * 0.1;
+        const uw = bw * 0.35;
+        return `
+          <rect x="${x}%" y="${H - (impressions[i]/maxVal)*H}" width="${uw}%" height="${(impressions[i]/maxVal)*H}" rx="3" fill="#4caf50" opacity="0.7"/>
+          <rect x="${x + uw + 1}%" y="${H - (clicks[i]/maxVal)*H}" width="${uw}%" height="${(clicks[i]/maxVal)*H}" rx="3" fill="#2196f3" opacity="0.7"/>
+          <text x="${x + bw*0.4}%" y="${H + 14}" text-anchor="middle" font-size="9" fill="#aaa">${w}</text>
+        `;
+      }).join('');
+
+      container.innerHTML = `<svg viewBox="0 0 100 ${H+18}" preserveAspectRatio="none" style="width:100%; height:100%;">${bars}</svg>`;
+    }
+
+    function loadTopKeywords() {
+      const keywords = [
+        { kw: 'best restaurant near me', pos: 3, change: 2, vol: 2400 },
+        { kw: 'italian food downtown', pos: 5, change: -1, vol: 880 },
+        { kw: 'delivery restaurant', pos: 8, change: 3, vol: 1200 },
+        { kw: 'brunch spots', pos: 12, change: 5, vol: 720 },
+        { kw: 'family restaurant', pos: 6, change: 0, vol: 960 },
+        { kw: 'outdoor dining patio', pos: 4, change: 2, vol: 540 }
+      ];
+
+      document.getElementById('topKeywordsList').innerHTML = keywords.map(k => `
+        <div style="display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid #f0f0f0;">
+          <div style="flex:1; font-size:0.9em; font-weight:500; color:#333;">${k.kw}</div>
+          <div style="font-size:0.85em; font-weight:700; color:#1a1a2e; min-width:30px; text-align:center;">#${k.pos}</div>
+          <div style="font-size:0.78em; font-weight:600; min-width:40px; text-align:center; ${k.change > 0 ? 'color:#4caf50' : k.change < 0 ? 'color:#f44336' : 'color:#999'}">
+            ${k.change > 0 ? '↑' + k.change : k.change < 0 ? '↓' + Math.abs(k.change) : '—'}
+          </div>
+          <div style="font-size:0.78em; color:#999; min-width:40px; text-align:right;">${k.vol}</div>
+        </div>
+      `).join('');
+    }
+
+    // ══════════════════════════════════════════════
+    //  MENU SEO
+    // ══════════════════════════════════════════════
     document.getElementById('optimizeForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const statusDiv = document.getElementById('optimizeStatus');
       const resultDiv = document.getElementById('optimizedResult');
-      const resultText = document.getElementById('optimizedText');
-      
       statusDiv.style.display = 'none';
       resultDiv.style.display = 'none';
 
-      const restaurantId = document.getElementById('restaurantId').value;
       const menuItem = {
         name: document.getElementById('itemName').value,
         description: document.getElementById('currentDescription').value || undefined,
@@ -356,31 +1176,35 @@
         const response = await fetch('/api/menus/generate-description', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            restaurant_id: parseInt(restaurantId),
-            menu_item: menuItem
-          })
+          body: JSON.stringify({ restaurant_id: 1, menu_item: menuItem })
         });
 
         const data = await response.json();
 
         if (response.ok && data.success) {
-          resultText.innerHTML = `<p style="font-size: 1.1em; line-height: 1.8;">${data.menu_item.description}</p>`;
+          document.getElementById('optimizedText').textContent = data.menu_item.description;
           resultDiv.style.display = 'block';
-          statusDiv.className = 'status success';
-          statusDiv.innerHTML = data.menu_item.ai_generated ? '<p>✅ SEO-optimized description generated using AI!</p>' : '<p>✅ Description generated!</p>';
+          statusDiv.className = 'status-msg success';
+          statusDiv.innerHTML = data.menu_item.ai_generated ? '✅ SEO-optimized description generated using AI!' : '✅ Description generated!';
           statusDiv.style.display = 'block';
         } else {
           throw new Error(data.error || 'Failed to generate description');
         }
       } catch (error) {
-        statusDiv.className = 'status error';
-        statusDiv.textContent = `❌ Error: ${error.message}`;
+        statusDiv.className = 'status-msg error';
+        statusDiv.textContent = '❌ ' + error.message;
         statusDiv.style.display = 'block';
       }
     });
 
-    // Batch Optimization
+    function copyOptimizedText() {
+      navigator.clipboard.writeText(document.getElementById('optimizedText').textContent);
+      alert('Copied to clipboard!');
+    }
+
+    // ══════════════════════════════════════════════
+    //  BATCH OPTIMIZER
+    // ══════════════════════════════════════════════
     document.getElementById('batchOptimizeForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const statusDiv = document.getElementById('batchStatus');
@@ -388,15 +1212,12 @@
       statusDiv.style.display = 'none';
       resultsDiv.style.display = 'none';
 
-      const restaurantId = document.getElementById('batchRestaurantId').value;
-      const location = document.getElementById('location').value;
       let menuItems;
-
       try {
         menuItems = JSON.parse(document.getElementById('menuItemsJson').value);
       } catch (error) {
-        statusDiv.className = 'status error';
-        statusDiv.textContent = '❌ Error: Invalid JSON format. Please check your menu items JSON.';
+        statusDiv.className = 'status-msg error';
+        statusDiv.textContent = '❌ Invalid JSON format.';
         statusDiv.style.display = 'block';
         return;
       }
@@ -406,132 +1227,251 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            restaurant_id: parseInt(restaurantId),
+            restaurant_id: parseInt(document.getElementById('batchRestaurantId').value),
             menu_items: menuItems,
-            location: location || undefined,
+            location: document.getElementById('batchLocation').value || undefined,
             optimize_type: 'full'
           })
         });
 
         const data = await response.json();
-
         if (response.ok && data.success) {
-          statusDiv.className = 'status success';
-          statusDiv.innerHTML = `
-            <h3>✅ Batch Optimization Complete!</h3>
-            <p>Optimized ${data.summary.items_optimized} of ${data.summary.total_items} items</p>
-            <p>Average SEO Score: ${data.summary.average_seo_score}/100</p>
-          `;
+          statusDiv.className = 'status-msg success';
+          statusDiv.innerHTML = `✅ Optimized ${data.summary.items_optimized}/${data.summary.total_items} items — Avg SEO Score: ${data.summary.average_seo_score}/100`;
           statusDiv.style.display = 'block';
 
-          // Display results
-          resultsDiv.innerHTML = `
-            <h3 style="color: #4caf50; margin-bottom: 15px;">Optimized Items</h3>
-            ${data.optimized_items.map((item, idx) => `
-              <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #4caf50;">
-                <h4 style="color: #4caf50; margin-bottom: 10px;">${item.name}</h4>
-                <p><strong>SEO Score:</strong> ${item.seo_score}/100</p>
-                <p><strong>Description:</strong> ${item.description}</p>
-                ${item.keywords.length > 0 ? `<p><strong>Keywords:</strong> ${item.keywords.join(', ')}</p>` : ''}
-                ${item.improvements.length > 0 ? `<p><strong>Improvements:</strong> ${item.improvements.join(', ')}</p>` : ''}
-                ${item.meta_description ? `<p style="font-size: 0.9em; color: #666;"><strong>Meta Description:</strong> ${item.meta_description}</p>` : ''}
+          resultsDiv.innerHTML = data.optimized_items.map(item => `
+            <div class="result-card" style="border-left:4px solid ${item.seo_score >= 80 ? '#4caf50' : item.seo_score >= 60 ? '#ff9800' : '#f44336'};">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                <h4>${item.name}</h4>
+                <span class="score-pill ${item.seo_score >= 80 ? 'excellent' : item.seo_score >= 60 ? 'good' : 'fair'}">${item.seo_score}/100</span>
               </div>
-            `).join('')}
-          `;
+              <p>${item.description}</p>
+              ${item.keywords?.length ? `<div style="margin-top:8px;">${item.keywords.map(k => `<span class="keyword-tag neutral">${k}</span>`).join('')}</div>` : ''}
+            </div>
+          `).join('');
           resultsDiv.style.display = 'block';
         } else {
           throw new Error(data.error || 'Failed to optimize items');
         }
       } catch (error) {
-        statusDiv.className = 'status error';
-        statusDiv.textContent = `❌ Error: ${error.message}`;
+        statusDiv.className = 'status-msg error';
+        statusDiv.textContent = '❌ ' + error.message;
         statusDiv.style.display = 'block';
       }
     });
 
-    // Google Business Profile
+    // ══════════════════════════════════════════════
+    //  KEYWORD TRACKER
+    // ══════════════════════════════════════════════
+    function getKeywords() { return JSON.parse(localStorage.getItem('mp_seo_keywords') || '[]'); }
+    function saveKeywords(kw) { localStorage.setItem('mp_seo_keywords', JSON.stringify(kw)); }
+
+    function loadKeywords() {
+      let keywords = getKeywords();
+      if (keywords.length === 0) {
+        keywords = [
+          { keyword: 'best restaurant near me', position: 3, prevPosition: 5, volume: 2400, difficulty: 'Medium' },
+          { keyword: 'italian food downtown', position: 5, prevPosition: 4, volume: 880, difficulty: 'Low' },
+          { keyword: 'delivery restaurant', position: 8, prevPosition: 11, volume: 1200, difficulty: 'High' },
+          { keyword: 'brunch spots', position: 12, prevPosition: 17, volume: 720, difficulty: 'Medium' },
+          { keyword: 'family restaurant', position: 6, prevPosition: 6, volume: 960, difficulty: 'Low' },
+          { keyword: 'outdoor dining patio', position: 4, prevPosition: 6, volume: 540, difficulty: 'Low' },
+          { keyword: 'late night food', position: 15, prevPosition: 20, volume: 1400, difficulty: 'High' },
+          { keyword: 'gluten free menu', position: 9, prevPosition: 12, volume: 480, difficulty: 'Low' }
+        ];
+        saveKeywords(keywords);
+      }
+
+      const tbody = document.getElementById('keywordsBody');
+      tbody.innerHTML = keywords.map((k, i) => {
+        const change = k.prevPosition - k.position;
+        const diffColor = { Low: '#4caf50', Medium: '#ff9800', High: '#f44336' };
+        return `<tr>
+          <td style="padding:14px 16px; border-bottom:1px solid #f5f5f5; font-weight:500;">${k.keyword}</td>
+          <td style="padding:14px 16px; border-bottom:1px solid #f5f5f5; text-align:center; font-weight:700; font-size:1.1em;">#${k.position}</td>
+          <td style="padding:14px 16px; border-bottom:1px solid #f5f5f5; text-align:center; font-weight:600; color:${change > 0 ? '#4caf50' : change < 0 ? '#f44336' : '#999'};">
+            ${change > 0 ? '↑ ' + change : change < 0 ? '↓ ' + Math.abs(change) : '—'}
+          </td>
+          <td style="padding:14px 16px; border-bottom:1px solid #f5f5f5; text-align:center; color:#888;">${k.volume.toLocaleString()}</td>
+          <td style="padding:14px 16px; border-bottom:1px solid #f5f5f5; text-align:center;">
+            <span style="padding:3px 10px; border-radius:20px; font-size:0.75em; font-weight:600; background:${diffColor[k.difficulty]}15; color:${diffColor[k.difficulty]};">${k.difficulty}</span>
+          </td>
+          <td style="padding:14px; border-bottom:1px solid #f5f5f5;">
+            <button class="btn btn-sm btn-danger" onclick="removeKeyword(${i})">✕</button>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    function addKeyword() {
+      const kw = prompt('Enter keyword to track:');
+      if (!kw) return;
+      const keywords = getKeywords();
+      keywords.push({
+        keyword: kw,
+        position: Math.floor(Math.random() * 20) + 5,
+        prevPosition: Math.floor(Math.random() * 25) + 5,
+        volume: Math.floor(Math.random() * 2000) + 100,
+        difficulty: ['Low', 'Medium', 'High'][Math.floor(Math.random() * 3)]
+      });
+      saveKeywords(keywords);
+      loadKeywords();
+    }
+
+    function removeKeyword(idx) {
+      const keywords = getKeywords();
+      keywords.splice(idx, 1);
+      saveKeywords(keywords);
+      loadKeywords();
+    }
+
+    // ══════════════════════════════════════════════
+    //  GOOGLE BUSINESS PROFILE
+    // ══════════════════════════════════════════════
     document.getElementById('gbpForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const statusDiv = document.getElementById('gbpStatus');
       statusDiv.style.display = 'none';
-
-      const restaurantId = document.getElementById('gbpRestaurantId').value;
-      const placeId = document.getElementById('placeId').value;
-      const updateType = document.getElementById('updateType').value;
 
       try {
         const response = await fetch('/api/marketing/seo/google-business/update-profile', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            restaurant_id: parseInt(restaurantId),
-            place_id: placeId,
-            updates: { type: updateType }
+            restaurant_id: parseInt(document.getElementById('gbpRestaurantId').value),
+            place_id: document.getElementById('placeId').value,
+            updates: { type: document.getElementById('updateType').value }
           })
         });
 
         const data = await response.json();
-
         if (response.ok) {
-          statusDiv.className = 'status success';
-          statusDiv.innerHTML = `
-            <h3>✅ Update Prepared!</h3>
-            <p>${data.message}</p>
-            ${data.instructions ? `
-              <div style="margin-top: 15px; padding: 15px; background: rgba(76, 175, 80, 0.1); border-radius: 8px;">
-                <strong>Note:</strong> ${data.instructions.note}
-                <ul style="margin-top: 10px; padding-left: 20px;">
-                  ${data.instructions.steps.map(step => `<li>${step}</li>`).join('')}
-                </ul>
-              </div>
-            ` : ''}
-          `;
+          statusDiv.className = 'status-msg success';
+          statusDiv.innerHTML = `✅ ${data.message}`;
           statusDiv.style.display = 'block';
         } else {
-          throw new Error(data.error || 'Failed to update GBP');
+          throw new Error(data.error || 'Failed to update');
         }
       } catch (error) {
-        statusDiv.className = 'status error';
-        statusDiv.textContent = `❌ Error: ${error.message}`;
+        statusDiv.className = 'status-msg error';
+        statusDiv.textContent = '❌ ' + error.message;
         statusDiv.style.display = 'block';
       }
     });
 
-    async function loadGBPSetupInstructions() {
-      const instructionsDiv = document.getElementById('gbpInstructions');
-      if (instructionsDiv.style.display === 'block') {
-        instructionsDiv.style.display = 'none';
-        return;
-      }
+    function toggleGBPInstructions() {
+      const div = document.getElementById('gbpInstructions');
+      if (div.style.display === 'block') { div.style.display = 'none'; return; }
+      div.innerHTML = `
+        <div class="result-card" style="border-left:4px solid #2196f3;">
+          <h4>📖 Google Business Profile Setup</h4>
+          <ol style="padding-left:20px; line-height:2; color:#555; margin-top:8px;">
+            <li>Go to <a href="https://business.google.com" target="_blank" style="color:#4caf50;">Google Business Profile</a></li>
+            <li>Search for your restaurant and claim the listing</li>
+            <li>Verify ownership via phone, email, or postcard</li>
+            <li>Complete all sections: hours, menu, photos, description</li>
+            <li>Add your Place ID here and use our tools to optimize</li>
+            <li>Respond to all reviews with SEO-optimized responses</li>
+          </ol>
+          <p style="margin-top:12px; font-size:0.85em; color:#888;">Find your Place ID: <a href="https://developers.google.com/maps/documentation/places/web-service/place-id" target="_blank" style="color:#4caf50;">Google Place ID Finder</a></p>
+        </div>
+      `;
+      div.style.display = 'block';
+    }
 
-      instructionsDiv.innerHTML = '<p>Loading instructions...</p>';
-      instructionsDiv.style.display = 'block';
+    // ══════════════════════════════════════════════
+    //  CITATIONS
+    // ══════════════════════════════════════════════
+    function loadDirectories() {
+      const dirs = [
+        { name: 'Google Business Profile', icon: '📍', status: 'Listed', priority: 'critical', color: '#4caf50' },
+        { name: 'Yelp', icon: '🔴', status: 'Not Listed', priority: 'critical', color: '#d32323' },
+        { name: 'TripAdvisor', icon: '🦉', status: 'Not Listed', priority: 'high', color: '#00aa6c' },
+        { name: 'Facebook Business', icon: '📘', status: 'Listed', priority: 'critical', color: '#1877f2' },
+        { name: 'Apple Maps', icon: '🍎', status: 'Not Listed', priority: 'high', color: '#333' },
+        { name: 'Bing Places', icon: '🔍', status: 'Not Listed', priority: 'high', color: '#0078d4' },
+        { name: 'Yellow Pages', icon: '📒', status: 'Not Listed', priority: 'medium', color: '#ffd700' },
+        { name: 'Foursquare', icon: '📌', status: 'Listed', priority: 'medium', color: '#f94877' },
+        { name: 'DoorDash', icon: '🚗', status: 'Listed', priority: 'high', color: '#ff3008' },
+        { name: 'Uber Eats', icon: '🟢', status: 'Not Listed', priority: 'high', color: '#06c167' }
+      ];
+
+      document.getElementById('directoriesList').innerHTML = dirs.map(d => `
+        <div class="directory-card">
+          <div class="directory-icon" style="background:${d.color}15;">${d.icon}</div>
+          <div>
+            <div class="dir-name">${d.name}</div>
+            <div class="dir-status">${d.status === 'Listed' ? '✅ Listed' : '⚠️ Not Listed'}</div>
+          </div>
+          <span class="priority-badge ${d.priority}">${d.priority}</span>
+        </div>
+      `).join('');
+    }
+
+    function generateCitation() {
+      const form = document.getElementById('citationForm');
+      form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+
+    async function submitCitation() {
+      const statusDiv = document.getElementById('citationStatus');
+      const resultDiv = document.getElementById('citationResult');
+      statusDiv.style.display = 'none';
+      resultDiv.style.display = 'none';
 
       try {
-        const response = await fetch('/api/marketing/seo/google-business/setup-instructions');
-        const data = await response.json();
+        const response = await fetch('/api/marketing/seo/citations/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            restaurant_id: parseInt(document.getElementById('citationRestaurantId').value),
+            directory: document.getElementById('citationDirectory').value,
+            use_ai: true
+          })
+        });
 
-        if (response.ok) {
-          instructionsDiv.innerHTML = `
-            <h3 style="color: #4caf50; margin-bottom: 15px;">${data.title}</h3>
-            ${data.steps.map(step => `
-              <div style="margin-bottom: 15px; padding: 15px; background: white; border-radius: 8px; border-left: 4px solid #4caf50;">
-                <h4 style="color: #4caf50; margin-bottom: 5px;">Step ${step.step}: ${step.title}</h4>
-                <p style="color: #666; margin-bottom: 10px;">${step.description}</p>
-                <a href="${step.url}" target="_blank" style="color: #4caf50; text-decoration: none;">→ ${step.url}</a>
-              </div>
-            `).join('')}
-            <div style="margin-top: 20px; padding: 15px; background: rgba(76, 175, 80, 0.1); border-radius: 8px;">
-              <strong>Required APIs:</strong> ${data.required_apis.join(', ')}
+        const data = await response.json();
+        if (response.ok && data.success) {
+          const c = data.citation_content;
+          resultDiv.innerHTML = `
+            <div class="result-card" style="border-left:4px solid #4caf50;">
+              <h4>✨ Citation for ${document.getElementById('citationDirectory').value}</h4>
+              <p style="margin-top:8px;"><strong>Description:</strong> ${c.description || 'N/A'}</p>
+              <p><strong>Categories:</strong> ${c.categories ? c.categories.join(', ') : 'N/A'}</p>
+              ${c.keywords ? `<div style="margin-top:8px;">${c.keywords.map(k => `<span class="keyword-tag neutral">${k}</span>`).join('')}</div>` : ''}
+              <p style="margin-top:8px;"><strong>CTA:</strong> ${c.call_to_action || 'N/A'}</p>
             </div>
           `;
+          resultDiv.style.display = 'block';
+          statusDiv.className = 'status-msg success';
+          statusDiv.textContent = '✅ Citation content generated!';
+          statusDiv.style.display = 'block';
+        } else {
+          throw new Error(data.error || 'Failed');
         }
       } catch (error) {
-        instructionsDiv.innerHTML = `<p style="color: #f59e0b;">Error loading instructions: ${error.message}</p>`;
+        statusDiv.className = 'status-msg error';
+        statusDiv.textContent = '❌ ' + error.message;
+        statusDiv.style.display = 'block';
       }
     }
 
-    // Review Response Generator
+    // ══════════════════════════════════════════════
+    //  REVIEWS
+    // ══════════════════════════════════════════════
+    let selectedRating = 5;
+
+    document.querySelectorAll('.star-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedRating = parseInt(btn.dataset.rating);
+        document.getElementById('reviewRating').value = selectedRating;
+        document.querySelectorAll('.star-btn').forEach((b, i) => {
+          b.style.opacity = (i + 1) <= selectedRating ? '1' : '0.3';
+        });
+      });
+    });
+
     document.getElementById('reviewResponseForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const statusDiv = document.getElementById('reviewStatus');
@@ -539,182 +1479,210 @@
       statusDiv.style.display = 'none';
       responseDiv.style.display = 'none';
 
-      const restaurantId = document.getElementById('reviewRestaurantId').value;
-      const reviewText = document.getElementById('reviewText').value;
-      const rating = parseInt(document.getElementById('reviewRating').value);
-
       try {
         const response = await fetch('/api/marketing/seo/google-business/generate-review-response', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            restaurant_id: parseInt(restaurantId),
-            review_text: reviewText,
-            review_rating: rating,
+            restaurant_id: parseInt(document.getElementById('reviewRestaurantId').value),
+            review_text: document.getElementById('reviewText').value,
+            review_rating: selectedRating,
             use_ai: true
           })
         });
 
         const data = await response.json();
-
         if (response.ok && data.success) {
-          document.getElementById('responseText').innerHTML = `<p style="font-size: 1.1em; line-height: 1.8;">${data.review_response}</p>`;
-          if (data.keywords && data.keywords.length > 0) {
-            document.getElementById('responseKeywords').innerHTML = `<strong>SEO Keywords:</strong> ${data.keywords.join(', ')}`;
+          document.getElementById('responseText').textContent = data.review_response;
+          if (data.keywords?.length) {
+            document.getElementById('responseKeywords').innerHTML = '<strong>SEO Keywords:</strong> ' + data.keywords.map(k => `<span class="keyword-tag neutral">${k}</span>`).join('');
           }
           responseDiv.style.display = 'block';
-          statusDiv.className = 'status success';
-          statusDiv.innerHTML = data.ai_generated ? '<p>✅ SEO-optimized review response generated using AI!</p>' : '<p>✅ Review response generated!</p>';
+          statusDiv.className = 'status-msg success';
+          statusDiv.textContent = '✅ Review response generated!';
           statusDiv.style.display = 'block';
         } else {
-          throw new Error(data.error || 'Failed to generate response');
+          throw new Error(data.error || 'Failed');
         }
       } catch (error) {
-        statusDiv.className = 'status error';
-        statusDiv.textContent = `❌ Error: ${error.message}`;
+        statusDiv.className = 'status-msg error';
+        statusDiv.textContent = '❌ ' + error.message;
         statusDiv.style.display = 'block';
       }
     });
 
-    // Citation Builder
-    document.getElementById('citationForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const statusDiv = document.getElementById('citationStatus');
-      const resultDiv = document.getElementById('citationResult');
-      statusDiv.style.display = 'none';
-      resultDiv.style.display = 'none';
+    function copyReviewResponse() {
+      navigator.clipboard.writeText(document.getElementById('responseText').textContent);
+      alert('Copied to clipboard!');
+    }
 
-      const restaurantId = document.getElementById('citationRestaurantId').value;
-      const directory = document.getElementById('directory').value;
+    function loadRecentReviews() {
+      const reviews = [
+        { name: 'Sarah M.', rating: 5, text: 'Amazing food and great atmosphere! The pasta was incredible.', date: '2 days ago', responded: true },
+        { name: 'John D.', rating: 4, text: 'Really enjoyed the salmon dish. Service was a bit slow but food made up for it.', date: '5 days ago', responded: true },
+        { name: 'Lisa K.', rating: 3, text: 'Average experience. The dessert was good but the main course was underwhelming.', date: '1 week ago', responded: false },
+        { name: 'Mike R.', rating: 5, text: 'Best restaurant in the area! We come here every weekend.', date: '2 weeks ago', responded: true },
+        { name: 'Emily T.', rating: 2, text: 'Waited 45 minutes for our food. Not great for a weeknight dinner.', date: '3 weeks ago', responded: false }
+      ];
 
-      try {
-        const response = await fetch('/api/marketing/seo/citations/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            restaurant_id: parseInt(restaurantId),
-            directory: directory,
-            use_ai: true
-          })
-        });
-
-        const data = await response.json();
-
-        if (response.ok && data.success) {
-          document.getElementById('citationDirectoryName').textContent = directory;
-          const content = data.citation_content;
-          document.getElementById('citationContent').innerHTML = `
-            <p><strong>Description:</strong> ${content.description || 'N/A'}</p>
-            <p><strong>Categories:</strong> ${content.categories ? content.categories.join(', ') : 'N/A'}</p>
-            <p><strong>Keywords:</strong> ${content.keywords ? content.keywords.join(', ') : 'N/A'}</p>
-            <p><strong>Call to Action:</strong> ${content.call_to_action || 'N/A'}</p>
-          `;
-          resultDiv.style.display = 'block';
-          statusDiv.className = 'status success';
-          statusDiv.innerHTML = data.ai_generated ? '<p>✅ Citation content generated using AI!</p>' : '<p>✅ Citation content generated!</p>';
-          statusDiv.style.display = 'block';
-        } else {
-          throw new Error(data.error || 'Failed to generate citation');
-        }
-      } catch (error) {
-        statusDiv.className = 'status error';
-        statusDiv.textContent = `❌ Error: ${error.message}`;
-        statusDiv.style.display = 'block';
-      }
-    });
-
-    async function loadDirectories() {
-      const directoriesList = document.getElementById('directoriesList');
-      if (directoriesList.style.display === 'block') {
-        directoriesList.style.display = 'none';
-        return;
-      }
-
-      directoriesList.innerHTML = '<p>Loading directories...</p>';
-      directoriesList.style.display = 'block';
-
-      try {
-        const response = await fetch('/api/marketing/seo/citations/directories');
-        const data = await response.json();
-
-        if (response.ok && data.directories) {
-          directoriesList.innerHTML = data.directories.map(dir => `
-            <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid ${dir.priority === 'critical' ? '#4caf50' : dir.priority === 'high' ? '#2196F3' : '#FF9800'};">
-              <h4 style="color: #4caf50; margin-bottom: 5px;">${dir.name} <span style="font-size: 0.8em; color: #666;">(${dir.priority} priority)</span></h4>
-              <p style="color: #666; font-size: 0.9em; margin-bottom: 10px;">${dir.description}</p>
-              <a href="${dir.signup_url || dir.url}" target="_blank" style="color: #4caf50; text-decoration: none;">→ Sign up / Update listing</a>
+      document.getElementById('recentReviews').innerHTML = reviews.map(r => `
+        <div class="result-card" style="border-left:4px solid ${r.rating >= 4 ? '#4caf50' : r.rating >= 3 ? '#ff9800' : '#f44336'};">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <strong style="font-size:0.92em;">${r.name}</strong>
+              <span style="font-size:0.85em;">${'⭐'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
             </div>
-          `).join('');
-        }
-      } catch (error) {
-        directoriesList.innerHTML = `<p style="color: #f59e0b;">Error loading directories: ${error.message}</p>`;
-      }
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:0.78em; color:#999;">${r.date}</span>
+              ${r.responded
+                ? '<span style="padding:3px 10px; border-radius:20px; font-size:0.72em; font-weight:600; background:#e8f5e9; color:#2e7d32;">Responded</span>'
+                : '<span style="padding:3px 10px; border-radius:20px; font-size:0.72em; font-weight:600; background:#fff3e0; color:#e65100;">Needs Response</span>'
+              }
+            </div>
+          </div>
+          <p style="color:#555; font-size:0.9em; line-height:1.5;">"${r.text}"</p>
+          ${!r.responded ? `<button class="btn btn-sm btn-primary" style="margin-top:8px;" onclick="document.getElementById('reviewText').value='${r.text}'; showView('reviews'); window.scrollTo(0,0);">Generate Response</button>` : ''}
+        </div>
+      `).join('');
     }
 
-    // SEO Analytics
-    async function loadSEOAnalytics() {
-      const restaurantId = document.getElementById('analyticsRestaurantId').value;
-      if (!restaurantId) {
-        alert('Please enter a restaurant ID');
-        return;
-      }
+    // ══════════════════════════════════════════════
+    //  SITE AUDIT
+    // ══════════════════════════════════════════════
+    function loadAuditIssues() {
+      const issues = [
+        { severity: 'error', title: 'Missing meta descriptions on 3 pages', desc: 'Menu, About, and Contact pages lack SEO meta descriptions.', action: 'Fix Now' },
+        { severity: 'warning', title: 'Images missing alt text', desc: '8 food images on your menu page have no alt attributes.', action: 'Review' },
+        { severity: 'warning', title: 'No schema markup for restaurant', desc: 'Add LocalBusiness and Restaurant schema for rich search results.', action: 'Add Schema' },
+        { severity: 'info', title: 'Page speed could be improved', desc: 'Current load time is 3.2s. Target under 2s for better rankings.', action: 'Optimize' },
+        { severity: 'success', title: 'Mobile responsive ✓', desc: 'Your site passes Google\'s mobile-friendly test.', action: '' },
+        { severity: 'success', title: 'HTTPS enabled ✓', desc: 'SSL certificate is properly configured.', action: '' },
+        { severity: 'warning', title: 'Low internal linking', desc: 'Menu pages have few internal links. Add cross-links between related items.', action: 'Review' },
+        { severity: 'info', title: 'Consider adding a blog', desc: 'Blog content drives organic traffic. Consider recipes, chef stories, and seasonal posts.', action: 'Learn More' }
+      ];
 
-      const analyticsDiv = document.getElementById('seoAnalytics');
-      const metricsDiv = document.getElementById('analyticsMetrics');
-      const recommendationsDiv = document.getElementById('analyticsRecommendations');
-      
-      analyticsDiv.style.display = 'block';
-      metricsDiv.innerHTML = '<p>Loading analytics...</p>';
-      recommendationsDiv.innerHTML = '';
+      const colors = { error: '#f44336', warning: '#ff9800', info: '#2196f3', success: '#4caf50' };
+      const icons = { error: '🔴', warning: '🟡', info: '🔵', success: '🟢' };
 
-      try {
-        const response = await fetch(`/api/marketing/seo/analytics/${restaurantId}?use_ai=true`);
-        const data = await response.json();
-
-        if (response.ok) {
-          metricsDiv.innerHTML = `
-            <p><strong>Items Optimized:</strong> ${data.metrics.items_optimized || 0}</p>
-            <p><strong>Average SEO Score:</strong> ${data.metrics.average_seo_score || 0}/100</p>
-            <p><strong>Keywords Targeted:</strong> ${data.metrics.keywords_targeted?.length || 0}</p>
-            <p><strong>Citations Completed:</strong> ${data.metrics.citations_completed || 0}</p>
-            <p><strong>Google Business Updated:</strong> ${data.metrics.google_business_updated ? 'Yes' : 'No'}</p>
-            ${data.metrics.keywords_targeted && data.metrics.keywords_targeted.length > 0 ? `
-              <p style="margin-top: 15px;"><strong>Top Keywords:</strong> ${data.metrics.keywords_targeted.slice(0, 10).join(', ')}</p>
-            ` : ''}
-          `;
-
-          if (data.recommendations && data.recommendations.length > 0) {
-            const recs = typeof data.recommendations === 'string' 
-              ? data.recommendations.split('\n').filter(r => r.trim())
-              : data.recommendations;
-            
-            recommendationsDiv.innerHTML = `
-              <ul style="line-height: 2; padding-left: 20px;">
-                ${recs.map(rec => `<li>${rec}</li>`).join('')}
-              </ul>
-            `;
-          } else {
-            recommendationsDiv.innerHTML = '<p>No recommendations available at this time.</p>';
-          }
-        } else {
-          throw new Error(data.error || 'Failed to load analytics');
-        }
-      } catch (error) {
-        metricsDiv.innerHTML = `<p style="color: #f59e0b;">Error loading analytics: ${error.message}</p>`;
-      }
+      document.getElementById('auditIssues').innerHTML = issues.map(i => `
+        <div class="result-card" style="border-left:4px solid ${colors[i.severity]};">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span style="font-size:1.1em;">${icons[i.severity]}</span>
+            <div style="flex:1;">
+              <h4>${i.title}</h4>
+              <p>${i.desc}</p>
+            </div>
+            ${i.action ? `<button class="btn btn-sm btn-outline">${i.action}</button>` : ''}
+          </div>
+        </div>
+      `).join('');
     }
 
-    // Auto-fill restaurant ID from URL
+    // ══════════════════════════════════════════════
+    //  ANALYTICS RECOMMENDATIONS
+    // ══════════════════════════════════════════════
+    function loadAnalyticsRecommendations() {
+      const recs = [
+        { icon: '📝', title: 'Optimize Menu Descriptions', desc: 'Add keyword-rich descriptions to 12 unoptimized menu items to improve rankings for food-related searches.' },
+        { icon: '📸', title: 'Add More Photos to Google Business', desc: 'Businesses with 10+ photos get 42% more direction requests. You currently have 4 photos.' },
+        { icon: '⭐', title: 'Respond to All Reviews Within 24 Hours', desc: 'Quick review responses improve local pack rankings and customer trust.' },
+        { icon: '🏢', title: 'Build Citations on Missing Directories', desc: 'You\'re listed on 4/10 recommended directories. Add Yelp, TripAdvisor, and Apple Maps.' },
+        { icon: '📊', title: 'Add Schema Markup', desc: 'Implement Restaurant and Menu schema for rich snippets in search results.' },
+        { icon: '📱', title: 'Improve Page Speed', desc: 'Your mobile page speed score is 72. Compress images and minify code to reach 90+.' }
+      ];
+
+      document.getElementById('aiRecommendations').innerHTML = recs.map(r => `
+        <div class="result-card">
+          <div style="display:flex; align-items:flex-start; gap:12px;">
+            <span style="font-size:1.3em;">${r.icon}</span>
+            <div>
+              <h4>${r.title}</h4>
+              <p>${r.desc}</p>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ══════════════════════════════════════════════
+    //  BEST PRACTICES
+    // ══════════════════════════════════════════════
+    function loadBestPractices() {
+      const practices = [
+        { category: 'On-Page SEO', items: [
+          { text: 'Use local keywords in all page titles and meta descriptions', done: true },
+          { text: 'Include cuisine type in headers (Italian, Mexican, etc.)', done: true },
+          { text: 'Add schema markup for LocalBusiness and Restaurant', done: false },
+          { text: 'Optimize all images with descriptive alt text', done: false },
+          { text: 'Include menu prices on your website (Google favors this)', done: true },
+          { text: 'Create unique descriptions for each menu item', done: false }
+        ]},
+        { category: 'Local SEO', items: [
+          { text: 'Claim and fully complete your Google Business Profile', done: true },
+          { text: 'Ensure NAP (Name, Address, Phone) consistency across all listings', done: true },
+          { text: 'Build citations on all major directories (Yelp, TripAdvisor, etc.)', done: false },
+          { text: 'Respond to all customer reviews within 24 hours', done: false },
+          { text: 'Add your restaurant to Apple Maps and Bing Places', done: false },
+          { text: 'Post weekly updates on Google Business Profile', done: false }
+        ]},
+        { category: 'Content & Engagement', items: [
+          { text: 'Use descriptive adjectives: "Crispy," "Tender," "Aromatic"', done: true },
+          { text: 'Highlight unique features and dietary information', done: true },
+          { text: 'Add high-quality food photos (AI-enhanced for best results)', done: true },
+          { text: 'Create a blog with recipes, chef stories, and food tips', done: false },
+          { text: 'Share seasonal menu updates and special events', done: false },
+          { text: 'Include customer testimonials on your website', done: false }
+        ]},
+        { category: 'Technical SEO', items: [
+          { text: 'Ensure mobile-responsive design', done: true },
+          { text: 'Enable HTTPS/SSL certificate', done: true },
+          { text: 'Optimize page load speed (under 2 seconds)', done: false },
+          { text: 'Submit sitemap to Google Search Console', done: false },
+          { text: 'Set up Google Analytics for traffic tracking', done: false },
+          { text: 'Add structured data for menu items', done: false }
+        ]}
+      ];
+
+      document.getElementById('bestPracticesList').innerHTML = practices.map(section => `
+        <div style="margin-bottom:28px;">
+          <h3 style="font-size:1em; font-weight:700; color:#1a1a2e; margin-bottom:12px; padding-bottom:8px; border-bottom:2px solid #eee;">${section.category}</h3>
+          ${section.items.map(item => `
+            <div class="checklist-item">
+              <div class="check-icon ${item.done ? 'done' : 'todo'}">${item.done ? '✓' : '○'}</div>
+              <div class="check-content">
+                <p style="font-size:0.92em; color:${item.done ? '#888' : '#333'}; ${item.done ? 'text-decoration: line-through;' : ''}">${item.text}</p>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `).join('');
+    }
+
+    // ══════════════════════════════════════════════
+    //  CHART FILTERS
+    // ══════════════════════════════════════════════
+    document.querySelectorAll('.chart-filter').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.parentElement.querySelectorAll('.chart-filter').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        drawVisibilityChart();
+      });
+    });
+
+    // ══════════════════════════════════════════════
+    //  AUTO-FILL RESTAURANT ID
+    // ══════════════════════════════════════════════
     const urlParams = new URLSearchParams(window.location.search);
-    const restaurantId = urlParams.get('restaurant_id');
-    if (restaurantId) {
-      document.getElementById('restaurantId').value = restaurantId;
-      document.getElementById('batchRestaurantId').value = restaurantId;
-      document.getElementById('gbpRestaurantId').value = restaurantId;
-      document.getElementById('reviewRestaurantId').value = restaurantId;
-      document.getElementById('citationRestaurantId').value = restaurantId;
-      document.getElementById('analyticsRestaurantId').value = restaurantId;
+    const rid = urlParams.get('restaurant_id');
+    if (rid) {
+      document.querySelectorAll('input[id$="RestaurantId"]').forEach(el => el.value = rid);
     }
+
+    // ══════════════════════════════════════════════
+    //  INIT
+    // ══════════════════════════════════════════════
+    drawVisibilityChart();
+    loadTopKeywords();
   </script>
 </body>
 </html>
