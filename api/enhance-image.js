@@ -314,31 +314,13 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
     }
     const hasUploadFields = Object.keys(uploadFields).length > 0;
     
-    // Check if URL points to bucket root (ends with /) - Leonardo may return base URL + separate key
+    // CRITICAL: Do NOT modify the presigned URL - the signature is tied to the exact URL
+    // If the URL ends with /, Leonardo expects us to use it as-is or it provides the full URL
+    // Modifying the URL invalidates the signature and causes 403 errors
     if (presignedUrl.endsWith('/')) {
-      console.warn('⚠️ Presigned URL ends with / - checking for object key in response');
-      
-      // Leonardo API may return key separately - check various possible field names
-      const objectKey = uploadInitImage.key || 
-                       uploadInitImage.objectKey || 
-                       uploadInitImage.fileKey ||
-                       uploadInitImage.file_name ||
-                       uploadInitImage.filename ||
-                       uploadFields.key ||
-                       uploadFields.Key;
-      
-      if (objectKey) {
-        // Append object key to URL (remove leading slash from key if present)
-        const cleanKey = objectKey.startsWith('/') ? objectKey.substring(1) : objectKey;
-        presignedUrl = presignedUrl + cleanKey;
-        console.log('✅ Appended object key to URL:', cleanKey);
-      } else {
-        // Try using initImageId as the key with extension
-        const filename = `${initImageId}.${extension}`;
-        presignedUrl = presignedUrl + filename;
-        console.log('⚠️ No object key found in response, using initImageId as filename:', filename);
-        console.log('Full uploadInitImage object:', JSON.stringify(uploadInitImage, null, 2));
-      }
+      console.warn('⚠️ Presigned URL ends with / - this might be intentional by Leonardo');
+      console.warn('⚠️ NOT modifying URL to preserve signature integrity');
+      // Don't modify the URL - use it exactly as provided
     }
     
     console.log('Upload fields found:', hasUploadFields);
@@ -480,7 +462,14 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
           if (uploadResponse.status === 200 || uploadResponse.status === 204) {
             console.log('✅ Upload successful with Content-Length header');
           } else {
-            throw new Error(`PUT returned status ${uploadResponse.status}`);
+            const errorDetails = {
+              status: uploadResponse.status,
+              statusText: uploadResponse.statusText,
+              data: uploadResponse.data,
+              headers: uploadResponse.headers
+            };
+            console.error('❌ PUT failed with response:', errorDetails);
+            throw new Error(`PUT returned status ${uploadResponse.status}. Response: ${JSON.stringify(errorDetails)}`);
           }
         } catch (error2) {
           lastError = error2;
@@ -508,7 +497,14 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
             if (uploadResponse.status === 200 || uploadResponse.status === 204) {
               console.log('✅ Upload successful with Content-Type header');
             } else {
-              throw new Error(`PUT returned status ${uploadResponse.status}`);
+              const errorDetails = {
+                status: uploadResponse.status,
+                statusText: uploadResponse.statusText,
+                data: uploadResponse.data,
+                headers: uploadResponse.headers
+              };
+              console.error('❌ PUT failed with response:', errorDetails);
+              throw new Error(`PUT returned status ${uploadResponse.status}. Response: ${JSON.stringify(errorDetails)}`);
             }
           } catch (error3) {
             lastError = error3;
@@ -537,7 +533,14 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
               if (uploadResponse.status === 200 || uploadResponse.status === 204) {
                 console.log('✅ Upload successful with both headers');
               } else {
-                throw new Error(`PUT returned status ${uploadResponse.status}`);
+                const errorDetails = {
+                  status: uploadResponse.status,
+                  statusText: uploadResponse.statusText,
+                  data: uploadResponse.data,
+                  headers: uploadResponse.headers
+                };
+                console.error('❌ PUT failed with response:', errorDetails);
+                throw new Error(`PUT returned status ${uploadResponse.status}. Response: ${JSON.stringify(errorDetails)}`);
               }
             } catch (error4) {
               lastError = error4;
