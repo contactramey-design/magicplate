@@ -87,13 +87,17 @@ function buildRegenPrompt(style) {
     // Use the comprehensive ethical food photography prompt
     const basePrompt = getAIGatewayPrompt(style);
     
-    // Add QUALITY-FOCUSED instructions at the beginning
-    // Emphasize quality improvement (sharpness, detail, noise reduction) over style transformation
-    const qualityPrompt = `Professional food photography QUALITY ENHANCEMENT. 
-Improve sharpness and clarity, reduce noise and grain, enhance fine details and textures, 
-correct colors and white balance, optimize lighting and exposure, upscale resolution while maintaining authenticity. 
-Maintain the exact same dish composition, ingredients, and portions. 
-Ultra-high resolution, crisp textures, professional food photography quality. 
+    // DRAMATIC QUALITY ENHANCEMENT - Make it look like professional restaurant marketing photography
+    // Emphasize DRASTIC improvements to match homepage slider effect
+    const qualityPrompt = `DRAMATIC QUALITY ENHANCEMENT: Transform this food photo into professional restaurant marketing quality. 
+DRASTICALLY improve sharpness and clarity - make every detail crisp, clear, and razor-sharp. 
+DRASTICALLY enhance colors - make them vibrant, rich, and appetizing (deeper reds for meat, brighter greens for vegetables, richer browns for breads, glossy sauces). 
+DRASTICALLY improve lighting - add professional food photography lighting with perfect highlights on glossy surfaces, natural shadows for depth, balanced exposure. 
+DRASTICALLY reduce noise and grain - make the image crystal clear and professional quality. 
+DRASTICALLY enhance textures - make food look more tactile and appealing (crispy edges, juicy meat, flaky pastry, glossy glazes). 
+Upscale resolution to maximum quality. 
+Maintain the exact same dish composition, ingredients, and portions - but make it look PROFESSIONALLY PHOTOGRAPHED like a magazine cover. 
+Ultra-high resolution, magazine-quality food photography, editorial commercial food photo. 
 ${basePrompt}`;
     
     // Ensure prompt is not too long (Leonardo has limits around 1000-2000 chars)
@@ -104,8 +108,8 @@ ${basePrompt}`;
     return qualityPrompt;
   } catch (error) {
     console.error('Error generating prompt, using fallback:', error);
-    // Fallback to quality-focused prompt if new system fails
-    return `Professional food photography QUALITY ENHANCEMENT. Improve sharpness, reduce noise, enhance details, correct colors, optimize lighting. Ultra-high resolution, crisp textures, professional quality. ${styleBlock(style)}`;
+    // Fallback to dramatic quality-focused prompt if new system fails
+    return `DRAMATIC QUALITY ENHANCEMENT. DRASTICALLY improve sharpness, colors, lighting, and detail. Professional food photography quality, magazine-quality, editorial commercial food photo. ${styleBlock(style)}`;
   }
 }
 
@@ -172,11 +176,10 @@ async function enhanceImageWithReplicate(imageBuffer, imageName, style = 'upscal
           image: uploadedFileUrl, // Reference image for img2img
           prompt: prompt, // Quality-focused prompt
           negative_prompt: negativePrompt,
-          prompt_strength: 0.85, // HIGHER = quality enhancement (stays closer to original, improves quality)
-          // LOWER = style transformation (changes appearance more)
-          // 0.85 = 85% original, 15% enhancement (quality improvement, not transformation)
+          prompt_strength: 0.75, // LOWER = allows MORE dramatic enhancement (was 0.85, too conservative)
+          // 0.75 = 75% original, 25% enhancement (more dramatic quality improvement)
           num_inference_steps: 40, // Increased for better quality (was 20 in example)
-          guidance_scale: 7.5, // Balanced adherence to prompt
+          guidance_scale: 9.0, // Increased from 7.5 - more adherence to dramatic quality prompt
           output_format: 'jpg', // Output format
           output_quality: 95, // High quality output
         }
@@ -204,9 +207,9 @@ async function enhanceImageWithReplicate(imageBuffer, imageName, style = 'upscal
             image: uploadedFileUrl,
             prompt: prompt,
             negative_prompt: negativePrompt,
-            prompt_strength: 0.85, // Quality-focused
+            prompt_strength: 0.75, // Decreased from 0.85 - allows more dramatic enhancement
             num_inference_steps: 40,
-            guidance_scale: 7.5,
+            guidance_scale: 9.0, // Increased from 7.5 - more adherence to dramatic quality prompt
             output_format: 'jpg',
             output_quality: 95,
           }
@@ -716,13 +719,14 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
     // 1536x1536 = 2.36MP (vs 1024x1024 = 1MP) = 2.36x more pixels for better quality
     width: 1536,  // Leonardo maximum (was 2048, but Leonardo limit is 1536)
     height: 1536, // Leonardo maximum (was 2048, but Leonardo limit is 1536)
-    guidance_scale: 7,
+    // INCREASE guidance_scale to make AI follow quality instructions more strictly
+    guidance_scale: 9, // Increased from 7 - more adherence to dramatic quality prompt
     // MORE STEPS = better quality (more processing time but better results)
     num_inference_steps: 40, // Increased from 30 for better quality
-    // HIGHER init_strength = quality enhancement (stays closer to original, improves quality)
-    // LOWER init_strength = style transformation (changes appearance more)
-    // 0.85 = 85% original, 15% enhancement (quality improvement, not transformation)
-    init_strength: 0.85, // Changed from 0.65 - focus on quality enhancement, not style change
+    // LOWER init_strength to allow MORE dramatic enhancement (was 0.85, too conservative)
+    // 0.75 = 75% original, 25% enhancement (more dramatic quality improvement)
+    // This allows the AI to make more significant quality improvements while maintaining composition
+    init_strength: 0.75, // Changed from 0.85 - allows more dramatic quality enhancement
     scheduler: 'LEONARDO',
     seed: null,
     // PhotoReal settings for food photography
@@ -842,8 +846,8 @@ async function enhanceImageWithTogether(imageBuffer, imageName, style = 'upscale
         negative_prompt: negativePrompt,
         image: `data:image/jpeg;base64,${base64Image}`,
         steps: 50,  // Increased for better quality (was 40)
-        guidance_scale: 7.5,  // Balanced stylization
-        strength: 0.85  // Increased from 0.7 - focus on quality enhancement, not transformation
+        guidance_scale: 9.0,  // Increased from 7.5 - more adherence to dramatic quality prompt
+        strength: 0.75  // Decreased from 0.85 - allows more dramatic enhancement
       },
       {
         headers: {
