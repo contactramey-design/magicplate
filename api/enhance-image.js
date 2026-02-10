@@ -88,10 +88,20 @@ function buildRegenPrompt(style, fictionalLevel = 30) {
     const basePrompt = getAIGatewayPrompt(style);
     
     // CRITICAL: Analysis instructions - AI must properly identify all elements first
-    const analysisInstructions = `FIRST: Carefully analyze the original image. Identify ALL food items, ingredients, plates, cups, utensils, garnishes, and elements present. 
-Recognize the exact dish composition, all ingredients, portion sizes, arrangement, and every element in the photo. 
-Make sure you understand what food is in the image before enhancing. 
-Identify: main dishes, sides, drinks/cups, plates/bowls, utensils, garnishes, sauces, condiments, and all food elements.`;
+    const analysisInstructions = `CRITICAL FIRST STEP: Before enhancing, carefully analyze the original reference image. 
+You MUST identify and understand EVERY element in the image:
+- Main food items (burger, chicken, pizza, pasta, etc.)
+- Side dishes (fries, salad, bread, etc.)
+- Drinks and cups (soda, coffee, water, wine glasses, etc.)
+- Plates, bowls, and servingware
+- Utensils (forks, knives, spoons)
+- Garnishes (herbs, microgreens, parsley, etc.)
+- Sauces and condiments
+- All ingredients visible in the dish
+- Arrangement and composition
+- Portion sizes and quantities
+
+After identifying ALL elements, recreate them ALL in the enhanced version. Do not miss any food items, cups, or elements. If you see a burger and fries, recreate both. If you see a cup, recreate the cup. Enhance everything you identify, but make it perfect.`;
     
     // Determine enhancement style based on fictional level (0-100)
     let enhancementMode = '';
