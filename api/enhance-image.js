@@ -204,10 +204,9 @@ async function enhanceImageWithReplicate(imageBuffer, imageName, style = 'upscal
           image: uploadedFileUrl, // Reference image for img2img
           prompt: prompt, // Quality-focused prompt
           negative_prompt: negativePrompt,
-          prompt_strength: 0.75, // LOWER = allows MORE dramatic enhancement (was 0.85, too conservative)
-          // 0.75 = 75% original, 25% enhancement (more dramatic quality improvement)
+          prompt_strength: calculatedStrength, // Scale from 0.75 (authentic) to 0.3 (fictional)
           num_inference_steps: 40, // Increased for better quality (was 20 in example)
-          guidance_scale: 9.0, // Increased from 7.5 - more adherence to dramatic quality prompt
+          guidance_scale: calculatedGuidance, // Scale from 7.5 to 9.0
           output_format: 'jpg', // Output format
           output_quality: 95, // High quality output
         }
