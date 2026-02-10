@@ -421,9 +421,10 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
       
       // S3 presigned URLs ALWAYS use PUT method (not POST)
       // The 405 error confirms POST is not allowed - must use PUT
-      console.log('Using PUT method for S3 presigned URL (S3 requires PUT, not POST)');
+      console.log('🔵 Using PUT method for S3 presigned URL (S3 requires PUT, not POST)');
       console.log('Image size:', imageBuffer.length, 'bytes');
       console.log('Content-Type:', contentType);
+      console.log('⚠️ IMPORTANT: This code ONLY uses PUT, never POST. If you see POST in errors, Vercel may not have deployed the latest code.');
       
       // Try different header combinations to match the presigned URL signature
       // The signature is calculated with specific headers, so we must match them exactly
@@ -432,7 +433,7 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
       
       // Attempt 1: No custom headers (let axios set defaults)
       try {
-        console.log('Attempt 1: PUT without any custom headers...');
+        console.log('🔵 Attempt 1: PUT (not POST) without any custom headers...');
         uploadResponse = await axios.put(presignedUrl, imageBuffer, {
           maxContentLength: Infinity,
           maxBodyLength: Infinity,
@@ -458,7 +459,7 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
         
         // Attempt 2: With Content-Length only
         try {
-          console.log('Attempt 2: PUT with Content-Length header...');
+          console.log('🔵 Attempt 2: PUT (not POST) with Content-Length header...');
           uploadResponse = await axios.put(presignedUrl, imageBuffer, {
             headers: {
               'Content-Length': imageBuffer.length.toString()
@@ -487,7 +488,7 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
           
           // Attempt 3: With Content-Type (some presigned URLs require it)
           try {
-            console.log('Attempt 3: PUT with Content-Type header...');
+            console.log('🔵 Attempt 3: PUT (not POST) with Content-Type header...');
             uploadResponse = await axios.put(presignedUrl, imageBuffer, {
               headers: {
                 'Content-Type': contentType
@@ -509,7 +510,7 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
             
             // Attempt 4: With both Content-Type and Content-Length
             try {
-              console.log('Attempt 4: PUT with Content-Type and Content-Length headers...');
+              console.log('🔵 Attempt 4: PUT (not POST) with Content-Type and Content-Length headers...');
               uploadResponse = await axios.put(presignedUrl, imageBuffer, {
                 headers: {
                   'Content-Type': contentType,
@@ -579,7 +580,13 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
       }
       
       if (s3Error.response?.status === 405) {
-        throw new Error(`S3 upload method not allowed (405). ${errorMessage}. The presigned URL may require a different HTTP method (PUT vs POST).`);
+        // Check if the error says POST was used (should never happen with current code)
+        const methodMatch = s3Error.response?.data?.match(/<Method>(.*?)<\/Method>/);
+        const methodUsed = methodMatch ? methodMatch[1] : 'unknown';
+        if (methodUsed === 'POST') {
+          throw new Error(`S3 upload method not allowed (405). The error shows POST was used, but this code only uses PUT. This suggests Vercel hasn't deployed the latest code yet. Please wait a few minutes for deployment to complete, or check Vercel deployment status. Error: ${errorMessage}`);
+        }
+        throw new Error(`S3 upload method not allowed (405). ${errorMessage}. The presigned URL requires PUT method (not POST).`);
       }
       
       throw new Error(`Failed to upload image to S3 (${s3Error.response?.status || 'unknown'} - ${errorCode}): ${errorMessage}`);
