@@ -91,35 +91,46 @@ function buildRegenPrompt(style, fictionalLevel = 30) {
     let enhancementMode = '';
     let backgroundInstructions = '';
     let authenticityInstructions = '';
+    let plateInstructions = '';
+    let styleInstructions = '';
     
     if (fictionalLevel <= 30) {
       // AUTHENTIC: Enhance food only, keep original background
       enhancementMode = 'AUTHENTIC ENHANCEMENT';
       backgroundInstructions = 'Keep the original background exactly as shown - only enhance the food quality. Maintain original restaurant setting, table, plates, and environment exactly as they appear. Do not change the background at all.';
       authenticityInstructions = 'Maintain complete authenticity - only improve food quality, colors, lighting, and textures. Keep everything else exactly as in the original photo. No background changes, no new settings, no fictional elements.';
+      plateInstructions = 'Keep original plates and servingware exactly as shown.';
+      styleInstructions = 'Realistic, natural food photography.';
     } else if (fictionalLevel <= 70) {
       // BALANCED: Perfect food with subtle background improvements
       enhancementMode = 'BALANCED PERFECTION';
       backgroundInstructions = 'Improve the background subtly - enhance depth of field, soften distractions, clean up the table/surface, but keep the general restaurant setting recognizable. Make subtle improvements without changing the fundamental environment.';
       authenticityInstructions = 'Perfect the food dramatically while making subtle background improvements. Maintain recognizable restaurant environment but make it cleaner and more professional.';
+      plateInstructions = 'Improve plates and servingware - make them cleaner, more elegant, but keep them recognizable.';
+      styleInstructions = 'Professional food photography with subtle enhancements.';
     } else {
-      // FICTIONAL: New restaurant setting
-      enhancementMode = 'FICTIONAL PERFECTION';
-      backgroundInstructions = 'Create a new, ideal restaurant setting - professional food photography studio background, elegant modern restaurant table, perfect restaurant environment, or sophisticated dining setting. Replace background completely with perfect setting that matches the food style. Make it look like a professional restaurant marketing photo in an ideal location.';
-      authenticityInstructions = 'Create the perfect version - new ideal restaurant setting, perfect food, perfect everything. Make it look like a professional restaurant marketing photo in an ideal location. Transform the entire scene while keeping the main food item recognizable.';
+      // FICTIONAL/MAGICAL: Complete transformation - like homepage slider
+      enhancementMode = 'MAGICAL TRANSFORMATION';
+      backgroundInstructions = 'COMPLETELY TRANSFORM the background - create a stunning white or light-colored professional food photography studio setting, elegant modern restaurant environment, or sophisticated dining scene. Replace everything with a perfect, clean, bright background. White plates, white table, professional studio lighting. Make it look like a high-end restaurant marketing photo with dramatic white space and perfect composition.';
+      authenticityInstructions = 'DRAMATICALLY TRANSFORM the entire scene - create the most perfect, idealized version possible. White plates, clean white background, professional studio setting. Make it look like a magazine cover or high-end restaurant advertisement. Transform everything while keeping the main food item recognizable but perfected.';
+      plateInstructions = 'Replace with clean white plates, elegant white servingware, or sophisticated modern tableware. White ceramic plates, white bowls, minimalist presentation.';
+      styleInstructions = 'Dramatic, high-contrast food photography with white plates, white background, cartoon-like vibrant colors, almost editorial/commercial style. Make colors pop dramatically against white.';
     }
     
-    const qualityPrompt = `${enhancementMode}: Transform this food photo into ${fictionalLevel <= 30 ? 'an enhanced authentic' : fictionalLevel <= 70 ? 'a perfectly balanced' : 'a completely idealized'} restaurant marketing photo. 
+    const qualityPrompt = `${enhancementMode}: ${fictionalLevel <= 30 ? 'Enhance this food photo authentically' : fictionalLevel <= 70 ? 'Transform this food photo into a perfectly balanced' : 'DRAMATICALLY TRANSFORM this food photo into a completely idealized, magical'} restaurant marketing photo. 
 Create the PERFECT version of this dish - make it look absolutely flawless and magazine-worthy. 
 PERFECT sharpness and clarity - every detail should be razor-sharp and crystal clear. 
-PERFECT colors - make them vibrant, rich, and ideal (perfectly cooked meat colors, fresh vibrant vegetables, glossy perfect sauces). 
+${fictionalLevel > 70 ? 'DRAMATICALLY ENHANCE colors - make them vibrant, cartoon-like, pop against white background. Rich, saturated, almost unreal colors that look amazing.' : 'PERFECT colors - make them vibrant, rich, and ideal (perfectly cooked meat colors, fresh vibrant vegetables, glossy perfect sauces).'}
 PERFECT lighting - add ideal professional food photography lighting with perfect highlights, perfect shadows, perfect exposure - make it look like it was shot in a professional studio. 
 PERFECT textures - make food look absolutely perfect (perfectly crispy edges, perfectly juicy meat, perfectly flaky pastry, perfectly glossy glazes). 
-PERFECT plating - idealize the presentation if needed (perfect arrangement, perfect garnish placement, perfect composition). 
+PERFECT plating - idealize the presentation ${fictionalLevel > 70 ? 'dramatically' : 'subtly'} (perfect arrangement, perfect garnish placement, perfect composition). 
+${plateInstructions}
 ${backgroundInstructions}
 Upscale to maximum resolution. 
 ${authenticityInstructions}
-Ultra-high resolution, perfect magazine-quality food photography, ${fictionalLevel <= 30 ? 'authentic' : fictionalLevel <= 70 ? 'balanced' : 'idealized'} commercial food photo, flawless presentation. 
+${styleInstructions}
+Ultra-high resolution, perfect magazine-quality food photography, ${fictionalLevel <= 30 ? 'authentic' : fictionalLevel <= 70 ? 'balanced' : 'magical idealized'} commercial food photo, flawless presentation. 
+${fictionalLevel > 70 ? 'White plates, white background, dramatic colors, high-end restaurant marketing style.' : ''}
 ${basePrompt}`;
     
     // Ensure prompt is not too long (Leonardo has limits around 1000-2000 chars)
@@ -131,7 +142,10 @@ ${basePrompt}`;
   } catch (error) {
     console.error('Error generating prompt, using fallback:', error);
     // Fallback to perfection-focused prompt if new system fails
-    return `PERFECT THIS FOOD PHOTO. Create the ideal, perfect version - flawless sharpness, perfect colors, perfect lighting, perfect textures, perfect plating. Magazine-quality, idealized commercial food photography. ${styleBlock(style)}`;
+    const fallbackPrompt = fictionalLevel > 70 
+      ? `MAGICAL TRANSFORMATION. Dramatically transform into white plate, white background, cartoon-like vibrant colors, high-end restaurant marketing style. ${styleBlock(style)}`
+      : `PERFECT THIS FOOD PHOTO. Create the ideal, perfect version - flawless sharpness, perfect colors, perfect lighting, perfect textures, perfect plating. Magazine-quality, idealized commercial food photography. ${styleBlock(style)}`;
+    return fallbackPrompt;
   }
 }
 
