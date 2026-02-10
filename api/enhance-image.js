@@ -353,6 +353,15 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
     console.log('Init image ID:', initImageId);
     console.log('Full uploadInitImage response:', JSON.stringify(uploadInitImage, null, 2));
     
+    // Check if presigned URL has query parameters that might indicate required headers
+    try {
+      const urlObj = new URL(presignedUrl);
+      console.log('Presigned URL query parameters:', urlObj.searchParams.toString());
+      console.log('Presigned URL path:', urlObj.pathname);
+    } catch (e) {
+      console.warn('Could not parse presigned URL:', e.message);
+    }
+    
     console.log('Got presigned URL, uploading image to S3...');
     
     // Step 2: Upload image to presigned S3 URL
@@ -413,13 +422,18 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
       // S3 presigned URLs ALWAYS use PUT method (not POST)
       // The 405 error confirms POST is not allowed - must use PUT
       console.log('Using PUT method for S3 presigned URL (S3 requires PUT, not POST)');
+      console.log('Image size:', imageBuffer.length, 'bytes');
+      console.log('Content-Type:', contentType);
       
-      // Try PUT with minimal headers first (most S3 presigned URLs work this way)
+      // Try different header combinations to match the presigned URL signature
+      // The signature is calculated with specific headers, so we must match them exactly
       let uploadResponse;
+      let lastError;
+      
+      // Attempt 1: No custom headers (let axios set defaults)
       try {
-        console.log('Attempt 1: PUT without custom headers...');
+        console.log('Attempt 1: PUT without any custom headers...');
         uploadResponse = await axios.put(presignedUrl, imageBuffer, {
-          // No custom headers - let axios handle it automatically
           maxContentLength: Infinity,
           maxBodyLength: Infinity,
           timeout: 120000,
@@ -435,10 +449,14 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
         } else {
           throw new Error(`PUT returned status ${uploadResponse.status}`);
         }
-      } catch (putError1) {
-        console.log('❌ Attempt 1 failed:', putError1.response?.status, putError1.message);
+      } catch (error1) {
+        lastError = error1;
+        console.log('❌ Attempt 1 failed:', error1.response?.status);
+        if (error1.response?.status === 403) {
+          console.log('  403 error - signature mismatch, trying with headers...');
+        }
         
-        // Try PUT with Content-Length header
+        // Attempt 2: With Content-Length only
         try {
           console.log('Attempt 2: PUT with Content-Length header...');
           uploadResponse = await axios.put(presignedUrl, imageBuffer, {
@@ -460,9 +478,60 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
           } else {
             throw new Error(`PUT returned status ${uploadResponse.status}`);
           }
-        } catch (putError2) {
-          console.log('❌ Attempt 2 failed:', putError2.response?.status, putError2.message);
-          throw putError2; // Re-throw the last error
+        } catch (error2) {
+          lastError = error2;
+          console.log('❌ Attempt 2 failed:', error2.response?.status);
+          if (error2.response?.status === 403) {
+            console.log('  403 error - signature mismatch, trying with Content-Type...');
+          }
+          
+          // Attempt 3: With Content-Type (some presigned URLs require it)
+          try {
+            console.log('Attempt 3: PUT with Content-Type header...');
+            uploadResponse = await axios.put(presignedUrl, imageBuffer, {
+              headers: {
+                'Content-Type': contentType
+              },
+              maxContentLength: Infinity,
+              maxBodyLength: Infinity,
+              timeout: 120000,
+              validateStatus: (status) => status < 500
+            });
+            
+            if (uploadResponse.status === 200 || uploadResponse.status === 204) {
+              console.log('✅ Upload successful with Content-Type header');
+            } else {
+              throw new Error(`PUT returned status ${uploadResponse.status}`);
+            }
+          } catch (error3) {
+            lastError = error3;
+            console.log('❌ Attempt 3 failed:', error3.response?.status);
+            
+            // Attempt 4: With both Content-Type and Content-Length
+            try {
+              console.log('Attempt 4: PUT with Content-Type and Content-Length headers...');
+              uploadResponse = await axios.put(presignedUrl, imageBuffer, {
+                headers: {
+                  'Content-Type': contentType,
+                  'Content-Length': imageBuffer.length.toString()
+                },
+                maxContentLength: Infinity,
+                maxBodyLength: Infinity,
+                timeout: 120000,
+                validateStatus: (status) => status < 500
+              });
+              
+              if (uploadResponse.status === 200 || uploadResponse.status === 204) {
+                console.log('✅ Upload successful with both headers');
+              } else {
+                throw new Error(`PUT returned status ${uploadResponse.status}`);
+              }
+            } catch (error4) {
+              lastError = error4;
+              console.log('❌ All attempts failed');
+              throw error4;
+            }
+          }
         }
       }
       
