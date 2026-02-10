@@ -288,7 +288,7 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
       throw new Error('Failed to get presigned URL from Leonardo. Response: ' + JSON.stringify(initResponse.data));
     }
     
-    const presignedUrl = uploadInitImage.url || uploadInitImage.uploadUrl || uploadInitImage.presignedUrl;
+    let presignedUrl = uploadInitImage.url || uploadInitImage.uploadUrl || uploadInitImage.presignedUrl;
     initImageId = uploadInitImage.id || uploadInitImage.initImageId;
     
     if (!presignedUrl || !initImageId) {
@@ -297,8 +297,34 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
       throw new Error('Missing presigned URL or init image ID from Leonardo response');
     }
     
+    // Check if URL points to bucket root (ends with /) - Leonardo may return base URL + separate key
+    if (presignedUrl.endsWith('/')) {
+      console.warn('⚠️ Presigned URL ends with / - checking for object key in response');
+      
+      // Leonardo API may return key separately - check various possible field names
+      const objectKey = uploadInitImage.key || 
+                       uploadInitImage.objectKey || 
+                       uploadInitImage.fileKey ||
+                       uploadInitImage.file_name ||
+                       uploadInitImage.filename;
+      
+      if (objectKey) {
+        // Append object key to URL (remove leading slash from key if present)
+        const cleanKey = objectKey.startsWith('/') ? objectKey.substring(1) : objectKey;
+        presignedUrl = presignedUrl + cleanKey;
+        console.log('✅ Appended object key to URL:', cleanKey);
+      } else {
+        // Try using initImageId as the key with extension
+        const filename = `${initImageId}.${extension}`;
+        presignedUrl = presignedUrl + filename;
+        console.log('⚠️ No object key found in response, using initImageId as filename:', filename);
+        console.log('Full uploadInitImage object:', JSON.stringify(uploadInitImage, null, 2));
+      }
+    }
+    
     console.log('Presigned URL received (length:', presignedUrl.length, ')');
     console.log('Presigned URL (first 200 chars):', presignedUrl.substring(0, 200));
+    console.log('Presigned URL (last 100 chars):', presignedUrl.substring(presignedUrl.length - 100));
     console.log('Init image ID:', initImageId);
     
     console.log('Got presigned URL, uploading image to S3...');
