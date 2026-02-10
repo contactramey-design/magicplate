@@ -434,6 +434,24 @@
         <p style="color: #666; margin-top: 10px;">This may take 30-60 seconds</p>
       </div>
 
+      <!-- Confirmation card: shows after identification, before enhancement -->
+      <div id="confirmationCard" style="display:none; background:linear-gradient(135deg,#e8f5e9,#f1f8e9); border:1px solid #a5d6a7; border-radius:14px; padding:24px; margin-bottom:18px; box-shadow:0 4px 16px rgba(76,175,80,0.12);">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <span style="font-size:1.6em;">🔍</span>
+          <div>
+            <div style="font-weight:700; color:#2e7d32; font-size:1.15em;">We detected these items</div>
+            <div style="color:#555; font-size:0.88em;">Confirm or edit before we enhance — saves credits if something's wrong.</div>
+          </div>
+        </div>
+        <textarea id="confirmedItemsInput" rows="3" style="width:100%; padding:12px; border:1px solid #c8e6c9; border-radius:8px; font-family:inherit; font-size:0.95em; line-height:1.5; resize:vertical; background:#fff;"></textarea>
+        <div style="display:flex; gap:10px; margin-top:14px; flex-wrap:wrap;">
+          <button id="confirmEnhanceBtn" class="btn btn-primary" style="flex:1; min-width:180px;">✅ Looks right — Enhance this!</button>
+          <button id="skipIdentifyBtn" class="btn btn-secondary" style="min-width:140px;">Skip & Enhance anyway</button>
+        </div>
+        <div id="confirmationNote" style="margin-top:10px; font-size:0.82em; color:#777; display:none;"></div>
+      </div>
+
+      <!-- Shows after enhancement is complete -->
       <div id="identifiedItemsBanner" style="display:none; background:linear-gradient(135deg,#e8f5e9,#f1f8e9); border:1px solid #c8e6c9; border-radius:10px; padding:14px 18px; margin-bottom:15px;">
         <div style="font-weight:600; color:#2e7d32; margin-bottom:4px;">🔍 Detected Food Items</div>
         <div id="identifiedItemsText" style="color:#333; font-size:0.95em; line-height:1.4;"></div>
@@ -478,6 +496,10 @@
     let fictionalLevel = parseInt(localStorage.getItem('fictionalLevel') || '30'); // Default 30%
     let regenerationTimeout = null;
     let isRegenerating = false;
+
+    // Two-step flow state (identify → confirm → enhance)
+    let pendingBase64 = null;
+    let confirmedItems = '';
     
     // Slider state management
     let sliderInitialized = false;
@@ -624,7 +646,8 @@
             filename: currentFile.name,
             restaurant_id: parseInt(restaurantId),
             style: 'upscale_casual',
-            fictional_level: fictionalLevel
+            fictional_level: fictionalLevel,
+            identified_items: confirmedItems // Reuse confirmed items
           })
         });
         
@@ -688,103 +711,142 @@
       });
     });
     
-    // Enhance button
+    // ── Enhance button: Step 1 — Identify food items first ──
     enhanceBtn.addEventListener('click', async () => {
       if (!currentFile) return;
-      
-      // Hide preview, show processing
+
+      // Reset UI
       previewContainer.style.display = 'none';
       previewSection.classList.add('active');
       processingDiv.style.display = 'block';
       document.getElementById('processingText').textContent = 'Identifying food items…';
+      document.getElementById('confirmationCard').style.display = 'none';
       document.getElementById('identifiedItemsBanner').style.display = 'none';
       sliderContainer.style.display = 'none';
       actionsDiv.style.display = 'none';
       statusDiv.style.display = 'none';
-      
+
       try {
-        // Convert file to base64
         const base64 = await fileToBase64(currentFile);
-        
-        // Get restaurant ID from URL or default to 1
+        pendingBase64 = base64;
+
+        // Call lightweight identify endpoint
+        const idResponse = await fetch('/api/identify-food', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: base64 })
+        });
+        const idData = await idResponse.json();
+
+        processingDiv.style.display = 'none';
+
+        if (idData.identified && idData.description) {
+          // Show confirmation card with editable description
+          const card = document.getElementById('confirmationCard');
+          const input = document.getElementById('confirmedItemsInput');
+          input.value = idData.description;
+          card.style.display = 'block';
+          input.focus();
+        } else {
+          // Vision unavailable — go straight to enhancement
+          document.getElementById('confirmationNote').style.display = 'block';
+          document.getElementById('confirmationNote').textContent =
+            idData.message || 'Could not identify items automatically.';
+          confirmedItems = '';
+          await runEnhancement();
+        }
+      } catch (error) {
+        processingDiv.style.display = 'none';
+        // If identification fails, let user enhance anyway
+        confirmedItems = '';
+        await runEnhancement();
+      }
+    });
+
+    // ── Confirm button: Step 2 — Enhance with confirmed items ──
+    document.getElementById('confirmEnhanceBtn').addEventListener('click', async () => {
+      confirmedItems = document.getElementById('confirmedItemsInput').value.trim();
+      document.getElementById('confirmationCard').style.display = 'none';
+      await runEnhancement();
+    });
+
+    // ── Skip button: Enhance without identification ──
+    document.getElementById('skipIdentifyBtn').addEventListener('click', async () => {
+      confirmedItems = '';
+      document.getElementById('confirmationCard').style.display = 'none';
+      await runEnhancement();
+    });
+
+    // ── The actual enhancement call ──
+    async function runEnhancement() {
+      processingDiv.style.display = 'block';
+      document.getElementById('processingText').textContent = 'Enhancing your photo with AI…';
+      sliderContainer.style.display = 'none';
+      actionsDiv.style.display = 'none';
+
+      try {
+        if (!pendingBase64) {
+          pendingBase64 = await fileToBase64(currentFile);
+        }
+
         const urlParams = new URLSearchParams(window.location.search);
         const restaurantId = urlParams.get('restaurant_id') || '1';
-        
-        // Update processing text after a few seconds to reflect stage
-        const processingTextEl = document.getElementById('processingText');
-        const stageTimer = setTimeout(() => {
-          processingTextEl.textContent = 'Enhancing your photo with AI…';
-        }, 8000); // After ~8s, the vision step is likely done
 
-        // Call enhancement API
         const response = await fetch('/api/enhance-image', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            image: base64,
+            image: pendingBase64,
             filename: currentFile.name,
             restaurant_id: parseInt(restaurantId),
             style: 'upscale_casual',
-            fictional_level: fictionalLevel
+            fictional_level: fictionalLevel,
+            identified_items: confirmedItems // Pass user-confirmed items
           })
         });
 
-        clearTimeout(stageTimer);
         const data = await response.json();
-        
+
         if (!response.ok) {
-          // Show detailed error message
           let errorMsg = data.message || data.error || `Enhancement failed (${response.status})`;
-          
-          // Provide helpful messages for common errors
           if (response.status === 403) {
-            errorMsg = 'Access forbidden. This usually means: (1) API key issue, (2) Insufficient credits, or (3) Rate limit exceeded. Please check your API configuration.';
+            errorMsg = 'Access forbidden. (1) API key issue, (2) Insufficient credits, or (3) Rate limit exceeded.';
           } else if (response.status === 401) {
-            errorMsg = 'Authentication failed. Please check your API key configuration.';
+            errorMsg = 'Authentication failed. Check your API key.';
           } else if (response.status === 402) {
-            errorMsg = 'Insufficient credits. Please add credits to your AI service account.';
+            errorMsg = 'Insufficient credits. Add credits to your AI service.';
           }
-          
-          console.error('Enhancement API error:', {
-            status: response.status,
-            statusText: response.statusText,
-            data: data
-          });
+          console.error('Enhancement API error:', { status: response.status, data });
           throw new Error(errorMsg);
         }
-        
-        // Show identified items if available
-        if (data.identifiedItems) {
-          const banner = document.getElementById('identifiedItemsBanner');
-          document.getElementById('identifiedItemsText').textContent = data.identifiedItems;
-          banner.style.display = 'block';
+
+        // Show identified items banner (from confirmation or server)
+        const items = confirmedItems || data.identifiedItems;
+        if (items) {
+          document.getElementById('identifiedItemsText').textContent = items;
+          document.getElementById('identifiedItemsBanner').style.display = 'block';
         }
 
-        // Show results - set images first
-        beforeImage.src = beforeImageUrl; // Original image - shown on LEFT side
-        afterImage.src = data.afterUrl || data.output[0]; // Enhanced image - shown on RIGHT side
+        // Show results
+        beforeImage.src = beforeImageUrl;
+        afterImage.src = data.afterUrl || data.output[0];
         afterImageUrl = data.afterUrl || data.output[0];
-        
+
         await waitForImages();
-        
+
         processingDiv.style.display = 'none';
         sliderContainer.style.display = 'block';
         actionsDiv.style.display = 'flex';
-        
+
         await initSlider();
-        
+
         showStatus('✅ Enhancement complete! Drag the slider to compare.', 'success');
-        
-        // Confetti effect (simple)
         triggerConfetti();
-        
       } catch (error) {
         processingDiv.style.display = 'none';
         showStatus(`❌ Error: ${error.message}`, 'error');
       }
-    });
+    }
     
     // Download button
     downloadBtn.addEventListener('click', () => {

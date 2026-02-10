@@ -1128,19 +1128,23 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'Image too large. Maximum size: 10MB' });
     }
     
-    // ── STEP 1: Automatic food item identification ──
-    // This runs a vision model FIRST to list every food item, drink, etc.
-    // Then embeds that list in the enhancement prompt so nothing gets swapped.
-    let identifiedItems = '';
-    try {
-      identifiedItems = await analyzeImageContents(imageBuffer);
-      if (identifiedItems) {
-        console.log(`🔍 Food identification complete: "${identifiedItems}"`);
-      } else {
-        console.log('⚠️ No food identification available — will rely on prompt rules only');
+    // ── STEP 1: Food item identification ──
+    // If the client already confirmed items (from /api/identify-food), use those.
+    // Otherwise fall back to server-side analysis (or prompt rules only).
+    let identifiedItems = req.body.identified_items || '';
+    if (identifiedItems) {
+      console.log(`🔍 Using client-confirmed food items: "${identifiedItems}"`);
+    } else {
+      try {
+        identifiedItems = await analyzeImageContents(imageBuffer);
+        if (identifiedItems) {
+          console.log(`🔍 Food identification complete: "${identifiedItems}"`);
+        } else {
+          console.log('⚠️ No food identification available — will rely on prompt rules only');
+        }
+      } catch (analysisError) {
+        console.warn('⚠️ Food identification step failed (non-fatal):', analysisError.message);
       }
-    } catch (analysisError) {
-      console.warn('⚠️ Food identification step failed (non-fatal):', analysisError.message);
     }
 
     // ── STEP 2: Enhancement using identified items ──

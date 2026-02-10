@@ -169,6 +169,25 @@ app.post('/api/generate-dish-image', async (req, res) => {
   }
 });
 
+// Food identification (vision-only, lightweight)
+app.options('/api/identify-food', (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.status(200).end();
+});
+app.post('/api/identify-food', async (req, res) => {
+  try {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    require('dotenv').config();
+    const handler = require('./api/identify-food');
+    return await handler(req, res);
+  } catch (error) {
+    console.error('Identify food error:', error);
+    return res.status(500).json({ error: 'Identification failed', message: error.message });
+  }
+});
+
 // Image enhancement API endpoint (for local development)
 // Handle OPTIONS for CORS preflight
 app.options('/api/enhance-image', (req, res) => {
