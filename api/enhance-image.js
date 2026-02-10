@@ -410,71 +410,37 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
         console.warn('⚠️ Could not parse URL, attempting upload anyway:', urlError.message);
       }
       
-      // Leonardo API requires POST with multipart/form-data (not PUT)
-      // According to Leonardo docs: POST to presigned URL with all fields + file
-      let uploadResponse;
+      // S3 presigned URLs ALWAYS use PUT method (not POST)
+      // The 405 error confirms POST is not allowed - must use PUT
+      console.log('Using PUT method for S3 presigned URL (S3 requires PUT, not POST)');
       
-      if (hasUploadFields) {
-        // Leonardo's documented method: POST with multipart/form-data
-        console.log('Using Leonardo method: POST with multipart/form-data');
-        console.log('Upload fields:', Object.keys(uploadFields));
-        
-        const FormData = require('form-data');
-        const formData = new FormData();
-        
-        // Add all required fields from Leonardo's response (in the exact order they appear)
-        // S3 presigned POST requires fields in a specific order
-        Object.entries(uploadFields).forEach(([key, value]) => {
-          formData.append(key, value);
-          console.log(`Added field: ${key} = ${value}`);
-        });
-        
-        // Add the file - field name is typically 'file' for Leonardo
-        const fileFieldName = uploadInitImage.fileField || 'file';
-        formData.append(fileFieldName, imageBuffer, {
-          filename: `${initImageId}.${extension}`,
-          contentType: contentType
-        });
-        
-        // Get form-data headers but don't override Content-Type if it's in uploadFields
-        const formHeaders = formData.getHeaders();
-        console.log('Form headers:', formHeaders);
-        
-        // For S3 presigned POST, we should use ONLY the headers from formData
-        // Don't add any extra headers that might break the signature
-        console.log('POSTing to:', presignedUrl);
-        uploadResponse = await axios.post(presignedUrl, formData, {
-          headers: formHeaders, // Use form-data headers as-is, no modifications
+      // Try PUT with minimal headers first (most S3 presigned URLs work this way)
+      let uploadResponse;
+      try {
+        console.log('Attempt 1: PUT without custom headers...');
+        uploadResponse = await axios.put(presignedUrl, imageBuffer, {
+          // No custom headers - let axios handle it automatically
           maxContentLength: Infinity,
           maxBodyLength: Infinity,
           timeout: 120000,
+          transformRequest: [(data) => {
+            if (Buffer.isBuffer(data)) return data;
+            return data;
+          }],
           validateStatus: (status) => status < 500
         });
-      } else {
-        // Fallback: Try PUT (standard S3 presigned URL method)
-        console.log('No upload fields found, trying PUT method (standard S3)...');
         
-        // For S3 presigned PUT URLs, try with minimal headers first
-        // The signature might not include Content-Length, so try without it
+        if (uploadResponse.status === 200 || uploadResponse.status === 204) {
+          console.log('✅ Upload successful with no custom headers');
+        } else {
+          throw new Error(`PUT returned status ${uploadResponse.status}`);
+        }
+      } catch (putError1) {
+        console.log('❌ Attempt 1 failed:', putError1.response?.status, putError1.message);
+        
+        // Try PUT with Content-Length header
         try {
-          uploadResponse = await axios.put(presignedUrl, imageBuffer, {
-            // No custom headers - let axios handle it
-            maxContentLength: Infinity,
-            maxBodyLength: Infinity,
-            timeout: 120000,
-            transformRequest: [(data) => {
-              if (Buffer.isBuffer(data)) return data;
-              return data;
-            }],
-            validateStatus: (status) => status < 500
-          });
-          
-          if (uploadResponse.status !== 200 && uploadResponse.status !== 204) {
-            throw new Error(`PUT returned status ${uploadResponse.status}`);
-          }
-        } catch (putError) {
-          // If PUT without headers fails, try with Content-Length
-          console.log('PUT without headers failed, trying with Content-Length...');
+          console.log('Attempt 2: PUT with Content-Length header...');
           uploadResponse = await axios.put(presignedUrl, imageBuffer, {
             headers: {
               'Content-Length': imageBuffer.length.toString()
@@ -488,6 +454,15 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
             }],
             validateStatus: (status) => status < 500
           });
+          
+          if (uploadResponse.status === 200 || uploadResponse.status === 204) {
+            console.log('✅ Upload successful with Content-Length header');
+          } else {
+            throw new Error(`PUT returned status ${uploadResponse.status}`);
+          }
+        } catch (putError2) {
+          console.log('❌ Attempt 2 failed:', putError2.response?.status, putError2.message);
+          throw putError2; // Re-throw the last error
         }
       }
       
