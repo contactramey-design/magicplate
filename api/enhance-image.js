@@ -876,12 +876,26 @@ Check: http://localhost:3000/api/check-config
       
       // Provide more helpful error messages
       let errorMessage = apiError.message || 'Enhancement failed';
-      if (apiError.response?.data?.detail) {
-        errorMessage = apiError.response.data.detail;
-      } else if (apiError.response?.data?.error) {
-        errorMessage = apiError.response.data.error;
-      } else if (apiError.response?.data?.message) {
-        errorMessage = apiError.response.data.message;
+      
+      // Extract error from various response formats
+      if (apiError.response?.data) {
+        const errorData = apiError.response.data;
+        
+        // Check for XML error (S3 errors)
+        if (typeof errorData === 'string' && errorData.includes('<Error>')) {
+          const codeMatch = errorData.match(/<Code>(.*?)<\/Code>/);
+          const messageMatch = errorData.match(/<Message>(.*?)<\/Message>/);
+          if (codeMatch && messageMatch) {
+            errorMessage = `S3 Error (${codeMatch[1]}): ${messageMatch[1]}`;
+          } else {
+            // Truncate long XML responses
+            errorMessage = errorData.substring(0, 200) + (errorData.length > 200 ? '...' : '');
+          }
+        } else if (typeof errorData === 'object') {
+          errorMessage = errorData.detail || errorData.error || errorData.message || JSON.stringify(errorData).substring(0, 200);
+        } else {
+          errorMessage = String(errorData).substring(0, 200);
+        }
       }
       
       // Check for specific Leonardo errors
@@ -902,10 +916,21 @@ Check: http://localhost:3000/api/check-config
         errorMessage = 'Invalid model or parameter format. Please check the API configuration.';
       }
       
+      // Truncate very long error messages for API response (keep full in logs)
+      const truncatedMessage = errorMessage.length > 300 ? errorMessage.substring(0, 300) + '...' : errorMessage;
+      
+      // Log full error for debugging
+      console.error('❌ Enhancement API error:');
+      console.error('  Message:', apiError.message);
+      console.error('  Status:', apiError.response?.status);
+      console.error('  Response Data:', apiError.response?.data);
+      console.error('  Stack:', apiError.stack);
+      
       return res.status(500).json({ 
         error: 'Enhancement failed',
-        message: errorMessage,
+        message: truncatedMessage,
         service: serviceUsed,
+        errorCode: apiError.response?.status,
         details: process.env.NODE_ENV === 'development' ? {
           fullError: apiError.response?.data,
           status: apiError.response?.status,
