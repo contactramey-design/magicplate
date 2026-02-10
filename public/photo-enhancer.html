@@ -562,9 +562,125 @@
     // Remove preview
     removeBtn.addEventListener('click', () => {
       currentFile = null;
+      beforeImageUrl = null;
+      afterImageUrl = null;
       previewContainer.style.display = 'none';
       previewSection.classList.remove('active');
       fileInput.value = '';
+      clearTimeout(regenerationTimeout);
+      isRegenerating = false;
+    });
+    
+    // Fiction Level Functions
+    function updateFictionalLabel(level) {
+      if (!fictionalLabel || !fictionalDescription) return;
+      
+      if (level <= 30) {
+        fictionalLabel.textContent = `Authentic (${level}%)`;
+        fictionalLabel.style.color = '#4CAF50';
+        fictionalDescription.textContent = 'Enhance food quality while keeping original background';
+      } else if (level <= 70) {
+        fictionalLabel.textContent = `Balanced (${level}%)`;
+        fictionalLabel.style.color = '#FF9800';
+        fictionalDescription.textContent = 'Perfect food with subtle background improvements';
+      } else {
+        fictionalLabel.textContent = `Magical (${level}%)`;
+        fictionalLabel.style.color = '#F44336';
+        fictionalDescription.textContent = 'Create new restaurant setting with perfect food';
+      }
+    }
+    
+    // Initialize fiction level slider
+    if (fictionalLevelSlider) {
+      fictionalLevelSlider.value = fictionalLevel;
+      updateFictionalLabel(fictionalLevel);
+    }
+    
+    // Regenerate enhancement with new fiction level
+    async function regenerateEnhancement() {
+      if (!currentFile || isRegenerating) return;
+      
+      isRegenerating = true;
+      processingDiv.style.display = 'block';
+      sliderContainer.style.display = 'none';
+      actionsDiv.style.display = 'none';
+      statusDiv.style.display = 'none';
+      
+      try {
+        const base64 = await fileToBase64(currentFile);
+        const urlParams = new URLSearchParams(window.location.search);
+        const restaurantId = urlParams.get('restaurant_id') || '1';
+        
+        const response = await fetch('/api/enhance-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            image: base64,
+            filename: currentFile.name,
+            restaurant_id: parseInt(restaurantId),
+            style: 'upscale_casual',
+            fictional_level: fictionalLevel
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.message || data.error || 'Enhancement failed');
+        }
+        
+        // Update after image
+        afterImage.src = data.afterUrl || data.output[0];
+        afterImageUrl = data.afterUrl || data.output[0];
+        
+        await waitForImages();
+        processingDiv.style.display = 'none';
+        sliderContainer.style.display = 'block';
+        actionsDiv.style.display = 'flex';
+        
+      } catch (error) {
+        console.error('Regeneration error:', error);
+        showStatus(`Regeneration failed: ${error.message}`, 'error');
+        processingDiv.style.display = 'none';
+      } finally {
+        isRegenerating = false;
+      }
+    }
+    
+    // Slider change handler with debounce
+    if (fictionalLevelSlider) {
+      fictionalLevelSlider.addEventListener('input', (e) => {
+        const newLevel = parseInt(e.target.value);
+        fictionalLevel = newLevel;
+        localStorage.setItem('fictionalLevel', newLevel.toString());
+        updateFictionalLabel(newLevel);
+        
+        // Debounced regeneration if image already enhanced
+        if (afterImageUrl && !isRegenerating) {
+          clearTimeout(regenerationTimeout);
+          regenerationTimeout = setTimeout(() => {
+            regenerateEnhancement();
+          }, 600); // 600ms debounce
+        }
+      });
+    }
+    
+    // Preset button handlers
+    presetButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const level = parseInt(btn.dataset.level);
+        fictionalLevel = level;
+        if (fictionalLevelSlider) {
+          fictionalLevelSlider.value = level;
+        }
+        localStorage.setItem('fictionalLevel', level.toString());
+        updateFictionalLabel(level);
+        
+        // Regenerate if image already enhanced
+        if (afterImageUrl && !isRegenerating) {
+          regenerateEnhancement();
+        }
+      });
     });
     
     // Enhance button
