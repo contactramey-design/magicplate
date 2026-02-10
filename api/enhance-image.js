@@ -34,12 +34,12 @@ const fsPromises = require('fs').promises;
 // path already declared above
 
 // API Configuration - reload env vars to ensure latest values
-// Load .env.local first, then .env (overrides .env.local)
-if (fs.existsSync(envLocalPath)) {
-  require('dotenv').config({ path: envLocalPath });
-}
+// Load .env first, then .env.local overrides .env
 if (fs.existsSync(envPath)) {
-  require('dotenv').config({ path: envPath, override: true });
+  require('dotenv').config({ path: envPath });
+}
+if (fs.existsSync(envLocalPath)) {
+  require('dotenv').config({ path: envLocalPath, override: true });
 }
 
 const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN;
@@ -79,8 +79,8 @@ function styleBlock(style) {
   }
 }
 
-// Import the new prompt system
-const { getAIGatewayPrompt } = require('../lib/photo-enhancement-prompt');
+// Import prompt system
+const { buildRegenPrompt: buildPrompt, baseNegativePrompt: getNegativePrompt, getAIGatewayPrompt } = require('../lib/photo-enhancement-prompt');
 
 /**
  * STEP 1: Automatic food item identification using a vision model.
@@ -144,84 +144,20 @@ async function analyzeImageContents(imageBuffer) {
 }
 
 /**
- * STEP 2: Build the enhancement prompt, embedding the identified items so the
- * AI knows exactly what to preserve.
+ * STEP 2: Build the enhancement prompt using the centralized prompt system.
+ * Wraps the imported buildPrompt with logging.
  */
 function buildRegenPrompt(style, fictionalLevel = 30, identifiedItems = '') {
-  try {
-    const basePrompt = getAIGatewayPrompt(style);
-
-    // If we identified specific items, embed them directly in the prompt
-    const identityBlock = identifiedItems
-      ? `IDENTIFIED ITEMS IN THIS PHOTO (from automatic analysis):
-${identifiedItems}
-
-You MUST include ALL of the items listed above in your output. Do NOT substitute, remove, or add items.
-Enhance these EXACT items — make them look perfect, but they must remain the SAME food.`
-      : `FOOD IDENTITY PRESERVATION:
-Study the reference image. The output MUST contain the SAME food items as the input.
-NEVER substitute one food for another. A burger stays a burger, tacos stay tacos.
-Keep the same number of items and recognizable arrangement.`;
-
-    // Determine enhancement style based on fictional level (0-100)
-    let enhancementMode = '';
-    let backgroundInstructions = '';
-    let authenticityInstructions = '';
-    let plateInstructions = '';
-    let styleInstructions = '';
-    
-    if (fictionalLevel <= 30) {
-      enhancementMode = 'AUTHENTIC ENHANCEMENT';
-      backgroundInstructions = 'Keep the original background exactly as shown.';
-      authenticityInstructions = 'Only improve food quality, colors, lighting, textures. Keep everything else as-is.';
-      plateInstructions = 'Keep original plates and servingware.';
-      styleInstructions = 'Realistic, natural food photography.';
-    } else if (fictionalLevel <= 70) {
-      enhancementMode = 'BALANCED PERFECTION';
-      backgroundInstructions = 'Subtly improve background — enhance depth of field, soften distractions.';
-      authenticityInstructions = 'Perfect the food dramatically with subtle background improvements.';
-      plateInstructions = 'Improve plates — cleaner, more elegant.';
-      styleInstructions = 'Professional food photography.';
-    } else {
-      enhancementMode = 'MAGICAL ENHANCEMENT';
-      backgroundInstructions = 'Create a stunning blurred bokeh background with professional studio lighting.';
-      authenticityInstructions = 'Dramatically enhance colors, lighting, contrast while keeping the SAME food items recognizable.';
-      plateInstructions = 'Clean white plates or elegant servingware for dramatic contrast.';
-      styleInstructions = 'Dramatic high-contrast food photography. Vibrant saturated colors, bokeh background, sharp food details.';
-    }
-    
-    const qualityPrompt = `${identityBlock}
-
-${enhancementMode}: Enhance this food photo into a ${fictionalLevel <= 30 ? 'high-quality authentic' : fictionalLevel <= 70 ? 'perfectly balanced professional' : 'stunning, dramatic magazine-quality'} restaurant marketing photo.
-
-Make the SAME dish look flawless and magazine-worthy.
-Sharp focus, crystal-clear food details, perfect exposure.
-${fictionalLevel > 70 ? 'Vibrant, rich, saturated colors that pop. Enhanced contrast. Professional studio lighting with dramatic highlights and shadows.' : 'Natural, appetizing colors. Clean professional lighting.'}
-Perfect textures (crispy edges, juicy meat, flaky pastry, glossy glazes).
-${plateInstructions}
-${backgroundInstructions}
-${authenticityInstructions}
-${styleInstructions}
-${basePrompt}`;
-    
-    if (qualityPrompt.length > 1500) {
-      console.warn('Prompt too long, truncating to 1500 chars');
-      return qualityPrompt.substring(0, 1500);
-    }
-    return qualityPrompt;
-  } catch (error) {
-    console.error('Error generating prompt, using fallback:', error);
-    return `FOOD IDENTITY PRESERVATION: The output must contain the SAME food items as the input. ${identifiedItems ? 'Items: ' + identifiedItems + '. ' : ''}Enhance with perfect sharpness, colors, lighting, textures. ${styleBlock(style)}`;
+  const prompt = buildPrompt(style, fictionalLevel, identifiedItems);
+  if (prompt.length > 1500) {
+    console.warn('Prompt too long, truncating to 1500 chars');
+    return prompt.substring(0, 1500);
   }
+  return prompt;
 }
 
 function baseNegativePrompt() {
-  return (
-    'different food, wrong food, substituted dish, changed cuisine, new dish, extra food items not in original, ' +
-    'text, watermark, logo, menu text, handwriting, extra plates, cluttered table, ' +
-    'blurry, low-res, noisy, grainy, oversaturated, underexposed, overexposed, harsh flash, ' +
-    'cartoon, illustration, CGI, plastic-looking, deformed food, duplicate garnish, messy smear'
-  );
+  return getNegativePrompt();
 }
 
 /**
@@ -848,8 +784,9 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
     // MORE STEPS = better quality (more processing time but better results)
     num_inference_steps: 40, // Increased from 30 for better quality
     // init_strength: how much the original image influences the output
-    // Higher = stays closer to original (preserves food identity)
-    init_strength: calculatedStrength, // 0.75 (authentic) to 0.45 (magical) — never below 0.45
+    // Higher = stays closer to original, Lower = more dramatic transformation
+    // Food identity is preserved via explicit prompt rules, not strength alone
+    init_strength: calculatedStrength, // 0.75 (authentic) → 0.25 (Michelin/magical)
     scheduler: 'LEONARDO',
     seed: null,
     // PhotoReal settings for food photography
@@ -1018,12 +955,12 @@ module.exports = async (req, res) => {
   }
   
   // Reload environment variables on each request (in case .env was updated)
-  // Load .env.local first, then .env (overrides .env.local)
-  if (fs.existsSync(envLocalPath)) {
-    require('dotenv').config({ path: envLocalPath });
-  }
+  // Load .env first, then .env.local overrides
   if (fs.existsSync(envPath)) {
-    require('dotenv').config({ path: envPath, override: true });
+    require('dotenv').config({ path: envPath });
+  }
+  if (fs.existsSync(envLocalPath)) {
+    require('dotenv').config({ path: envLocalPath, override: true });
   }
   
     // Re-read API keys after reloading env
