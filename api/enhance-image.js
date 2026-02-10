@@ -295,23 +295,49 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
     const contentType = contentTypeMap[extension] || 'image/jpeg';
     
     try {
+      // Leonardo presigned URLs may require specific headers
+      // Try with minimal headers first, then add Content-Type if needed
+      const uploadHeaders = {
+        'Content-Length': imageBuffer.length.toString()
+      };
+      
+      // Some S3 presigned URLs include Content-Type in the signature, so we need to match it
+      // Try with Content-Type first
+      uploadHeaders['Content-Type'] = contentType;
+      
+      console.log('Uploading to S3 with headers:', uploadHeaders);
+      console.log('Image size:', imageBuffer.length, 'bytes');
+      console.log('Content-Type:', contentType);
+      
       const uploadResponse = await axios.put(presignedUrl, imageBuffer, {
-        headers: {
-          'Content-Type': contentType,
-          'Content-Length': imageBuffer.length.toString()
-        },
+        headers: uploadHeaders,
         maxContentLength: Infinity,
         maxBodyLength: Infinity,
-        timeout: 120000 // 2 minutes max (presigned URLs expire)
+        timeout: 120000, // 2 minutes max (presigned URLs expire)
+        validateStatus: (status) => status < 500 // Don't throw on 4xx, we'll handle it
       });
+      
+      console.log('S3 upload response status:', uploadResponse.status);
+      
+      // Check if upload was successful (200 or 204)
+      if (uploadResponse.status !== 200 && uploadResponse.status !== 204) {
+        console.error('S3 upload returned non-success status:', uploadResponse.status);
+        console.error('Response data:', uploadResponse.data);
+        throw new Error(`S3 upload failed with status ${uploadResponse.status}`);
+      }
       
       console.log('Image uploaded to S3 successfully, status:', uploadResponse.status);
       console.log('Init image ID:', initImageId);
     } catch (s3Error) {
       console.error('S3 upload error:', s3Error.response?.status, s3Error.response?.data || s3Error.message);
+      console.error('Error headers:', s3Error.response?.headers);
+      
       if (s3Error.response?.status === 403) {
-        throw new Error('S3 upload forbidden (403). The presigned URL may have expired or access was denied. Please try uploading again.');
+        // Try to get more details from the error
+        const errorDetails = s3Error.response?.data || s3Error.message;
+        throw new Error(`S3 upload forbidden (403). This usually means: (1) Presigned URL expired (try again), (2) Wrong Content-Type header, or (3) Request signature mismatch. Error: ${errorDetails}`);
       }
+      
       throw new Error(`Failed to upload image to S3: ${s3Error.response?.data || s3Error.message}`);
     }
   } catch (uploadError) {
