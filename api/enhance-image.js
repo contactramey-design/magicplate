@@ -1043,18 +1043,42 @@ Check: http://localhost:3000/api/check-config
     
     // Get enhanced image URL
     let enhancedImageUrl;
+    console.log('🔍 Parsing result from service:', serviceUsed);
+    console.log('🔍 Full result object:', JSON.stringify(result, null, 2));
+    
     if (serviceUsed === 'replicate') {
       enhancedImageUrl = result.output?.[0] || result.output;
+      console.log('🔍 Replicate URL:', enhancedImageUrl);
     } else if (serviceUsed === 'leonardo') {
-      enhancedImageUrl = result.generations?.[0]?.url;
+      // Leonardo returns different structures - try multiple paths
+      enhancedImageUrl = result.output?.[0] || 
+                        result.generations?.[0]?.url ||
+                        result.generated_images?.[0]?.url ||
+                        result.images?.[0]?.url ||
+                        result.url;
+      console.log('🔍 Leonardo URL:', enhancedImageUrl);
+      console.log('🔍 Leonardo result structure keys:', Object.keys(result || {}));
+      if (result.generations) {
+        console.log('🔍 Leonardo generations array length:', result.generations.length);
+        console.log('🔍 First generation:', JSON.stringify(result.generations[0], null, 2));
+      }
+      if (result.output) {
+        console.log('🔍 Leonardo output:', JSON.stringify(result.output, null, 2));
+      }
     } else if (serviceUsed === 'together') {
       enhancedImageUrl = result.output?.choices?.[0]?.image || result.output?.image;
+      console.log('🔍 Together URL:', enhancedImageUrl);
     }
     
     if (!enhancedImageUrl) {
+      console.error('❌ No enhanced image URL found in result');
+      console.error('❌ Result structure:', JSON.stringify(result, null, 2));
+      console.error('❌ Service used:', serviceUsed);
       return res.status(500).json({ 
         error: 'No enhanced image returned',
-        result: result
+        message: `The ${serviceUsed} service did not return a valid image URL. Check server logs for details.`,
+        result: result,
+        service: serviceUsed
       });
     }
     
