@@ -780,19 +780,29 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
 
   // Step 3: Generate enhanced image using image-to-image with PhotoReal for food
   // Focus on QUALITY ENHANCEMENT (sharpness, detail, noise reduction) not style transformation
-  const prompt = buildRegenPrompt(style, fictionalLevel, identifiedItems);
-  const negativePrompt = baseNegativePrompt(identifiedItems);
+  let prompt = buildRegenPrompt(style, fictionalLevel, identifiedItems);
+  let negativePrompt = baseNegativePrompt(identifiedItems);
+  
+  // Leonardo has stricter prompt length limits — truncate if needed
+  if (prompt.length > 1000) {
+    console.log(`⚠️ Leonardo prompt too long (${prompt.length} chars), truncating to 1000`);
+    prompt = prompt.substring(0, 1000);
+  }
+  if (negativePrompt.length > 500) {
+    negativePrompt = negativePrompt.substring(0, 500);
+  }
   
   // Calculate init_strength for Leonardo
   // IMPORTANT: In Leonardo, init_strength works as "how much to KEEP from original"
   //   1.0 = keep original unchanged, 0.0 = fully regenerate from prompt
   //   So we need HIGH values to preserve food identity
-  const calculatedStrength = 0.88 - (fictionalLevel / 100 * 0.40);
-  // Authentic (0%):  0.88 — 88% faithful to original
-  // Authentic (30%): 0.76 — 76% faithful, subtle enhancement
-  // Balanced (50%):  0.68 — 68% faithful, noticeable improvement
-  // Balanced (70%):  0.60 — 60% faithful, significant transformation
-  // Magical (100%):  0.48 — 48% faithful, dramatic overhaul
+  //   Leonardo API caps init_strength at 0.80 max
+  const calculatedStrength = Math.min(0.80, 0.80 - (fictionalLevel / 100 * 0.35));
+  // Authentic (0%):  0.80 — 80% faithful to original (Leonardo max)
+  // Authentic (30%): 0.70 — 70% faithful, subtle enhancement
+  // Balanced (50%):  0.63 — 63% faithful, noticeable improvement
+  // Balanced (70%):  0.56 — 56% faithful, significant transformation
+  // Magical (100%):  0.45 — 45% faithful, dramatic overhaul
   
   const calculatedGuidance = 5.5 + (fictionalLevel / 100 * 2.0); // 5.5 to 7.5
   
@@ -819,7 +829,7 @@ async function enhanceImageWithLeonardo(imageBuffer, imageName, style = 'upscale
     // init_strength: how much the original image influences the output
     // Higher = stays closer to original, Lower = more dramatic transformation
     // Food identity is preserved via both strength AND explicit prompt rules
-    init_strength: calculatedStrength, // 0.88 (authentic) → 0.48 (Michelin/magical)
+    init_strength: calculatedStrength, // 0.80 (authentic) → 0.45 (Michelin/magical)
     scheduler: 'LEONARDO',
     seed: null,
     // PhotoReal settings for food photography
